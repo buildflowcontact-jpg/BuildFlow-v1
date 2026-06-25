@@ -118,8 +118,57 @@ export const plansService = {
     x: number;
     y: number;
     content: string;
+    page_number: number;
   }): Promise<PlanAnnotation> {
     return unwrap(await supabase.from('plan_annotations').insert(payload).select('*').single());
+  },
+
+  async setAnnotationResolved(id: string, resolved: boolean): Promise<PlanAnnotation> {
+    return unwrap(await supabase.from('plan_annotations').update({ resolved }).eq('id', id).select('*').single());
+  },
+
+  /**
+   * Marque explicitement une version de plan comme envoyée à un ensemble de
+   * destinataires, en plus de la notification interne déjà déclenchée à la
+   * création/au dépôt d'une nouvelle version. Distinct du partage silencieux
+   * (resource_permissions) : c'est une action volontaire et traçable.
+   */
+  async sendVersion(params: {
+    plan: Plan;
+    version: PlanVersion;
+    sentBy: string;
+    recipients: { id: string; label: string }[];
+  }): Promise<PlanVersion> {
+    const sentTo = params.recipients.map((r) => r.label);
+    const updated = unwrap(
+      await supabase
+        .from('plan_versions')
+        .update({ sent_at: new Date().toISOString(), sent_by: params.sentBy, sent_to: sentTo })
+        .eq('id', params.version.id)
+        .select('*')
+        .single()
+    );
+
+    await activityLogsService.log({
+      project_id: params.plan.project_id,
+      action: 'plan.sent',
+      entity_type: 'plan',
+      entity_id: params.plan.id,
+      metadata: { version: params.version.version, recipients: sentTo },
+    });
+
+    const { error } = await supabase.from('notifications').insert(
+      params.recipients.map((r) => ({
+        user_id: r.id,
+        type: 'plan_sent',
+        title: 'Plan envoyé',
+        message: `"${params.plan.name}" (version ${params.version.version}) vous a été envoyé.`,
+        link: `/projects/${params.plan.project_id}/plans`,
+      }))
+    );
+    if (error) throw error;
+
+    return updated;
   },
 
   async remove(plan: Plan): Promise<void> {

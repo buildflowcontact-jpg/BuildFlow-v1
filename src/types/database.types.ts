@@ -858,7 +858,9 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          page_number: number
           plan_version_id: string
+          resolved: boolean
           x: number
           y: number
         }
@@ -867,7 +869,9 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          page_number?: number
           plan_version_id: string
+          resolved?: boolean
           x: number
           y: number
         }
@@ -876,7 +880,9 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          page_number?: number
           plan_version_id?: string
+          resolved?: boolean
           x?: number
           y?: number
         }
@@ -903,6 +909,9 @@ export type Database = {
           id: string
           notes: string | null
           plan_id: string
+          sent_at: string | null
+          sent_by: string | null
+          sent_to: Json | null
           storage_path: string
           uploaded_by: string | null
           version: number
@@ -912,6 +921,9 @@ export type Database = {
           id?: string
           notes?: string | null
           plan_id: string
+          sent_at?: string | null
+          sent_by?: string | null
+          sent_to?: Json | null
           storage_path: string
           uploaded_by?: string | null
           version: number
@@ -921,6 +933,9 @@ export type Database = {
           id?: string
           notes?: string | null
           plan_id?: string
+          sent_at?: string | null
+          sent_by?: string | null
+          sent_to?: Json | null
           storage_path?: string
           uploaded_by?: string | null
           version?: number

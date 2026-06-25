@@ -27,6 +27,11 @@ export function Models3dTab({ projectId }: Models3dTabProps) {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !userId) return;
+    if (!file.name.toLowerCase().endsWith('.ifc')) {
+      alert('Seuls les fichiers .ifc sont acceptés pour les maquettes 3D.');
+      e.target.value = '';
+      return;
+    }
     upload.mutate({ file, uploadedBy: userId });
     e.target.value = '';
   }
@@ -50,7 +55,7 @@ export function Models3dTab({ projectId }: Models3dTabProps) {
           <h3 className="text-base font-semibold text-slate-900">Maquettes 3D</h3>
           <p className="text-sm text-slate-500">{models.length} maquette(s)</p>
         </div>
-        <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} />
+        <input ref={fileInputRef} type="file" accept=".ifc" className="hidden" onChange={handleFileChange} />
         <Button size="sm" onClick={() => fileInputRef.current?.click()} loading={upload.isPending}>
           <Upload className="h-4 w-4" />
           Déposer une maquette

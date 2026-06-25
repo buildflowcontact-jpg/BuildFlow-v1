@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { plansService } from '@/services/plans.service';
-import type { Plan } from '@/types/domain';
+import type { Plan, PlanVersion } from '@/types/domain';
 
-type AddAnnotationParams = { author_id: string; x: number; y: number; content: string };
+type AddAnnotationParams = { author_id: string; x: number; y: number; content: string; page_number: number };
 
 export function usePlans(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -34,11 +34,22 @@ export function usePlans(projectId: string | undefined) {
 }
 
 export function usePlanVersions(planId: string | undefined) {
-  return useQuery({
-    queryKey: ['plan-versions', planId],
+  const queryClient = useQueryClient();
+  const queryKey = ['plan-versions', planId];
+
+  const query = useQuery({
+    queryKey,
     queryFn: () => plansService.listVersions(planId!),
     enabled: Boolean(planId),
   });
+
+  const sendVersion = useMutation({
+    mutationFn: (params: { plan: Plan; version: PlanVersion; sentBy: string; recipients: { id: string; label: string }[] }) =>
+      plansService.sendVersion(params),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
+  return { ...query, sendVersion };
 }
 
 export function usePlanAnnotations(planVersionId: string | undefined) {
@@ -57,5 +68,10 @@ export function usePlanAnnotations(planVersionId: string | undefined) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey }),
   });
 
-  return { ...query, annotations: query.data ?? [], addAnnotation };
+  const setResolved = useMutation({
+    mutationFn: ({ id, resolved }: { id: string; resolved: boolean }) => plansService.setAnnotationResolved(id, resolved),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
+  return { ...query, annotations: query.data ?? [], addAnnotation, setResolved };
 }
