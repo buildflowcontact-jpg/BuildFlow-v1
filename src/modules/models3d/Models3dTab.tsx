@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Box, Upload, Download, Trash2, Lock } from 'lucide-react';
+import { Box, Upload, Download, Trash2, Lock, Eye } from 'lucide-react';
 import { useModels3d } from '@/hooks/useModels3d';
 import { useProject } from '@/hooks/useProject';
 import { useMyProjectAccess } from '@/hooks/useMyProjectAccess';
@@ -8,9 +8,12 @@ import { useAuthStore } from '@/stores/authStore';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { Modal } from '@/components/ui/Modal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 import { formatDateTime } from '@/utils/date';
+import { IfcViewer } from './IfcViewer';
+import type { Model3D } from '@/types/domain';
 
 interface Models3dTabProps {
   projectId: string;
@@ -23,6 +26,15 @@ export function Models3dTab({ projectId }: Models3dTabProps) {
   const userId = useAuthStore((s) => s.session?.user.id);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [viewerModel, setViewerModel] = useState<Model3D | null>(null);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+
+  async function handlePreview(model: Model3D) {
+    setViewerModel(model);
+    setViewerUrl(null);
+    const url = await models3dService.getDownloadUrl(model);
+    setViewerUrl(url);
+  }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -83,6 +95,16 @@ export function Models3dTab({ projectId }: Models3dTabProps) {
               </div>
               <div className="flex items-center gap-3">
                 {model.format && <Badge tone="slate">{model.format.toUpperCase()}</Badge>}
+                {model.format?.toLowerCase() === 'ifc' && (
+                  <button
+                    onClick={() => handlePreview(model)}
+                    className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700"
+                    title="Aperçu 3D"
+                    aria-label="Aperçu 3D"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </button>
+                )}
                 <button
                   onClick={() => handleDownload(model)}
                   disabled={downloadingId === model.id}
@@ -109,6 +131,10 @@ export function Models3dTab({ projectId }: Models3dTabProps) {
           ))}
         </ul>
       )}
+
+      <Modal open={Boolean(viewerModel)} onClose={() => setViewerModel(null)} title={`Aperçu 3D — ${viewerModel?.name ?? ''}`} size="xl">
+        {viewerUrl ? <IfcViewer fileUrl={viewerUrl} /> : <FullPageSpinner />}
+      </Modal>
     </Card>
   );
 }
