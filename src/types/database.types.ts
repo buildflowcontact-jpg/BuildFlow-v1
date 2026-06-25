@@ -62,6 +62,73 @@ export type Database = {
           },
         ]
       }
+      annotated_captures: {
+        Row: {
+          annotations: Json
+          created_at: string
+          created_by: string
+          id: string
+          image_storage_path: string
+          project_id: string
+          report_id: string | null
+          source_id: string
+          source_label: string
+          source_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          annotations?: Json
+          created_at?: string
+          created_by: string
+          id?: string
+          image_storage_path: string
+          project_id: string
+          report_id?: string | null
+          source_id: string
+          source_label: string
+          source_type: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          annotations?: Json
+          created_at?: string
+          created_by?: string
+          id?: string
+          image_storage_path?: string
+          project_id?: string
+          report_id?: string | null
+          source_id?: string
+          source_label?: string
+          source_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "annotated_captures_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annotated_captures_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annotated_captures_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "capture_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_categories: {
         Row: {
           created_at: string
@@ -103,6 +170,54 @@ export type Database = {
           },
           {
             foreignKeyName: "budget_categories_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      capture_reports: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          pdf_storage_path: string | null
+          project_id: string
+          sent_at: string | null
+          sent_to: Json | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          pdf_storage_path?: string | null
+          project_id: string
+          sent_at?: string | null
+          sent_to?: Json | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          pdf_storage_path?: string | null
+          project_id?: string
+          sent_at?: string | null
+          sent_to?: Json | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "capture_reports_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capture_reports_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"

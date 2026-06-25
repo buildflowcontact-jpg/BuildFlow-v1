@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react';
 import { Box, Upload, Download, Trash2, Lock, Eye } from 'lucide-react';
 import { useModels3d } from '@/hooks/useModels3d';
+import { useCaptures } from '@/hooks/useCaptures';
 import { useProject } from '@/hooks/useProject';
 import { useMyProjectAccess } from '@/hooks/useMyProjectAccess';
 import { models3dService } from '@/services/models3d.service';
+import { CaptureEditor } from '@/components/captures/CaptureEditor';
 import { useAuthStore } from '@/stores/authStore';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -28,6 +30,8 @@ export function Models3dTab({ projectId }: Models3dTabProps) {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [viewerModel, setViewerModel] = useState<Model3D | null>(null);
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [captureDataUrl, setCaptureDataUrl] = useState<string | null>(null);
+  const { create: createCapture } = useCaptures(projectId, userId);
 
   async function handlePreview(model: Model3D) {
     setViewerModel(model);
@@ -133,8 +137,22 @@ export function Models3dTab({ projectId }: Models3dTabProps) {
       )}
 
       <Modal open={Boolean(viewerModel)} onClose={() => setViewerModel(null)} title={`Aperçu 3D — ${viewerModel?.name ?? ''}`} size="xl">
-        {viewerUrl ? <IfcViewer fileUrl={viewerUrl} /> : <FullPageSpinner />}
+        {viewerUrl ? <IfcViewer fileUrl={viewerUrl} onCapture={setCaptureDataUrl} /> : <FullPageSpinner />}
       </Modal>
+
+      <CaptureEditor
+        open={Boolean(captureDataUrl)}
+        onClose={() => setCaptureDataUrl(null)}
+        imageUrl={captureDataUrl ?? ''}
+        saving={createCapture.isPending}
+        onSave={(dataUrl, shapes) => {
+          if (!viewerModel) return;
+          createCapture.mutate(
+            { sourceType: 'model3d', sourceId: viewerModel.id, sourceLabel: viewerModel.name, dataUrl, annotations: shapes },
+            { onSuccess: () => setCaptureDataUrl(null) }
+          );
+        }}
+      />
     </Card>
   );
 }

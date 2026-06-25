@@ -31,6 +31,8 @@ export type Plan = Tables<'plans'>;
 export type PlanVersion = Tables<'plan_versions'>;
 export type PlanAnnotation = Tables<'plan_annotations'>;
 export type Model3D = Tables<'models3d'>;
+export type AnnotatedCapture = Tables<'annotated_captures'>;
+export type CaptureReport = Tables<'capture_reports'>;
 export type Supply = Tables<'supplies'>;
 export type Incident = Tables<'incidents'>;
 export type PunchListItem = Tables<'punch_list_items'>;
@@ -73,6 +75,19 @@ export interface TaskWithChildren extends Task {
 export interface ProjectMemberWithProfile extends ProjectMember {
   profile: Profile | null;
 }
+
+/**
+ * Forme d'une annotation libre sur une capture d'écran (plan 2D ou maquette
+ * 3D) : trait de dessin libre, bloc de texte positionné, ou pin avec
+ * commentaire. Stocké tel quel dans la colonne jsonb `annotated_captures.annotations`.
+ */
+export type CaptureAnnotationShape =
+  | { type: 'stroke'; points: { x: number; y: number }[]; color: string; width: number }
+  | { type: 'text'; x: number; y: number; text: string; color: string }
+  | { type: 'pin'; x: number; y: number; comment: string; color: string };
+
+export type CaptureSourceType = 'plan' | 'model3d';
+export type CaptureStatus = 'draft' | 'sent';
 
 export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
   prospection: 'Prospection',

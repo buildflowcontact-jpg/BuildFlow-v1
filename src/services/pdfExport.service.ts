@@ -434,6 +434,50 @@ export function exportDailyReportPdf(
   downloadDoc(doc, `rapport-quotidien-${reportDate}.pdf`);
 }
 
+/**
+ * Construit le PDF d'un rapport de captures annotées (plans 2D ou maquettes
+ * 3D) : une capture par page, image pleine largeur + légende. Les annotations
+ * (dessin libre, texte, pins) sont déjà "aplaties" dans `dataUrl` au moment de
+ * la capture, ce PDF ne fait qu'assembler les images.
+ */
+export function buildCaptureReportPdf(
+  project: Project,
+  title: string,
+  captures: { label: string; dataUrl: string; createdAt: string }[]
+): jsPDF {
+  const doc = createDocument('Rapport de captures', `${project.name} — ${title}`);
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 40;
+
+  captures.forEach((capture, index) => {
+    if (index > 0) doc.addPage();
+
+    const top = index === 0 ? 100 : 40;
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 41, 59);
+    doc.text(capture.label, margin, top);
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(148, 163, 184);
+    doc.text(format(new Date(capture.createdAt), 'dd/MM/yyyy à HH:mm', { locale: fr }), margin, top + 14);
+
+    const imgTop = top + 24;
+    const maxWidth = pageWidth - margin * 2;
+    const maxHeight = pageHeight - imgTop - 50;
+    const props = doc.getImageProperties(capture.dataUrl);
+    const ratio = Math.min(maxWidth / props.width, maxHeight / props.height);
+    const width = props.width * ratio;
+    const height = props.height * ratio;
+
+    doc.addImage(capture.dataUrl, 'PNG', margin, imgTop, width, height);
+  });
+
+  return doc;
+}
+
 /** Convertit un document jsPDF en File (pour upload direct vers Supabase Storage, ex. archivage auto). */
 export function pdfToFile(doc: jsPDF, filename: string): File {
   addFooters(doc);

@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import type * as THREE from 'three';
 import type * as OBC from '@thatopen/components';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 
 interface IfcViewerProps {
   fileUrl: string;
+  /** Appelé avec le PNG (dataURL) du canvas rendu quand l'utilisateur clique sur "Capturer". */
+  onCapture?: (dataUrl: string) => void;
 }
 
 /**
@@ -17,11 +19,12 @@ interface IfcViewerProps {
  * localement depuis /public (voir public/wasm et public/fragments-worker.mjs)
  * pour éviter toute dépendance réseau vers unpkg.com au runtime.
  */
-export function IfcViewer({ fileUrl }: IfcViewerProps) {
+export function IfcViewer({ fileUrl, onCapture }: IfcViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [progress, setProgress] = useState(0);
   const resetRef = useRef<() => void>(() => {});
+  const captureRef = useRef<() => string | null>(() => null);
 
   useEffect(() => {
     let disposed = false;
@@ -45,7 +48,7 @@ export function IfcViewer({ fileUrl }: IfcViewerProps) {
       world.scene.setup();
       world.scene.three.background = null;
 
-      world.renderer = new OBC.SimpleRenderer(components, container);
+      world.renderer = new OBC.SimpleRenderer(components, container, { preserveDrawingBuffer: true });
       world.camera = new OBC.OrthoPerspectiveCamera(components);
 
       components.init();
@@ -53,6 +56,15 @@ export function IfcViewer({ fileUrl }: IfcViewerProps) {
 
       resetRef.current = () => {
         void world.camera.controls.setLookAt(15, 15, 15, 0, 0, 0);
+      };
+      captureRef.current = () => {
+        try {
+          world.renderer!.three.render(world.scene.three, world.camera.three);
+          return world.renderer!.three.domElement.toDataURL('image/png');
+        } catch (err) {
+          console.error('Échec de la capture du viewer 3D', err);
+          return null;
+        }
       };
       await world.camera.controls.setLookAt(15, 15, 15, 0, 0, 0);
 
@@ -113,15 +125,27 @@ export function IfcViewer({ fileUrl }: IfcViewerProps) {
       <div ref={containerRef} className="absolute inset-0" />
 
       {status !== 'error' && (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => resetRef.current()}
-          className="absolute right-3 top-3 z-10 bg-white/90"
-        >
-          <RotateCcw className="h-4 w-4" />
-          Recentrer
-        </Button>
+        <div className="absolute right-3 top-3 z-10 flex gap-2">
+          {onCapture && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={status !== 'ready'}
+              onClick={() => {
+                const dataUrl = captureRef.current();
+                if (dataUrl) onCapture(dataUrl);
+              }}
+              className="bg-white/90"
+            >
+              <Camera className="h-4 w-4" />
+              Capturer
+            </Button>
+          )}
+          <Button size="sm" variant="outline" onClick={() => resetRef.current()} className="bg-white/90">
+            <RotateCcw className="h-4 w-4" />
+            Recentrer
+          </Button>
+        </div>
       )}
 
       {status === 'loading' && (

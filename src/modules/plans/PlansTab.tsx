@@ -20,8 +20,11 @@ import {
   Send,
   CheckCircle2,
   Circle,
+  Camera,
 } from 'lucide-react';
 import { usePlans, usePlanVersions, usePlanAnnotations } from '@/hooks/usePlans';
+import { useCaptures } from '@/hooks/useCaptures';
+import { CaptureEditor } from '@/components/captures/CaptureEditor';
 import { useProject } from '@/hooks/useProject';
 import { useMyProjectAccess } from '@/hooks/useMyProjectAccess';
 import { plansService } from '@/services/plans.service';
@@ -320,8 +323,11 @@ function PlanViewer({
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1);
   const [sendOpen, setSendOpen] = useState(false);
+  const [captureDataUrl, setCaptureDataUrl] = useState<string | null>(null);
+  const surfaceRef = useRef<HTMLDivElement>(null);
 
   const { annotations, addAnnotation, setResolved } = usePlanAnnotations(latestVersion?.id);
+  const { create: createCapture } = useCaptures(plan.project_id, userId);
 
   useEffect(() => {
     setFileUrl(null);
@@ -366,6 +372,12 @@ function PlanViewer({
       { author_id: userId, x: pendingPin.x, y: pendingPin.y, content: pinContent.trim(), page_number: pageNumber },
       { onSuccess: () => setPendingPin(null) }
     );
+  }
+
+  function handleCapture() {
+    const canvas = surfaceRef.current?.querySelector('canvas');
+    if (!canvas) return;
+    setCaptureDataUrl(canvas.toDataURL('image/png'));
   }
 
   return (
@@ -415,6 +427,10 @@ function PlanViewer({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={handleCapture} disabled={!fileUrl}>
+            <Camera className="h-4 w-4" />
+            Capturer
+          </Button>
           <Button size="sm" variant="outline" onClick={() => setSendOpen(true)}>
             <Send className="h-4 w-4" />
             Envoyer
@@ -434,7 +450,11 @@ function PlanViewer({
       </div>
 
       <div className="flex max-h-[65vh] flex-col items-center overflow-auto rounded-lg border border-slate-200 bg-slate-100 p-3">
-        <div onClick={handleSurfaceClick} className={cn('relative inline-block', annotateMode && 'cursor-crosshair')}>
+        <div
+          ref={surfaceRef}
+          onClick={handleSurfaceClick}
+          className={cn('relative inline-block', annotateMode && 'cursor-crosshair')}
+        >
           {fileUrl ? (
             <Document
               file={fileUrl}
@@ -519,6 +539,25 @@ function PlanViewer({
         version={latestVersion}
         members={members}
         userId={userId}
+      />
+
+      <CaptureEditor
+        open={Boolean(captureDataUrl)}
+        onClose={() => setCaptureDataUrl(null)}
+        imageUrl={captureDataUrl ?? ''}
+        saving={createCapture.isPending}
+        onSave={(dataUrl, shapes) => {
+          createCapture.mutate(
+            {
+              sourceType: 'plan',
+              sourceId: latestVersion.id,
+              sourceLabel: `${plan.name} (v${latestVersion.version}, p.${pageNumber})`,
+              dataUrl,
+              annotations: shapes,
+            },
+            { onSuccess: () => setCaptureDataUrl(null) }
+          );
+        }}
       />
     </div>
   );
