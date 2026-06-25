@@ -202,3 +202,41 @@ export const CHANGE_ORDER_STATUS_LABELS: Record<ChangeOrder['status'], string> =
   approved: 'Approuvé',
   rejected: 'Refusé',
 };
+
+// ---------------------------------------------------------------------------
+// Portail client : widgets configurables (projects.portal_widgets, jsonb)
+// ---------------------------------------------------------------------------
+export interface PortalWidgetsConfig {
+  progress: boolean;
+  daily_logs: boolean;
+  rfis: boolean;
+  change_orders: boolean;
+  documents: boolean;
+}
+
+export const DEFAULT_PORTAL_WIDGETS: PortalWidgetsConfig = {
+  progress: true,
+  daily_logs: true,
+  rfis: true,
+  change_orders: true,
+  documents: true,
+};
+
+export const PORTAL_WIDGET_LABELS: Record<keyof PortalWidgetsConfig, string> = {
+  progress: 'Avancement du projet',
+  daily_logs: 'Journal de chantier',
+  rfis: 'Demandes d’information (RFI)',
+  change_orders: 'Avenants',
+  documents: 'Documents récents',
+};
+
+/** Fusionne la config stockée (jsonb, potentiellement partielle) avec les valeurs par défaut. */
+export function parsePortalWidgets(value: unknown): PortalWidgetsConfig {
+  if (!value || typeof value !== 'object') return { ...DEFAULT_PORTAL_WIDGETS };
+  const raw = value as Record<string, unknown>;
+  const result = { ...DEFAULT_PORTAL_WIDGETS };
+  for (const key of Object.keys(DEFAULT_PORTAL_WIDGETS) as (keyof PortalWidgetsConfig)[]) {
+    if (typeof raw[key] === 'boolean') result[key] = raw[key] as boolean;
+  }
+  return result;
+}

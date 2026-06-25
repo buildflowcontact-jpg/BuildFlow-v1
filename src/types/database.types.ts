@@ -1236,6 +1236,7 @@ export type Database = {
           name: string
           organization_id: string
           owner_id: string
+          portal_widgets: Json
           reference: string | null
           start_date: string | null
           status: string
@@ -1255,6 +1256,7 @@ export type Database = {
           name: string
           organization_id: string
           owner_id: string
+          portal_widgets?: Json
           reference?: string | null
           start_date?: string | null
           status?: string
@@ -1274,6 +1276,7 @@ export type Database = {
           name?: string
           organization_id?: string
           owner_id?: string
+          portal_widgets?: Json
           reference?: string | null
           start_date?: string | null
           status?: string

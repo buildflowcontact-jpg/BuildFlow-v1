@@ -18,9 +18,15 @@ import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Modal } from '@/components/ui/Modal';
 import { FullPageSpinner } from '@/components/ui/Spinner';
-import { PROJECT_STATUS_LABELS } from '@/types/domain';
+import {
+  PROJECT_STATUS_LABELS,
+  PORTAL_WIDGET_LABELS,
+  DEFAULT_PORTAL_WIDGETS,
+  parsePortalWidgets,
+  type PortalWidgetsConfig,
+} from '@/types/domain';
 import { useClients } from '@/hooks/useClients';
-import type { ProjectStatus } from '@/types/database.types';
+import type { ProjectStatus, Json } from '@/types/database.types';
 
 export interface ProjectOutletContext {
   projectId: string;
@@ -119,6 +125,7 @@ export function ProjectLayout() {
     budget: '',
     latitude: '',
     longitude: '',
+    portal_widgets: DEFAULT_PORTAL_WIDGETS as PortalWidgetsConfig,
   });
   const [geocoding, setGeocoding] = useState(false);
   const [geocodeError, setGeocodeError] = useState<string | null>(null);
@@ -158,6 +165,7 @@ export function ProjectLayout() {
       budget: project!.budget != null ? String(project!.budget) : '',
       latitude: project!.latitude != null ? String(project!.latitude) : '',
       longitude: project!.longitude != null ? String(project!.longitude) : '',
+      portal_widgets: parsePortalWidgets(project!.portal_widgets),
     });
     setGeocodeError(null);
     setEditOpen(true);
@@ -178,6 +186,7 @@ export function ProjectLayout() {
         budget: editForm.budget ? Number(editForm.budget) : null,
         latitude: editForm.latitude ? Number(editForm.latitude) : null,
         longitude: editForm.longitude ? Number(editForm.longitude) : null,
+        portal_widgets: editForm.portal_widgets as unknown as Json,
       },
       { onSuccess: () => setEditOpen(false) }
     );
@@ -392,6 +401,26 @@ export function ProjectLayout() {
               value={editForm.budget}
               onChange={(e) => setEditForm({ ...editForm, budget: e.target.value })}
             />
+          </div>
+          <div className="border-t border-slate-100 pt-4">
+            <p className="mb-2 text-sm font-medium text-slate-700">Portail client — widgets visibles</p>
+            <div className="grid grid-cols-2 gap-2">
+              {(Object.keys(PORTAL_WIDGET_LABELS) as (keyof PortalWidgetsConfig)[]).map((key) => (
+                <label key={key} className="flex items-center gap-2 text-sm text-slate-600">
+                  <input
+                    type="checkbox"
+                    checked={editForm.portal_widgets[key]}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        portal_widgets: { ...editForm.portal_widgets, [key]: e.target.checked },
+                      })
+                    }
+                  />
+                  {PORTAL_WIDGET_LABELS[key]}
+                </label>
+              ))}
+            </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setEditOpen(false)}>
