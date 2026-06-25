@@ -1,7 +1,7 @@
-import { useCallback, useMemo, useState } from 'react';
-import { addDays, differenceInCalendarDays, format, isWithinInterval, startOfMonth, startOfWeek } from 'date-fns';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { addDays, differenceInCalendarDays, format, isWeekend, isWithinInterval, startOfMonth, startOfWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Plus, Flag, FileDown } from 'lucide-react';
+import { Plus, Flag, FileDown, LocateFixed } from 'lucide-react';
 import { useTasks } from '@/hooks/useTasks';
 import { usePhases } from '@/hooks/usePhases';
 import { useProject } from '@/hooks/useProject';
@@ -19,6 +19,7 @@ const ROW_HEIGHT = 36;
 const HEADER_HEIGHT = 44;
 const SECTION_HEIGHT = 30;
 const LABEL_WIDTH = 280;
+const VIEWPORT_MAX_HEIGHT = 640;
 
 const PX_PER_DAY: Record<GanttZoom, number> = { day: 36, week: 14, month: 5 };
 
@@ -89,6 +90,8 @@ export function GanttChart({ projectId }: GanttChartProps) {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const pxPerDay = PX_PER_DAY[zoom];
 
@@ -141,6 +144,17 @@ export function GanttChart({ projectId }: GanttChartProps) {
       }
     }
     return cols;
+  }, [zoom, rangeStart, rangeEnd, pxPerDay, xForDate]);
+
+  const weekendBands = useMemo(() => {
+    if (zoom !== 'day') return [];
+    const bands: { x: number; width: number }[] = [];
+    let cursor = rangeStart;
+    while (cursor <= rangeEnd) {
+      if (isWeekend(cursor)) bands.push({ x: xForDate(cursor), width: pxPerDay });
+      cursor = addDays(cursor, 1);
+    }
+    return bands;
   }, [zoom, rangeStart, rangeEnd, pxPerDay, xForDate]);
 
   const { items: layout, totalHeight } = useMemo(() => buildLayout(phases, tree), [phases, tree]);
@@ -212,6 +226,20 @@ export function GanttChart({ projectId }: GanttChartProps) {
           <Button
             size="sm"
             variant="outline"
+            disabled={todayX == null}
+            onClick={() => {
+              const el = scrollRef.current;
+              if (el && todayX != null) {
+                el.scrollTo({ left: Math.max(0, todayX + LABEL_WIDTH - el.clientWidth / 2), behavior: 'smooth' });
+              }
+            }}
+          >
+            <LocateFixed className="h-4 w-4" />
+            Aujourd'hui
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
             disabled={!project}
             onClick={() => {
               // Chargé à la demande : jsPDF/jspdf-autotable ne sont utiles qu'à
@@ -234,39 +262,47 @@ export function GanttChart({ projectId }: GanttChartProps) {
           Aucune tâche planifiée. Ajoutez des tâches depuis l'onglet « Tâches » pour les visualiser ici.
         </p>
       ) : (
-        <div className="flex">
-          <div className="shrink-0 border-r border-slate-100" style={{ width: LABEL_WIDTH }}>
-            <div className="flex items-center border-b border-slate-100 px-3 text-xs font-semibold uppercase text-slate-400" style={{ height: HEADER_HEIGHT }}>
-              Tâche
+        <div ref={scrollRef} className="overflow-auto" style={{ maxHeight: VIEWPORT_MAX_HEIGHT }}>
+          <div className="flex" style={{ width: LABEL_WIDTH + totalWidth, minHeight: HEADER_HEIGHT + totalHeight }}>
+            <div className="sticky left-0 z-20 shrink-0 border-r border-slate-100 bg-white" style={{ width: LABEL_WIDTH }}>
+              <div
+                className="sticky top-0 z-10 flex items-center border-b border-slate-100 bg-white px-3 text-xs font-semibold uppercase text-slate-400"
+                style={{ height: HEADER_HEIGHT }}
+              >
+                Tâche
+              </div>
+              <div style={{ height: totalHeight }} className="relative">
+                {layout.map((item) =>
+                  item.kind === 'section' ? (
+                    <div
+                      key={item.key}
+                      className="absolute left-0 right-0 flex items-center bg-slate-50 px-3 text-xs font-semibold text-slate-500"
+                      style={{ top: item.y, height: item.height }}
+                    >
+                      {item.label}
+                    </div>
+                  ) : (
+                    <button
+                      key={item.key}
+                      onClick={() => openEdit(item.task)}
+                      onMouseEnter={() => setHoveredKey(item.key)}
+                      onMouseLeave={() => setHoveredKey((k) => (k === item.key ? null : k))}
+                      className={cn(
+                        'absolute left-0 right-0 flex items-center truncate px-3 text-left text-sm text-slate-700 transition-colors duration-100',
+                        hoveredKey === item.key ? 'bg-brand-50' : 'hover:bg-slate-50'
+                      )}
+                      style={{ top: item.y, height: item.height, paddingLeft: 12 + item.depth * 16 }}
+                    >
+                      {item.task.is_milestone && <Flag className="mr-1.5 h-3 w-3 shrink-0 text-amber-500" />}
+                      <span className="truncate">{item.task.title}</span>
+                    </button>
+                  )
+                )}
+              </div>
             </div>
-            <div style={{ height: totalHeight }} className="relative">
-              {layout.map((item) =>
-                item.kind === 'section' ? (
-                  <div
-                    key={item.key}
-                    className="absolute left-0 right-0 flex items-center bg-slate-50 px-3 text-xs font-semibold text-slate-500"
-                    style={{ top: item.y, height: item.height }}
-                  >
-                    {item.label}
-                  </div>
-                ) : (
-                  <button
-                    key={item.key}
-                    onClick={() => openEdit(item.task)}
-                    className="absolute left-0 right-0 flex items-center truncate px-3 text-left text-sm text-slate-700 hover:bg-slate-50"
-                    style={{ top: item.y, height: item.height, paddingLeft: 12 + item.depth * 16 }}
-                  >
-                    {item.task.is_milestone && <Flag className="mr-1.5 h-3 w-3 shrink-0 text-amber-500" />}
-                    <span className="truncate">{item.task.title}</span>
-                  </button>
-                )
-              )}
-            </div>
-          </div>
 
-          <div className="relative flex-1 overflow-x-auto">
-            <div style={{ width: totalWidth }}>
-              <div className="relative flex border-b border-slate-100" style={{ height: HEADER_HEIGHT }}>
+            <div className="relative" style={{ width: totalWidth }}>
+              <div className="sticky top-0 z-10 flex border-b border-slate-100 bg-white" style={{ height: HEADER_HEIGHT }}>
                 {columns.map((col, i) => (
                   <div
                     key={i}
@@ -279,6 +315,10 @@ export function GanttChart({ projectId }: GanttChartProps) {
               </div>
 
               <div className="relative" style={{ height: totalHeight, width: totalWidth }}>
+                {weekendBands.map((band, i) => (
+                  <div key={i} className="absolute top-0 bg-slate-50" style={{ left: band.x, width: band.width, height: totalHeight }} />
+                ))}
+
                 {columns.map((col, i) => (
                   <div key={i} className="absolute top-0 border-r border-slate-50" style={{ left: col.x, height: totalHeight }} />
                 ))}
@@ -286,7 +326,15 @@ export function GanttChart({ projectId }: GanttChartProps) {
                 {layout.map((item) =>
                   item.kind === 'section' ? (
                     <div key={item.key} className="absolute left-0 right-0 bg-slate-50" style={{ top: item.y, height: item.height }} />
-                  ) : null
+                  ) : (
+                    <div
+                      key={item.key}
+                      onMouseEnter={() => setHoveredKey(item.key)}
+                      onMouseLeave={() => setHoveredKey((k) => (k === item.key ? null : k))}
+                      className={cn('absolute left-0 right-0 transition-colors duration-100', hoveredKey === item.key && 'bg-brand-50/70')}
+                      style={{ top: item.y, height: item.height }}
+                    />
+                  )
                 )}
 
                 {todayX != null && (
