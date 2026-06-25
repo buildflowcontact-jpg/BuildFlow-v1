@@ -1,0 +1,17 @@
+<svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="c3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" width="200" height="200" rx="48" fill="url(#c3)"/>
+  <!-- Ruban en double boucle = échange continu entre tous les acteurs -->
+  <path d="M60 110 C60 86, 80 70, 100 88 C120 106, 100 134, 80 134
+           C60 134, 60 110, 80 92 C100 74, 120 90, 140 110
+           C160 130, 180 114, 160 92"
+        fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" opacity="0.9"/>
+  <circle cx="70" cy="100" r="8" fill="#ffffff"/>
+  <circle cx="150" cy="120" r="8" fill="#ffffff"/>
+  <circle cx="110" cy="110" r="6" fill="#ffffff" opacity="0.85"/>
+</svg>

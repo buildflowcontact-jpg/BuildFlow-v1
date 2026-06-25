@@ -1,0 +1,23 @@
+# Configuration minimale pour exécuter les tests de base de données en local
+# (`supabase test db`, nécessite Docker). Le projet distant reste géré
+# directement via le project_id Supabase (nonqaratfnjpdogjbzyi) ; ce fichier
+# ne sert qu'à la stack locale éphémère utilisée pour les tests pgTAP.
+project_id = "buildflow"
+
+[db]
+port = 54322
+major_version = 15
+
+[db.pooler]
+enabled = false
+
+[api]
+enabled = true
+port = 54321
+
+[studio]
+enabled = false
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"

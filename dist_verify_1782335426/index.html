@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/favicon-180.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BuildFlow — Gestion de projets BTP</title>
+    <style>
+      /*
+        Écran de lancement statique : affiché instantanément, avant même le
+        téléchargement/parsing du bundle JS, pour éviter un écran blanc pendant
+        le chargement initial. Retiré par main.tsx une fois React monté (l'écran
+        de chargement React, visuellement identique, prend alors le relais le
+        temps que la session/l'organisation soient chargées).
+      */
+      #initial-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #eff6ff 100%);
+        transition: opacity 0.35s ease;
+      }
+      #initial-splash.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #initial-splash .splash-mark {
+        height: 64px;
+        width: 64px;
+        filter: drop-shadow(0 12px 24px rgba(99, 102, 241, 0.35));
+      }
+      #initial-splash .splash-title {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1e293b;
+        letter-spacing: -0.01em;
+      }
+      #initial-splash .splash-spinner {
+        height: 26px;
+        width: 26px;
+        border-radius: 50%;
+        border: 3px solid #c7d2fe;
+        border-top-color: #6366f1;
+        animation: splash-spin 0.8s linear infinite;
+      }
+      #initial-splash .splash-label {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 13px;
+        color: #64748b;
+      }
+      @keyframes splash-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-Dovd5B3l.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-react-L9Xtmhay.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-data-C2BsmVRE.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-ui-DcwUc8QY.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-DPNu6UdM.css">
+  </head>
+  <body>
+    <div id="initial-splash">
+      <img class="splash-mark" src="/logo-icon-square.png" alt="BuildFlow" />
+      <p class="splash-title">BuildFlow</p>
+      <div class="splash-spinner"></div>
+      <p class="splash-label">Chargement de BuildFlow…</p>
+    </div>
+    <div id="root"></div>
+  </body>
+</html>

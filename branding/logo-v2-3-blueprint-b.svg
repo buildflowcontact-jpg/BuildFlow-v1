@@ -1,0 +1,27 @@
+<svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cv3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" width="200" height="200" rx="48" fill="#ffffff" stroke="url(#cv3)" stroke-width="3"/>
+  <!-- Grille de plan en fond, légère -->
+  <g stroke="url(#cv3)" stroke-width="1" opacity="0.18">
+    <line x1="40" y1="40" x2="40" y2="180"/>
+    <line x1="70" y1="40" x2="70" y2="180"/>
+    <line x1="100" y1="40" x2="100" y2="180"/>
+    <line x1="130" y1="40" x2="130" y2="180"/>
+    <line x1="160" y1="40" x2="160" y2="180"/>
+    <line x1="40" y1="60" x2="180" y2="60"/>
+    <line x1="40" y1="90" x2="180" y2="90"/>
+    <line x1="40" y1="120" x2="180" y2="120"/>
+    <line x1="40" y1="150" x2="180" y2="150"/>
+  </g>
+  <!-- "B" construit à partir de segments architecturaux -->
+  <path d="M62 56 V164 H110 C132 164 144 152 144 136 C144 122 136 112 124 109
+           C134 106 140 97 140 85 C140 68 128 56 106 56 Z
+           M86 80 H104 C112 80 116 84 116 90 C116 96 112 100 104 100 H86 Z
+           M86 122 H110 C119 122 124 127 124 134 C124 141 119 146 110 146 H86 Z"
+        fill="url(#cv3)"/>
+</svg>

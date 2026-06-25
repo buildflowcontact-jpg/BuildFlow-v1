@@ -1,0 +1,20 @@
+<svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="c1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" width="200" height="200" rx="48" fill="url(#c1)"/>
+  <!-- Boucle de flux continue reliant 4 acteurs (client, MOE, chantier, fournisseur) -->
+  <circle cx="110" cy="110" r="48" fill="none" stroke="#ffffff" stroke-width="7" opacity="0.5"
+          stroke-dasharray="2 14" stroke-linecap="round"/>
+  <path d="M110 58 A52 52 0 0 1 162 110" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+  <path d="M152 100 L162 110 L150 118" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 4 noeuds = 4 types d'acteurs du projet -->
+  <circle cx="110" cy="58" r="11" fill="#ffffff"/>
+  <circle cx="162" cy="110" r="11" fill="#ffffff"/>
+  <circle cx="110" cy="162" r="11" fill="#ffffff"/>
+  <circle cx="58" cy="110" r="11" fill="#ffffff"/>
+  <circle cx="110" cy="110" r="9" fill="#ffffff" opacity="0.95"/>
+</svg>

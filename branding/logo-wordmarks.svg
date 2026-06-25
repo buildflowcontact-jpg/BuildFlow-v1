@@ -1,0 +1,23 @@
+<svg width="900" height="320" viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gw" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="320" fill="#ffffff"/>
+
+  <!-- Row 1: icon + wordmark, concept 1 hardhat -->
+  <rect x="40" y="40" width="64" height="64" rx="16" fill="url(#gw)"/>
+  <path d="M72 58c-12.15 0-22 9.85-22 22v3.5h44V80c0-12.15-9.85-22-22-22z" fill="#ffffff"/>
+  <rect x="46" y="92" width="52" height="7" rx="3.5" fill="#ffffff"/>
+  <text x="118" y="84" font-family="Inter, Arial, sans-serif" font-weight="700" font-size="34" fill="#1e1b3a">BuildFlow</text>
+
+  <!-- Row 2: monogram + wordmark -->
+  <rect x="40" y="140" width="64" height="64" rx="16" fill="url(#gw)"/>
+  <text x="72" y="186" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-weight="700" font-size="36" fill="#ffffff">B</text>
+  <text x="118" y="184" font-family="Inter, Arial, sans-serif" font-weight="700" font-size="34" fill="#1e1b3a">Build<tspan fill="#6366f1">Flow</tspan></text>
+
+  <!-- Row 3: text-only wordmark with gradient -->
+  <text x="40" y="280" font-family="Inter, Arial, sans-serif" font-weight="800" font-size="40" fill="url(#gw)">BuildFlow</text>
+</svg>

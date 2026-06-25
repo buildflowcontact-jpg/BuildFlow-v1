@@ -1,0 +1,34 @@
+<svg width="960" height="320" viewBox="0 0 960 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="320" fill="#ffffff"/>
+
+  <!-- Row 1 : cycle (boucle entre 4 acteurs) -->
+  <rect x="50" y="40" width="60" height="60" rx="14" fill="url(#wg3)"/>
+  <circle cx="80" cy="55" r="5" fill="#fff"/>
+  <circle cx="95" cy="70" r="5" fill="#fff"/>
+  <circle cx="80" cy="85" r="5" fill="#fff"/>
+  <circle cx="65" cy="70" r="5" fill="#fff"/>
+  <path d="M80 55 A15 15 0 0 1 95 70" stroke="#fff" stroke-width="3" fill="none"/>
+  <text x="124" y="82" font-family="Inter, Arial, sans-serif" font-weight="700" font-size="32" fill="#1e1b3a">BuildFlow</text>
+
+  <!-- Row 2 : convergence vers le projet -->
+  <rect x="50" y="130" width="60" height="60" rx="14" fill="#ffffff" stroke="url(#wg3)" stroke-width="2"/>
+  <circle cx="64" cy="144" r="5" fill="url(#wg3)"/>
+  <circle cx="96" cy="144" r="5" fill="url(#wg3)"/>
+  <circle cx="64" cy="176" r="5" fill="url(#wg3)"/>
+  <circle cx="96" cy="176" r="5" fill="url(#wg3)"/>
+  <circle cx="80" cy="160" r="9" fill="url(#wg3)"/>
+  <text x="124" y="172" font-family="Inter, Arial, sans-serif" font-weight="700" font-size="32" fill="#1e1b3a">Build<tspan fill="url(#wg3)">Flow</tspan></text>
+
+  <!-- Row 3 : ruban infini -->
+  <rect x="50" y="220" width="60" height="60" rx="14" fill="url(#wg3)"/>
+  <path d="M64 250 C64 240, 74 236, 80 244 C86 252, 80 260, 74 260
+           C64 260, 64 250, 74 242 C84 234, 90 244, 96 250"
+        fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+  <text x="124" y="262" font-family="Inter, Arial, sans-serif" font-weight="700" font-size="32" fill="#1e1b3a">BuildFlow</text>
+</svg>
