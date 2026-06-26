@@ -13,6 +13,7 @@ import { ChangeOrdersTab } from '@/modules/changeorders/ChangeOrdersTab';
 import { TimeEntriesTab } from '@/modules/timeentries/TimeEntriesTab';
 import { ClientPortalTab } from '@/modules/portal/ClientPortalTab';
 import { BillingTab } from '@/modules/billing/BillingTab';
+import { QualityTab } from '@/modules/quality/QualityTab';
 
 export function ProjectTasksPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -96,4 +97,10 @@ export function ProjectBillingPage() {
   const { projectId } = useParams<{ projectId: string }>();
   if (!projectId) return null;
   return <BillingTab projectId={projectId} />;
+}
+
+export function ProjectQualityPage() {
+  const { projectId } = useParams<{ projectId: string }>();
+  if (!projectId) return null;
+  return <QualityTab projectId={projectId} />;
 }

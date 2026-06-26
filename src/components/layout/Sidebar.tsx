@@ -21,6 +21,7 @@ import {
   Clock,
   LayoutDashboard,
   Receipt,
+  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useUiStore } from '@/stores/uiStore';
@@ -47,6 +48,7 @@ const projectSectionItems = [
   { to: 'client-portal', label: 'Portail client', icon: LayoutDashboard },
   { to: 'incidents', label: 'Incidents', icon: AlertTriangle },
   { to: 'punchlist', label: 'Réserves', icon: ClipboardCheck },
+  { to: 'quality', label: 'Qualité', icon: ShieldCheck },
   { to: 'members', label: 'Membres', icon: Users },
 ];
 

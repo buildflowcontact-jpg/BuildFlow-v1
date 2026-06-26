@@ -23,7 +23,11 @@ export type RealtimeTable =
   | 'daily_reports'
   | 'quotes'
   | 'invoices'
-  | 'invoice_payments';
+  | 'invoice_payments'
+  | 'quality_templates'
+  | 'quality_inspections'
+  | 'quality_inspection_results'
+  | 'non_conformities';
 
 /**
  * Abonnement générique à une table filtrée (par défaut sur project_id).

@@ -25,6 +25,7 @@ import {
   ProjectTimeEntriesPage,
   ProjectClientPortalPage,
   ProjectBillingPage,
+  ProjectQualityPage,
 } from '@/modules/projects/projectSectionPages';
 import { ClientsPage } from '@/modules/clients/ClientsPage';
 import { CompaniesPage } from '@/modules/companies/CompaniesPage';
@@ -65,6 +66,7 @@ export const router = createBrowserRouter([
           { path: 'client-portal', element: <ProjectClientPortalPage /> },
           { path: 'incidents', element: <ProjectIncidentsPage /> },
           { path: 'punchlist', element: <ProjectPunchListPage /> },
+          { path: 'quality', element: <ProjectQualityPage /> },
           { path: 'members', element: <ProjectMembersPage /> },
         ],
       },

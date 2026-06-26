@@ -11,6 +11,10 @@ import type {
   PunchListStatus,
   PermissionLevel,
   ResourceType,
+  QualityInspectionStatus,
+  QualityInspectionResult,
+  NonConformitySeverity,
+  NonConformityStatus,
 } from './database.types';
 
 export type Profile = Tables<'profiles'>;
@@ -54,6 +58,11 @@ export type QuoteItem = Tables<'quote_items'>;
 export type Invoice = Tables<'invoices'>;
 export type InvoiceItem = Tables<'invoice_items'>;
 export type InvoicePayment = Tables<'invoice_payments'>;
+export type QualityTemplate = Tables<'quality_templates'>;
+export type QualityTemplateItem = Tables<'quality_template_items'>;
+export type QualityInspection = Tables<'quality_inspections'>;
+export type QualityInspectionResultRow = Tables<'quality_inspection_results'>;
+export type NonConformity = Tables<'non_conformities'>;
 
 export interface DailyReportTimeEntry {
   user_id: string;
@@ -160,6 +169,30 @@ export const PUNCH_LIST_STATUS_LABELS: Record<PunchListStatus, string> = {
   verified: 'Vérifiée',
 };
 
+export const QUALITY_INSPECTION_STATUS_LABELS: Record<QualityInspectionStatus, string> = {
+  in_progress: 'En cours',
+  completed: 'Terminée',
+};
+
+export const QUALITY_INSPECTION_RESULT_LABELS: Record<QualityInspectionResult, string> = {
+  conforme: 'Conforme',
+  non_conforme: 'Non conforme',
+  non_applicable: 'Non applicable',
+};
+
+export const NON_CONFORMITY_SEVERITY_LABELS: Record<NonConformitySeverity, string> = {
+  mineure: 'Mineure',
+  majeure: 'Majeure',
+  critique: 'Critique',
+};
+
+export const NON_CONFORMITY_STATUS_LABELS: Record<NonConformityStatus, string> = {
+  ouverte: 'Ouverte',
+  en_cours: 'En cours',
+  resolue: 'Résolue',
+  verifiee: 'Vérifiée',
+};
+
 export const PHASE_STATUS_LABELS: Record<PhaseStatus, string> = {
   a_venir: 'À venir',
   en_cours: 'En cours',
@@ -257,6 +290,14 @@ export interface QuoteWithItems extends Quote {
 export interface InvoiceWithItems extends Invoice {
   items: InvoiceItem[];
   payments: InvoicePayment[];
+}
+
+export interface QualityTemplateWithItems extends QualityTemplate {
+  items: QualityTemplateItem[];
+}
+
+export interface QualityInspectionWithResults extends QualityInspection {
+  results: QualityInspectionResultRow[];
 }
 
 /** Calcule HT, TVA et TTC à partir d'une liste de lignes (devis ou facture). */
