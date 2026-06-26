@@ -2206,6 +2206,7 @@ export type Database = {
           description: string
           id: string
           line_total: number
+          lot: string | null
           position: number
           quantity: number
           quote_id: string
@@ -2218,6 +2219,7 @@ export type Database = {
           description: string
           id?: string
           line_total?: number
+          lot?: string | null
           position?: number
           quantity?: number
           quote_id: string
@@ -2230,6 +2232,7 @@ export type Database = {
           description?: string
           id?: string
           line_total?: number
+          lot?: string | null
           position?: number
           quantity?: number
           quote_id?: string

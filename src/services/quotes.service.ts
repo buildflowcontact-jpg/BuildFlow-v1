@@ -7,6 +7,7 @@ import { activityLogsService } from './activityLogs.service';
 
 export type QuoteItemInput = Pick<QuoteItem, 'description' | 'quantity' | 'unit' | 'unit_price' | 'vat_rate'> & {
   position?: number;
+  lot?: string | null;
 };
 
 export const quotesService = {

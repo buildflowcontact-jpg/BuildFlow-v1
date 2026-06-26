@@ -9,14 +9,16 @@ export interface LineItemRow {
   unit: string;
   unit_price: string;
   vat_rate: string;
+  /** Libellé du lot (regroupement DPGF), optionnel — non affiché si aucune ligne n'en a. */
+  lot?: string;
 }
 
 export function emptyLineItemRow(): LineItemRow {
-  return { description: '', quantity: '1', unit: 'u', unit_price: '0', vat_rate: '20' };
+  return { description: '', quantity: '1', unit: 'u', unit_price: '0', vat_rate: '20', lot: '' };
 }
 
 /** Convertit les lignes du formulaire (texte) en payload numérique pour les services. */
-export function lineRowsToItems<T extends { description: string; quantity: number; unit: string; unit_price: number; vat_rate: number; position?: number }>(
+export function lineRowsToItems<T extends { description: string; quantity: number; unit: string; unit_price: number; vat_rate: number; position?: number; lot?: string | null }>(
   rows: LineItemRow[]
 ): T[] {
   return rows
@@ -30,6 +32,7 @@ export function lineRowsToItems<T extends { description: string; quantity: numbe
           unit_price: Number(row.unit_price) || 0,
           vat_rate: Number(row.vat_rate) || 0,
           position: index,
+          lot: row.lot?.trim() || null,
         }) as T
     );
 }
@@ -72,6 +75,7 @@ export function LineItemsEditor({ rows, onChange }: LineItemsEditorProps) {
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <tr>
+              <th className="w-24 px-2 py-2 text-left">Lot</th>
               <th className="px-3 py-2 text-left">Description</th>
               <th className="w-20 px-2 py-2 text-left">Qté</th>
               <th className="w-20 px-2 py-2 text-left">Unité</th>
@@ -86,6 +90,13 @@ export function LineItemsEditor({ rows, onChange }: LineItemsEditorProps) {
               const lineTotal = (Number(row.quantity) || 0) * (Number(row.unit_price) || 0);
               return (
                 <tr key={index}>
+                  <td className="px-1 py-1.5">
+                    <Input
+                      value={row.lot ?? ''}
+                      placeholder="Lot"
+                      onChange={(e) => updateRow(index, { lot: e.target.value })}
+                    />
+                  </td>
                   <td className="px-2 py-1.5">
                     <Input
                       value={row.description}

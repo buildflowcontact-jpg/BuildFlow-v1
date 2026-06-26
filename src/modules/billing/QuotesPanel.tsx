@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, FileText, Pencil, Trash2, Send, Check, X, ArrowRightCircle } from 'lucide-react';
+import { Plus, FileText, Pencil, Trash2, Send, Check, X, ArrowRightCircle, FileSpreadsheet } from 'lucide-react';
 import { useQuotes, useQuote, useUpdateQuote } from '@/hooks/useQuotes';
 import { useClients } from '@/hooks/useClients';
 import { useAuthStore } from '@/stores/authStore';
@@ -19,6 +19,7 @@ import { formatCurrency } from '@/utils/currency';
 import { formatDate } from '@/utils/date';
 import type { QuoteItemInput } from '@/services/quotes.service';
 import { LineItemsEditor, emptyLineItemRow, lineRowsToItems, type LineItemRow } from './LineItemsEditor';
+import { DpgfImportModal } from './DpgfImportModal';
 
 const STATUS_TONE: Record<Quote['status'], 'slate' | 'blue' | 'green' | 'red' | 'yellow'> = {
   draft: 'slate',
@@ -60,6 +61,7 @@ export function QuotesPanel({ projectId }: QuotesPanelProps) {
   const [rows, setRows] = useState<LineItemRow[]>([emptyLineItemRow()]);
 
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
   const [decideMode, setDecideMode] = useState<'accept' | 'decline' | null>(null);
   const [signerName, setSignerName] = useState('');
   const [signatureData, setSignatureData] = useState<string | null>(null);
@@ -104,10 +106,16 @@ export function QuotesPanel({ projectId }: QuotesPanelProps) {
           <h3 className="text-base font-semibold text-slate-900">Devis</h3>
           <p className="text-sm text-slate-500">{quotes.length} devis</p>
         </div>
-        <Button size="sm" onClick={openCreate}>
-          <Plus className="h-4 w-4" />
-          Nouveau devis
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
+            <FileSpreadsheet className="h-4 w-4" />
+            Importer DPGF
+          </Button>
+          <Button size="sm" onClick={openCreate}>
+            <Plus className="h-4 w-4" />
+            Nouveau devis
+          </Button>
+        </div>
       </div>
 
       {quotes.length === 0 ? (
@@ -194,6 +202,13 @@ export function QuotesPanel({ projectId }: QuotesPanelProps) {
           </div>
         </form>
       </Modal>
+
+      <DpgfImportModal
+        projectId={projectId}
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={(quoteId) => setDetailId(quoteId)}
+      />
 
       {detailId && (
         <QuoteDetailModal
@@ -318,6 +333,7 @@ function QuoteDetailModal({
             unit: item.unit,
             unit_price: String(item.unit_price),
             vat_rate: String(item.vat_rate),
+            lot: item.lot ?? '',
           }))
         : [emptyLineItemRow()]
     );
@@ -382,6 +398,7 @@ function QuoteDetailModal({
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
+                  <th className="px-3 py-2 text-left">Lot</th>
                   <th className="px-3 py-2 text-left">Description</th>
                   <th className="px-2 py-2 text-left">Qté</th>
                   <th className="px-2 py-2 text-left">Unité</th>
@@ -393,6 +410,7 @@ function QuoteDetailModal({
               <tbody className="divide-y divide-slate-100">
                 {quote.items.map((item) => (
                   <tr key={item.id}>
+                    <td className="px-3 py-1.5 text-slate-400">{item.lot ?? '—'}</td>
                     <td className="px-3 py-1.5">{item.description}</td>
                     <td className="px-2 py-1.5">{item.quantity}</td>
                     <td className="px-2 py-1.5">{item.unit}</td>
