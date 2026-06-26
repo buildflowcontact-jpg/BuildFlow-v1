@@ -7,7 +7,10 @@ import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persist
 import { router } from './App';
 import { AuthProvider } from './app/AuthProvider';
 import { ErrorBoundary } from './app/ErrorBoundary';
+import { initSentry } from './lib/sentry';
 import './index.css';
+
+initSentry();
 
 // networkMode 'offlineFirst' : les requêtes servent le cache existant immédiatement
 // et tentent une revalidation en arrière-plan, sans bloquer l'UI hors-ligne.

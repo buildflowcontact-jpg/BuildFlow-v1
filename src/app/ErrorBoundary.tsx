@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AlertTriangle, RotateCcw } from 'lucide-react';
+import { reportError } from '../lib/sentry';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -29,6 +30,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     // En l'absence d'un service de monitoring externe branché, on garde au
     // moins une trace en console pour le diagnostic.
     console.error('[ErrorBoundary] Exception non interceptée :', error, info.componentStack);
+    // No-op si VITE_SENTRY_DSN n'est pas configuré (cf. src/lib/sentry.ts).
+    reportError(error, { componentStack: info.componentStack });
   }
 
   private handleReload = () => {
