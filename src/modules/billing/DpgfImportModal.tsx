@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react';
-import { Upload, FileSpreadsheet, AlertTriangle } from 'lucide-react';
+import { Upload, FileSpreadsheet } from 'lucide-react';
 import { useQuotes } from '@/hooks/useQuotes';
 import { useClients } from '@/hooks/useClients';
 import { dpgfImportService } from '@/services/dpgfImport.service';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Spinner } from '@/components/ui/Spinner';
+import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { LineItemsEditor, lineRowsToItems, type LineItemRow } from './LineItemsEditor';
 
 interface DpgfImportModalProps {
@@ -139,12 +140,7 @@ export function DpgfImportModal({ projectId, open, onClose, onImported }: DpgfIm
           </div>
         )}
 
-        {parseError && (
-          <div className="flex items-start gap-2 rounded-xl bg-red-50 px-3 py-2.5 text-sm text-red-700">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{parseError}</span>
-          </div>
-        )}
+        <ErrorMessage error={parseError} />
 
         {rows && (
           <>

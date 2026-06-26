@@ -6,6 +6,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { formatDateTime } from '@/utils/date';
 import type { ConversationWithMeta } from '@/types/domain';
 
@@ -75,6 +76,8 @@ export function MessageThread({ conversation }: MessageThreadProps) {
           </ul>
         )}
       </div>
+
+      <ErrorMessage error={send.error} className="mx-4 mb-2" />
 
       <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-slate-100 px-4 py-3">
         <input

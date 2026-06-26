@@ -10,6 +10,7 @@ import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { FullPageSpinner, Spinner } from '@/components/ui/Spinner';
 import { INVOICE_STATUS_LABELS, INVOICE_OPERATION_CATEGORY_LABELS } from '@/types/domain';
 import type { Invoice } from '@/types/domain';
@@ -444,7 +445,7 @@ function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }: Invoi
           </div>
 
           {invoice.notes && <p className="text-sm text-slate-600">{invoice.notes}</p>}
-          {facturXError && <p className="text-sm text-red-600">{facturXError}</p>}
+          <ErrorMessage error={facturXError} />
 
           <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
             <Button variant="outline" loading={generateFacturX.isPending} onClick={handleDownloadFacturX}>

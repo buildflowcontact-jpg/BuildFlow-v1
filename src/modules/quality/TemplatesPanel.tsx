@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Modal } from '@/components/ui/Modal';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { FullPageSpinner, Spinner } from '@/components/ui/Spinner';
 import type { QualityTemplate } from '@/types/domain';
 import { ChecklistItemsEditor, checklistRowsToItems, emptyChecklistRow, type ChecklistItemRow } from './ChecklistItemsEditor';
@@ -108,6 +109,7 @@ export function TemplatesPanel({ projectId }: TemplatesPanelProps) {
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
           <ChecklistItemsEditor rows={rows} onChange={setRows} />
+          <ErrorMessage error={create.error} />
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
               Annuler
@@ -168,6 +170,7 @@ function TemplateEditModal({ templateId, onClose }: TemplateEditModalProps) {
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
           <ChecklistItemsEditor rows={rows} onChange={setRows} />
+          <ErrorMessage error={update.error} />
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Annuler

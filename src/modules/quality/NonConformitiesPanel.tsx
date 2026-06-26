@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 import { NON_CONFORMITY_SEVERITY_LABELS, NON_CONFORMITY_STATUS_LABELS } from '@/types/domain';
 import type { NonConformity } from '@/types/domain';
@@ -227,6 +228,7 @@ export function NonConformitiesPanel({ projectId }: NonConformitiesPanelProps) {
               onChange={(e) => setForm({ ...form, resolution_notes: e.target.value })}
             />
           )}
+          <ErrorMessage error={create.error ?? update.error} />
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
               Annuler

@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { FullPageSpinner, Spinner } from '@/components/ui/Spinner';
 import { QUALITY_INSPECTION_STATUS_LABELS } from '@/types/domain';
 import type { QualityInspection } from '@/types/domain';
@@ -138,6 +139,7 @@ export function InspectionsPanel({ projectId }: InspectionsPanelProps) {
             ))}
           </Select>
           {!form.templateId && <ChecklistItemsEditor rows={rows} onChange={setRows} />}
+          <ErrorMessage error={create.error} />
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
               Annuler
@@ -246,6 +248,8 @@ function InspectionDetailModal({ inspectionId, projectId, onClose }: InspectionD
             </li>
           ))}
         </ul>
+
+        <ErrorMessage error={setResult.error ?? complete.error} />
 
         {!isCompleted && (
           <div className="flex justify-end border-t border-slate-100 pt-4">
