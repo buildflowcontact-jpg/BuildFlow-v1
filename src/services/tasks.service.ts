@@ -26,11 +26,22 @@ export function buildTaskTree(tasks: Task[]): TaskWithChildren[] {
   return roots;
 }
 
+export type ListPageOpts = { limit?: number; offset?: number };
+
 export const tasksService = {
-  async list(projectId: string): Promise<Task[]> {
-    return unwrap(
-      await supabase.from('tasks').select('*').eq('project_id', projectId).order('position', { ascending: true })
-    );
+  /**
+   * `opts` optionnel et rétrocompatible (cf. quotesService.list). À NE PAS
+   * utiliser depuis TasksTab/buildTaskTree : la reconstruction de l'arbre
+   * parent/enfant exige la liste complète du projet, pas une page partielle.
+   * Réservé aux futurs usages qui n'ont pas besoin de la hiérarchie complète.
+   */
+  async list(projectId: string, opts?: ListPageOpts): Promise<Task[]> {
+    let query = supabase.from('tasks').select('*').eq('project_id', projectId).order('position', { ascending: true });
+    if (opts?.limit !== undefined) {
+      const offset = opts.offset ?? 0;
+      query = query.range(offset, offset + opts.limit - 1);
+    }
+    return unwrap(await query);
   },
 
   async listByPhase(phaseId: string): Promise<Task[]> {

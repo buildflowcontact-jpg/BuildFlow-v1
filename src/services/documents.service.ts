@@ -6,11 +6,21 @@ import { storageService } from './storage.service';
 import { activityLogsService } from './activityLogs.service';
 import { notificationsService } from './notifications.service';
 
+export type ListPageOpts = { limit?: number; offset?: number };
+
 export const documentsService = {
-  async list(projectId: string): Promise<Document[]> {
-    return unwrap(
-      await supabase.from('documents').select('*').eq('project_id', projectId).order('created_at', { ascending: false })
-    );
+  /** `opts` optionnel et rétrocompatible — voir quotesService.list. */
+  async list(projectId: string, opts?: ListPageOpts): Promise<Document[]> {
+    let query = supabase
+      .from('documents')
+      .select('*')
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: false });
+    if (opts?.limit !== undefined) {
+      const offset = opts.offset ?? 0;
+      query = query.range(offset, offset + opts.limit - 1);
+    }
+    return unwrap(await query);
   },
 
   async upload(params: {

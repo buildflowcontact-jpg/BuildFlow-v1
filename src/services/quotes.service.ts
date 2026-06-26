@@ -10,11 +10,22 @@ export type QuoteItemInput = Pick<QuoteItem, 'description' | 'quantity' | 'unit'
   lot?: string | null;
 };
 
+export type ListPageOpts = { limit?: number; offset?: number };
+
 export const quotesService = {
-  async list(projectId: string): Promise<Quote[]> {
-    return unwrap(
-      await supabase.from('quotes').select('*').eq('project_id', projectId).order('number', { ascending: false })
-    );
+  /**
+   * `opts` est optionnel et rétrocompatible : sans lui, le comportement est
+   * inchangé (liste complète). Avec `{ limit, offset }`, applique `.range()`
+   * côté Postgres — à utiliser pour les projets à fort volume de devis plutôt
+   * que de tout charger en mémoire (cf. audit du 26/06/2026, section Perf).
+   */
+  async list(projectId: string, opts?: ListPageOpts): Promise<Quote[]> {
+    let query = supabase.from('quotes').select('*').eq('project_id', projectId).order('number', { ascending: false });
+    if (opts?.limit !== undefined) {
+      const offset = opts.offset ?? 0;
+      query = query.range(offset, offset + opts.limit - 1);
+    }
+    return unwrap(await query);
   },
 
   async getWithItems(quoteId: string): Promise<QuoteWithItems> {

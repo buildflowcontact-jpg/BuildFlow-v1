@@ -13,11 +13,17 @@ export type InvoiceItemInput = Pick<InvoiceItem, 'description' | 'quantity' | 'u
   position?: number;
 };
 
+export type ListPageOpts = { limit?: number; offset?: number };
+
 export const invoicesService = {
-  async list(projectId: string): Promise<Invoice[]> {
-    return unwrap(
-      await supabase.from('invoices').select('*').eq('project_id', projectId).order('number', { ascending: false })
-    );
+  /** `opts` optionnel et rétrocompatible — voir quotesService.list. */
+  async list(projectId: string, opts?: ListPageOpts): Promise<Invoice[]> {
+    let query = supabase.from('invoices').select('*').eq('project_id', projectId).order('number', { ascending: false });
+    if (opts?.limit !== undefined) {
+      const offset = opts.offset ?? 0;
+      query = query.range(offset, offset + opts.limit - 1);
+    }
+    return unwrap(await query);
   },
 
   async getWithItems(invoiceId: string): Promise<InvoiceWithItems> {

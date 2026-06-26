@@ -4,6 +4,8 @@ import type { Conversation, ConversationParticipant, ConversationWithMeta, Messa
 
 type ParticipantWithProfile = ConversationParticipant & { profile: Profile | null };
 
+export type ListMessagesOpts = { limit?: number };
+
 export const messagingService = {
   /** Récupère (ou crée) le fil "groupe" du projet, visible par toute l'équipe. */
   async ensureGroupConversation(projectId: string): Promise<string> {
@@ -88,7 +90,25 @@ export const messagingService = {
     return metas;
   },
 
-  async listMessages(conversationId: string): Promise<MessageWithSender[]> {
+  /**
+   * Sans `opts`, comportement inchangé (historique complet, ordre chronologique).
+   * Avec `{ limit }`, ne charge que les `limit` messages les plus récents (tri
+   * descendant côté requête puis ré-inversion) — évite de charger tout
+   * l'historique d'une conversation longue juste pour afficher les derniers
+   * échanges (cf. audit du 26/06/2026, section Perf).
+   */
+  async listMessages(conversationId: string, opts?: ListMessagesOpts): Promise<MessageWithSender[]> {
+    if (opts?.limit !== undefined) {
+      const recent = unwrap(
+        await supabase
+          .from('messages')
+          .select('*, sender:profiles(*)')
+          .eq('conversation_id', conversationId)
+          .order('created_at', { ascending: false })
+          .limit(opts.limit)
+      ) as unknown as MessageWithSender[];
+      return recent.reverse();
+    }
     return unwrap(
       await supabase
         .from('messages')
