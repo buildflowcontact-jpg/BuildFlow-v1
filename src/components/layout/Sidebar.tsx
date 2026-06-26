@@ -22,6 +22,7 @@ import {
   LayoutDashboard,
   Receipt,
   ShieldCheck,
+  MessageCircle,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useUiStore } from '@/stores/uiStore';
@@ -49,6 +50,7 @@ const projectSectionItems = [
   { to: 'incidents', label: 'Incidents', icon: AlertTriangle },
   { to: 'punchlist', label: 'Réserves', icon: ClipboardCheck },
   { to: 'quality', label: 'Qualité', icon: ShieldCheck },
+  { to: 'messages', label: 'Messagerie', icon: MessageCircle },
   { to: 'members', label: 'Membres', icon: Users },
 ];
 

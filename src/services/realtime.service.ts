@@ -27,7 +27,10 @@ export type RealtimeTable =
   | 'quality_templates'
   | 'quality_inspections'
   | 'quality_inspection_results'
-  | 'non_conformities';
+  | 'non_conformities'
+  | 'conversations'
+  | 'conversation_participants'
+  | 'messages';
 
 /**
  * Abonnement générique à une table filtrée (par défaut sur project_id).

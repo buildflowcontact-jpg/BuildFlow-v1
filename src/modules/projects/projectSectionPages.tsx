@@ -14,6 +14,7 @@ import { TimeEntriesTab } from '@/modules/timeentries/TimeEntriesTab';
 import { ClientPortalTab } from '@/modules/portal/ClientPortalTab';
 import { BillingTab } from '@/modules/billing/BillingTab';
 import { QualityTab } from '@/modules/quality/QualityTab';
+import { MessagingTab } from '@/modules/messaging/MessagingTab';
 
 export function ProjectTasksPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -103,4 +104,10 @@ export function ProjectQualityPage() {
   const { projectId } = useParams<{ projectId: string }>();
   if (!projectId) return null;
   return <QualityTab projectId={projectId} />;
+}
+
+export function ProjectMessagingPage() {
+  const { projectId } = useParams<{ projectId: string }>();
+  if (!projectId) return null;
+  return <MessagingTab projectId={projectId} />;
 }

@@ -63,6 +63,9 @@ export type QualityTemplateItem = Tables<'quality_template_items'>;
 export type QualityInspection = Tables<'quality_inspections'>;
 export type QualityInspectionResultRow = Tables<'quality_inspection_results'>;
 export type NonConformity = Tables<'non_conformities'>;
+export type Conversation = Tables<'conversations'>;
+export type ConversationParticipant = Tables<'conversation_participants'>;
+export type Message = Tables<'messages'>;
 
 export interface DailyReportTimeEntry {
   user_id: string;
@@ -298,6 +301,28 @@ export interface QualityTemplateWithItems extends QualityTemplate {
 
 export interface QualityInspectionWithResults extends QualityInspection {
   results: QualityInspectionResultRow[];
+}
+
+// ---------------------------------------------------------------------------
+// Messagerie interne
+// ---------------------------------------------------------------------------
+
+export type ConversationType = 'group' | 'direct';
+
+export const CONVERSATION_TYPE_LABELS: Record<ConversationType, string> = {
+  group: 'Équipe projet',
+  direct: 'Message direct',
+};
+
+/** Conversation enrichie pour la liste : libellé affiché, dernier message et compteur de non-lus. */
+export interface ConversationWithMeta extends Conversation {
+  displayName: string;
+  lastMessagePreview: string | null;
+  unreadCount: number;
+}
+
+export interface MessageWithSender extends Message {
+  sender: Pick<Profile, 'id' | 'full_name' | 'avatar_url'> | null;
 }
 
 /** Calcule HT, TVA et TTC à partir d'une liste de lignes (devis ou facture). */

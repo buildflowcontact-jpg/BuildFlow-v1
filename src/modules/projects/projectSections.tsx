@@ -14,6 +14,7 @@ import {
   ClipboardCheck,
   Receipt,
   ShieldCheck,
+  MessageCircle,
 } from 'lucide-react';
 import { TasksTab } from '@/modules/tasks/TasksTab';
 import { GanttChart } from '@/modules/gantt/GanttChart';
@@ -29,6 +30,7 @@ import { TimeEntriesTab } from '@/modules/timeentries/TimeEntriesTab';
 import { ClientPortalTab } from '@/modules/portal/ClientPortalTab';
 import { BillingTab } from '@/modules/billing/BillingTab';
 import { QualityTab } from '@/modules/quality/QualityTab';
+import { MessagingTab } from '@/modules/messaging/MessagingTab';
 
 export interface ProjectSectionDef {
   /** Doit correspondre au segment de route (ex: 'documents', 'gantt'). */
@@ -59,6 +61,7 @@ export const PROJECT_SECTIONS: ProjectSectionDef[] = [
   { key: 'incidents', label: 'Incidents', icon: AlertTriangle, Component: IncidentsTab },
   { key: 'punchlist', label: 'Réserves', icon: ClipboardCheck, Component: PunchListTab },
   { key: 'quality', label: 'Qualité', icon: ShieldCheck, Component: QualityTab },
+  { key: 'messages', label: 'Messagerie', icon: MessageCircle, Component: MessagingTab },
 ];
 
 export function getProjectSection(key: string): ProjectSectionDef | undefined {

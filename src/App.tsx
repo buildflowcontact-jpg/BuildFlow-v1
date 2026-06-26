@@ -26,6 +26,7 @@ import {
   ProjectClientPortalPage,
   ProjectBillingPage,
   ProjectQualityPage,
+  ProjectMessagingPage,
 } from '@/modules/projects/projectSectionPages';
 import { ClientsPage } from '@/modules/clients/ClientsPage';
 import { CompaniesPage } from '@/modules/companies/CompaniesPage';
@@ -67,6 +68,7 @@ export const router = createBrowserRouter([
           { path: 'incidents', element: <ProjectIncidentsPage /> },
           { path: 'punchlist', element: <ProjectPunchListPage /> },
           { path: 'quality', element: <ProjectQualityPage /> },
+          { path: 'messages', element: <ProjectMessagingPage /> },
           { path: 'members', element: <ProjectMembersPage /> },
         ],
       },
