@@ -12,6 +12,7 @@ import { RfisTab } from '@/modules/rfis/RfisTab';
 import { ChangeOrdersTab } from '@/modules/changeorders/ChangeOrdersTab';
 import { TimeEntriesTab } from '@/modules/timeentries/TimeEntriesTab';
 import { ClientPortalTab } from '@/modules/portal/ClientPortalTab';
+import { BillingTab } from '@/modules/billing/BillingTab';
 
 export function ProjectTasksPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -89,4 +90,10 @@ export function ProjectClientPortalPage() {
   const { projectId } = useParams<{ projectId: string }>();
   if (!projectId) return null;
   return <ClientPortalTab projectId={projectId} />;
+}
+
+export function ProjectBillingPage() {
+  const { projectId } = useParams<{ projectId: string }>();
+  if (!projectId) return null;
+  return <BillingTab projectId={projectId} />;
 }

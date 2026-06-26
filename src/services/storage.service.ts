@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabaseClient';
 
-export type StorageBucket = 'documents' | 'plans' | 'models3d' | 'avatars' | 'captures';
+export type StorageBucket = 'documents' | 'plans' | 'models3d' | 'avatars' | 'captures' | 'invoices';
 
 function sanitizeFileName(fileName: string): string {
   const lastDot = fileName.lastIndexOf('.');

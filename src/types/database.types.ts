@@ -308,6 +308,7 @@ export type Database = {
       clients: {
         Row: {
           address: string | null
+          billing_address: string | null
           company_name: string | null
           created_at: string
           created_by: string | null
@@ -317,10 +318,13 @@ export type Database = {
           notes: string | null
           organization_id: string
           phone: string | null
+          siret: string | null
           updated_at: string
+          vat_number: string | null
         }
         Insert: {
           address?: string | null
+          billing_address?: string | null
           company_name?: string | null
           created_at?: string
           created_by?: string | null
@@ -330,10 +334,13 @@ export type Database = {
           notes?: string | null
           organization_id: string
           phone?: string | null
+          siret?: string | null
           updated_at?: string
+          vat_number?: string | null
         }
         Update: {
           address?: string | null
+          billing_address?: string | null
           company_name?: string | null
           created_at?: string
           created_by?: string | null
@@ -343,7 +350,9 @@ export type Database = {
           notes?: string | null
           organization_id?: string
           phone?: string | null
+          siret?: string | null
           updated_at?: string
+          vat_number?: string | null
         }
         Relationships: [
           {
@@ -757,6 +766,218 @@ export type Database = {
           },
         ]
       }
+      invoice_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          invoice_id: string
+          line_total: number
+          position: number
+          quantity: number
+          unit: string
+          unit_price: number
+          vat_rate: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          invoice_id: string
+          line_total?: number
+          position?: number
+          quantity?: number
+          unit?: string
+          unit_price?: number
+          vat_rate?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_id?: string
+          line_total?: number
+          position?: number
+          quantity?: number
+          unit?: string
+          unit_price?: number
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          invoice_id: string
+          method: string | null
+          notes: string | null
+          paid_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_id: string
+          method?: string | null
+          notes?: string | null
+          paid_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_id?: string
+          method?: string | null
+          notes?: string | null
+          paid_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount_paid: number
+          client_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          due_date: string | null
+          facturx_storage_path: string | null
+          id: string
+          issue_date: string
+          late_penalty_rate: number | null
+          notes: string | null
+          number: number | null
+          operation_category: string
+          organization_id: string
+          payment_terms_days: number | null
+          project_id: string
+          quote_id: string | null
+          recovery_indemnity_amount: number | null
+          status: string
+          subtotal: number
+          title: string
+          total: number
+          updated_at: string
+          vat_amount: number
+        }
+        Insert: {
+          amount_paid?: number
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          due_date?: string | null
+          facturx_storage_path?: string | null
+          id?: string
+          issue_date?: string
+          late_penalty_rate?: number | null
+          notes?: string | null
+          number?: number | null
+          operation_category?: string
+          organization_id: string
+          payment_terms_days?: number | null
+          project_id: string
+          quote_id?: string | null
+          recovery_indemnity_amount?: number | null
+          status?: string
+          subtotal?: number
+          title: string
+          total?: number
+          updated_at?: string
+          vat_amount?: number
+        }
+        Update: {
+          amount_paid?: number
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          due_date?: string | null
+          facturx_storage_path?: string | null
+          id?: string
+          issue_date?: string
+          late_penalty_rate?: number | null
+          notes?: string | null
+          number?: number | null
+          operation_category?: string
+          organization_id?: string
+          payment_terms_days?: number | null
+          project_id?: string
+          quote_id?: string | null
+          recovery_indemnity_amount?: number | null
+          status?: string
+          subtotal?: number
+          title?: string
+          total?: number
+          updated_at?: string
+          vat_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       models3d: {
         Row: {
           created_at: string
@@ -887,28 +1108,52 @@ export type Database = {
       }
       organizations: {
         Row: {
+          bic: string | null
           created_at: string
+          default_late_penalty_rate: number | null
+          default_payment_terms_days: number
+          default_recovery_indemnity: number
+          iban: string | null
           id: string
+          legal_address: string | null
           name: string
           owner_id: string
+          siret: string | null
           slug: string
           updated_at: string
+          vat_number: string | null
         }
         Insert: {
+          bic?: string | null
           created_at?: string
+          default_late_penalty_rate?: number | null
+          default_payment_terms_days?: number
+          default_recovery_indemnity?: number
+          iban?: string | null
           id?: string
+          legal_address?: string | null
           name: string
           owner_id: string
+          siret?: string | null
           slug: string
           updated_at?: string
+          vat_number?: string | null
         }
         Update: {
+          bic?: string | null
           created_at?: string
+          default_late_penalty_rate?: number | null
+          default_payment_terms_days?: number
+          default_recovery_indemnity?: number
+          iban?: string | null
           id?: string
+          legal_address?: string | null
           name?: string
           owner_id?: string
+          siret?: string | null
           slug?: string
           updated_at?: string
+          vat_number?: string | null
         }
         Relationships: [
           {
@@ -1061,6 +1306,13 @@ export type Database = {
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_versions_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -1506,6 +1758,165 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          line_total: number
+          position: number
+          quantity: number
+          quote_id: string
+          unit: string
+          unit_price: number
+          vat_rate: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          line_total?: number
+          position?: number
+          quantity?: number
+          quote_id: string
+          unit?: string
+          unit_price?: number
+          vat_rate?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          line_total?: number
+          position?: number
+          quantity?: number
+          quote_id?: string
+          unit?: string
+          unit_price?: number
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_items_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          accepted_at: string | null
+          client_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          decided_by: string | null
+          id: string
+          issue_date: string
+          notes: string | null
+          number: number | null
+          organization_id: string
+          project_id: string
+          signature_id: string | null
+          status: string
+          subtotal: number
+          title: string
+          total: number
+          updated_at: string
+          validity_until: string | null
+          vat_amount: number
+        }
+        Insert: {
+          accepted_at?: string | null
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          decided_by?: string | null
+          id?: string
+          issue_date?: string
+          notes?: string | null
+          number?: number | null
+          organization_id: string
+          project_id: string
+          signature_id?: string | null
+          status?: string
+          subtotal?: number
+          title: string
+          total?: number
+          updated_at?: string
+          validity_until?: string | null
+          vat_amount?: number
+        }
+        Update: {
+          accepted_at?: string | null
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          decided_by?: string | null
+          id?: string
+          issue_date?: string
+          notes?: string | null
+          number?: number | null
+          organization_id?: string
+          project_id?: string
+          signature_id?: string | null
+          status?: string
+          subtotal?: number
+          title?: string
+          total?: number
+          updated_at?: string
+          validity_until?: string | null
+          vat_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_signature_id_fkey"
+            columns: ["signature_id"]
+            isOneToOne: false
+            referencedRelation: "signatures"
             referencedColumns: ["id"]
           },
         ]
@@ -2077,6 +2488,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      decide_quote: {
+        Args: {
+          p_accept: boolean
+          p_quote_id: string
+          p_signature_data?: string
+          p_signer_name?: string
+        }
+        Returns: undefined
+      }
       decide_selection: {
         Args: {
           p_selected_option_index: number
@@ -2395,6 +2815,12 @@ export type CompositeTypes<
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
+
 // Alias de confort pour les colonnes texte contraintes par des CHECK constraints (le schéma n'utilise pas de vrais types ENUM Postgres, donc Supabase ne les
 // génère pas automatiquement). Tenir à jour si les CHECK constraints changent.
 export type PhaseType =
@@ -2428,9 +2854,6 @@ export type DocumentType = 'pdf' | 'plan' | 'photo' | 'doe' | 'compte_rendu' | '
 export type ResourceType = 'document' | 'plan' | 'task' | 'project';
 export type PermissionLevel = 'view' | 'edit' | 'manage';
 export type CommentParentType = 'task' | 'document' | 'incident';
-
-export const Constants = {
-  public: {
-    Enums: {},
-  },
-} as const
+export type QuoteStatus = 'draft' | 'sent' | 'accepted' | 'declined' | 'expired';
+export type InvoiceStatus = 'draft' | 'sent' | 'partially_paid' | 'paid' | 'overdue' | 'cancelled';
+export type InvoiceOperationCategory = 'biens' | 'services' | 'mixte';

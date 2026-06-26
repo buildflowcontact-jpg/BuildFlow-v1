@@ -5,11 +5,14 @@ import type { ResourceSignature } from '@/types/domain';
 /**
  * Lecture seule côté front : les signatures ne sont jamais créées via un
  * insert direct (policy signatures_select_member en select uniquement) mais
- * uniquement via la fonction RPC decide_change_order, qui les écrit en
- * bypassant RLS.
+ * uniquement via les fonctions RPC decide_change_order / decide_selection /
+ * decide_quote, qui les écrivent en bypassant RLS.
  */
 export const signaturesService = {
-  async getForResource(resourceType: 'change_order', resourceId: string): Promise<ResourceSignature | null> {
+  async getForResource(
+    resourceType: 'change_order' | 'selection' | 'quote',
+    resourceId: string
+  ): Promise<ResourceSignature | null> {
     const { data, error } = await supabase
       .from('signatures')
       .select('*')

@@ -24,6 +24,7 @@ import {
   ProjectChangeOrdersPage,
   ProjectTimeEntriesPage,
   ProjectClientPortalPage,
+  ProjectBillingPage,
 } from '@/modules/projects/projectSectionPages';
 import { ClientsPage } from '@/modules/clients/ClientsPage';
 import { CompaniesPage } from '@/modules/companies/CompaniesPage';
@@ -59,6 +60,7 @@ export const router = createBrowserRouter([
           { path: 'budget', element: <ProjectBudgetPage /> },
           { path: 'rfis', element: <ProjectRfisPage /> },
           { path: 'change-orders', element: <ProjectChangeOrdersPage /> },
+          { path: 'billing', element: <ProjectBillingPage /> },
           { path: 'time-entries', element: <ProjectTimeEntriesPage /> },
           { path: 'client-portal', element: <ProjectClientPortalPage /> },
           { path: 'incidents', element: <ProjectIncidentsPage /> },

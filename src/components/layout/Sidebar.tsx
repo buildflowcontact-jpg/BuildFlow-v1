@@ -20,6 +20,7 @@ import {
   HelpCircle,
   Clock,
   LayoutDashboard,
+  Receipt,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useUiStore } from '@/stores/uiStore';
@@ -35,6 +36,7 @@ const projectSectionItems = [
   { to: '', label: 'Tableau de bord', icon: Info, end: true },
   { to: 'documents', label: 'Documents', icon: FileText },
   { to: 'budget', label: 'Budget', icon: Wallet },
+  { to: 'billing', label: 'Devis & Facturation', icon: Receipt },
   { to: 'tasks', label: 'Tâches', icon: ListTree },
   { to: 'gantt', label: 'Planning', icon: GanttChartSquare },
   { to: 'plans', label: 'Plans et 3D', icon: Map },

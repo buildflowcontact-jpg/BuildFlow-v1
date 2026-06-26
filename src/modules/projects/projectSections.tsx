@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   AlertTriangle,
   ClipboardCheck,
+  Receipt,
 } from 'lucide-react';
 import { TasksTab } from '@/modules/tasks/TasksTab';
 import { GanttChart } from '@/modules/gantt/GanttChart';
@@ -25,6 +26,7 @@ import { BudgetTab } from '@/modules/budget/BudgetTab';
 import { RfisTab } from '@/modules/rfis/RfisTab';
 import { TimeEntriesTab } from '@/modules/timeentries/TimeEntriesTab';
 import { ClientPortalTab } from '@/modules/portal/ClientPortalTab';
+import { BillingTab } from '@/modules/billing/BillingTab';
 
 export interface ProjectSectionDef {
   /** Doit correspondre au segment de route (ex: 'documents', 'gantt'). */
@@ -43,6 +45,7 @@ export interface ProjectSectionDef {
 export const PROJECT_SECTIONS: ProjectSectionDef[] = [
   { key: 'documents', label: 'Documents', icon: FileText, Component: DocumentsTab },
   { key: 'budget', label: 'Budget', icon: Wallet, Component: BudgetTab },
+  { key: 'billing', label: 'Devis & Facturation', icon: Receipt, Component: BillingTab },
   { key: 'tasks', label: 'Tâches', icon: ListTree, Component: TasksTab },
   { key: 'gantt', label: 'Planning', icon: GanttChartSquare, Component: GanttChart },
   { key: 'plans', label: 'Plans et 3D', icon: Map, Component: PlansAnd3dTab },

@@ -20,7 +20,10 @@ export type RealtimeTable =
   | 'time_entries'
   | 'resource_attachments'
   | 'signatures'
-  | 'daily_reports';
+  | 'daily_reports'
+  | 'quotes'
+  | 'invoices'
+  | 'invoice_payments';
 
 /**
  * Abonnement générique à une table filtrée (par défaut sur project_id).

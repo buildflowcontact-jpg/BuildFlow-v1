@@ -49,6 +49,11 @@ export type TimeEntry = Tables<'time_entries'>;
 export type ResourceSignature = Tables<'signatures'>;
 export type ResourceAttachment = Tables<'resource_attachments'>;
 export type DailyReport = Tables<'daily_reports'>;
+export type Quote = Tables<'quotes'>;
+export type QuoteItem = Tables<'quote_items'>;
+export type Invoice = Tables<'invoices'>;
+export type InvoiceItem = Tables<'invoice_items'>;
+export type InvoicePayment = Tables<'invoice_payments'>;
 
 export interface DailyReportTimeEntry {
   user_id: string;
@@ -217,6 +222,56 @@ export const CHANGE_ORDER_STATUS_LABELS: Record<ChangeOrder['status'], string> =
   approved: 'Approuvé',
   rejected: 'Refusé',
 };
+
+// ---------------------------------------------------------------------------
+// Devis & Facturation
+// ---------------------------------------------------------------------------
+
+export const QUOTE_STATUS_LABELS: Record<Quote['status'], string> = {
+  draft: 'Brouillon',
+  sent: 'Envoyé',
+  accepted: 'Accepté',
+  declined: 'Refusé',
+  expired: 'Expiré',
+};
+
+export const INVOICE_STATUS_LABELS: Record<Invoice['status'], string> = {
+  draft: 'Brouillon',
+  sent: 'Envoyée',
+  partially_paid: 'Partiellement payée',
+  paid: 'Payée',
+  overdue: 'En retard',
+  cancelled: 'Annulée',
+};
+
+export const INVOICE_OPERATION_CATEGORY_LABELS: Record<Invoice['operation_category'], string> = {
+  biens: 'Biens',
+  services: 'Services',
+  mixte: 'Mixte',
+};
+
+export interface QuoteWithItems extends Quote {
+  items: QuoteItem[];
+}
+
+export interface InvoiceWithItems extends Invoice {
+  items: InvoiceItem[];
+  payments: InvoicePayment[];
+}
+
+/** Calcule HT, TVA et TTC à partir d'une liste de lignes (devis ou facture). */
+export function computeLineTotals<T extends { quantity: number; unit_price: number; vat_rate: number }>(
+  items: T[]
+): { subtotal: number; vatAmount: number; total: number } {
+  let subtotal = 0;
+  let vatAmount = 0;
+  for (const item of items) {
+    const lineHt = item.quantity * item.unit_price;
+    subtotal += lineHt;
+    vatAmount += lineHt * (item.vat_rate / 100);
+  }
+  return { subtotal, vatAmount, total: subtotal + vatAmount };
+}
 
 // ---------------------------------------------------------------------------
 // Portail client : widgets configurables (projects.portal_widgets, jsonb)
