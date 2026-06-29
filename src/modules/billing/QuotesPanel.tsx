@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 import { SignaturePad } from '@/components/ui/SignaturePad';
+import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { QUOTE_STATUS_LABELS } from '@/types/domain';
 import { formatCurrency } from '@/utils/currency';
 import { formatDate } from '@/utils/date';
@@ -22,6 +23,7 @@ import { emptyLineItemRow, lineRowsToItems, type LineItemRow } from './lineItems
 import { DpgfImportModal } from './DpgfImportModal';
 import { QuoteDetailModal } from './QuoteDetailModal';
 import { STATUS_TONE, type QuoteFormState } from './quoteForm';
+import { quoteFormSchema, lineItemsSchema, validateOrError } from '@/schemas/billing.schema';
 
 function emptyForm(): QuoteFormState {
   return {
@@ -45,6 +47,7 @@ export function QuotesPanel({ projectId }: QuotesPanelProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState<QuoteFormState>(emptyForm());
   const [rows, setRows] = useState<LineItemRow[]>([emptyLineItemRow()]);
+  const [formError, setFormError] = useState<Error | null>(null);
 
   const [detailId, setDetailId] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
@@ -61,12 +64,24 @@ export function QuotesPanel({ projectId }: QuotesPanelProps) {
   function openCreate() {
     setForm(emptyForm());
     setRows([emptyLineItemRow()]);
+    setFormError(null);
     setCreateOpen(true);
   }
 
   function handleCreateSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const formCheck = validateOrError(quoteFormSchema, form);
+    if (formCheck.error) {
+      setFormError(formCheck.error);
+      return;
+    }
     const items = lineRowsToItems<QuoteItemInput>(rows);
+    const itemsCheck = validateOrError(lineItemsSchema, items);
+    if (itemsCheck.error) {
+      setFormError(itemsCheck.error);
+      return;
+    }
+    setFormError(null);
     create.mutate(
       {
         payload: {
@@ -178,6 +193,7 @@ export function QuotesPanel({ projectId }: QuotesPanelProps) {
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
           />
           <LineItemsEditor rows={rows} onChange={setRows} />
+          <ErrorMessage error={formError} />
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
               Annuler

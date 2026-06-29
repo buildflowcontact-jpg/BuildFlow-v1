@@ -15,6 +15,7 @@ import type { InvoiceItemInput } from '@/services/invoices.service';
 import { LineItemsEditor } from './LineItemsEditor';
 import { emptyLineItemRow, lineRowsToItems, type LineItemRow } from './lineItemsForm';
 import { STATUS_TONE, type InvoiceFormState } from './invoiceForm';
+import { invoiceFormSchema, lineItemsSchema, paymentFormSchema, validateOrError } from '@/schemas/billing.schema';
 
 interface PaymentFormState {
   amount: string;
@@ -45,6 +46,8 @@ export function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [paymentForm, setPaymentForm] = useState<PaymentFormState>(emptyPaymentForm());
   const [facturXError, setFacturXError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<Error | null>(null);
+  const [paymentFormError, setPaymentFormError] = useState<Error | null>(null);
 
   function startEdit() {
     if (!invoice) return;
@@ -67,12 +70,25 @@ export function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }
           }))
         : [emptyLineItemRow()]
     );
+    setFormError(null);
     setEditing(true);
   }
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!form) return;
+    const formCheck = validateOrError(invoiceFormSchema, form);
+    if (formCheck.error) {
+      setFormError(formCheck.error);
+      return;
+    }
+    const items = lineRowsToItems<InvoiceItemInput>(rows);
+    const itemsCheck = validateOrError(lineItemsSchema, items);
+    if (itemsCheck.error) {
+      setFormError(itemsCheck.error);
+      return;
+    }
+    setFormError(null);
     updateInvoice.mutate(
       {
         payload: {
@@ -83,7 +99,7 @@ export function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }
           operation_category: form.operation_category,
           notes: form.notes || null,
         },
-        items: lineRowsToItems<InvoiceItemInput>(rows),
+        items,
       },
       { onSuccess: () => setEditing(false) }
     );
@@ -91,20 +107,24 @@ export function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }
 
   function handleAddPayment(e: React.FormEvent) {
     e.preventDefault();
-    addPayment.mutate(
-      {
-        amount: Number(paymentForm.amount) || 0,
-        paid_at: paymentForm.paid_at,
-        method: paymentForm.method || null,
-        notes: paymentForm.notes || null,
+    const payment = {
+      amount: Number(paymentForm.amount) || 0,
+      paid_at: paymentForm.paid_at,
+      method: paymentForm.method || null,
+      notes: paymentForm.notes || null,
+    };
+    const paymentCheck = validateOrError(paymentFormSchema, payment);
+    if (paymentCheck.error) {
+      setPaymentFormError(paymentCheck.error);
+      return;
+    }
+    setPaymentFormError(null);
+    addPayment.mutate(payment, {
+      onSuccess: () => {
+        setPaymentOpen(false);
+        setPaymentForm(emptyPaymentForm());
       },
-      {
-        onSuccess: () => {
-          setPaymentOpen(false);
-          setPaymentForm(emptyPaymentForm());
-        },
-      }
-    );
+    });
   }
 
   async function handleDownloadFacturX() {
@@ -136,6 +156,7 @@ export function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }
           </div>
           <Textarea label="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
           <LineItemsEditor rows={rows} onChange={setRows} />
+          <ErrorMessage error={formError} />
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setEditing(false)}>
               Annuler
@@ -211,7 +232,14 @@ export function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }
             <div className="mb-2 flex items-center justify-between">
               <p className="text-sm font-medium text-slate-700">Paiements</p>
               {invoice.status !== 'cancelled' && (
-                <Button size="sm" variant="outline" onClick={() => setPaymentOpen(true)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setPaymentFormError(null);
+                    setPaymentOpen(true);
+                  }}
+                >
                   <CreditCard className="h-4 w-4" />
                   Enregistrer un paiement
                 </Button>
@@ -317,6 +345,7 @@ export function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }
             value={paymentForm.notes}
             onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
           />
+          <ErrorMessage error={paymentFormError} />
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setPaymentOpen(false)}>
               Annuler

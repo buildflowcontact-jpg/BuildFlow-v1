@@ -7,12 +7,14 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
+import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { QUOTE_STATUS_LABELS } from '@/types/domain';
 import { formatCurrency } from '@/utils/currency';
 import type { QuoteItemInput } from '@/services/quotes.service';
 import { LineItemsEditor } from './LineItemsEditor';
 import { emptyLineItemRow, lineRowsToItems, type LineItemRow } from './lineItemsForm';
 import { STATUS_TONE, type QuoteFormState } from './quoteForm';
+import { quoteFormSchema, lineItemsSchema, validateOrError } from '@/schemas/billing.schema';
 
 interface QuoteDetailModalProps {
   quoteId: string;
@@ -44,6 +46,7 @@ export function QuoteDetailModal({
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<QuoteFormState | null>(null);
   const [rows, setRows] = useState<LineItemRow[]>([]);
+  const [formError, setFormError] = useState<Error | null>(null);
 
   function startEdit() {
     if (!quote) return;
@@ -66,12 +69,25 @@ export function QuoteDetailModal({
           }))
         : [emptyLineItemRow()]
     );
+    setFormError(null);
     setEditing(true);
   }
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!form) return;
+    const formCheck = validateOrError(quoteFormSchema, form);
+    if (formCheck.error) {
+      setFormError(formCheck.error);
+      return;
+    }
+    const items = lineRowsToItems<QuoteItemInput>(rows);
+    const itemsCheck = validateOrError(lineItemsSchema, items);
+    if (itemsCheck.error) {
+      setFormError(itemsCheck.error);
+      return;
+    }
+    setFormError(null);
     updateQuote.mutate(
       {
         payload: {
@@ -81,7 +97,7 @@ export function QuoteDetailModal({
           validity_until: form.validity_until || null,
           notes: form.notes || null,
         },
-        items: lineRowsToItems<QuoteItemInput>(rows),
+        items,
       },
       { onSuccess: () => setEditing(false) }
     );
@@ -104,6 +120,7 @@ export function QuoteDetailModal({
           </div>
           <Textarea label="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
           <LineItemsEditor rows={rows} onChange={setRows} />
+          <ErrorMessage error={formError} />
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setEditing(false)}>
               Annuler

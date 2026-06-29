@@ -11,6 +11,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
+import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { INVOICE_STATUS_LABELS, INVOICE_OPERATION_CATEGORY_LABELS } from '@/types/domain';
 import type { Invoice } from '@/types/domain';
 import { formatCurrency } from '@/utils/currency';
@@ -20,6 +21,7 @@ import { LineItemsEditor } from './LineItemsEditor';
 import { emptyLineItemRow, lineRowsToItems, type LineItemRow } from './lineItemsForm';
 import { InvoiceDetailModal } from './InvoiceDetailModal';
 import { STATUS_TONE, type InvoiceFormState } from './invoiceForm';
+import { invoiceFormSchema, lineItemsSchema, validateOrError } from '@/schemas/billing.schema';
 
 function emptyForm(): InvoiceFormState {
   return {
@@ -43,6 +45,7 @@ export function InvoicesPanel({ projectId }: InvoicesPanelProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState<InvoiceFormState>(emptyForm());
   const [rows, setRows] = useState<LineItemRow[]>([emptyLineItemRow()]);
+  const [formError, setFormError] = useState<Error | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
 
   function clientName(clientId: string | null) {
@@ -54,12 +57,24 @@ export function InvoicesPanel({ projectId }: InvoicesPanelProps) {
   function openCreate() {
     setForm(emptyForm());
     setRows([emptyLineItemRow()]);
+    setFormError(null);
     setCreateOpen(true);
   }
 
   function handleCreateSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const formCheck = validateOrError(invoiceFormSchema, form);
+    if (formCheck.error) {
+      setFormError(formCheck.error);
+      return;
+    }
     const items = lineRowsToItems<InvoiceItemInput>(rows);
+    const itemsCheck = validateOrError(lineItemsSchema, items);
+    if (itemsCheck.error) {
+      setFormError(itemsCheck.error);
+      return;
+    }
+    setFormError(null);
     create.mutate(
       {
         payload: {
@@ -179,6 +194,7 @@ export function InvoicesPanel({ projectId }: InvoicesPanelProps) {
           </div>
           <Textarea label="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
           <LineItemsEditor rows={rows} onChange={setRows} />
+          <ErrorMessage error={formError} />
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
               Annuler

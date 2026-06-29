@@ -4,6 +4,7 @@ import { computeLineTotals } from '@/types/domain';
 import type { Quote, QuoteItem, QuoteWithItems } from '@/types/domain';
 import type { TablesInsert } from '@/types/database.types';
 import { activityLogsService } from './activityLogs.service';
+import { lineItemsSchema } from '@/schemas/billing.schema';
 
 export type QuoteItemInput = Pick<QuoteItem, 'description' | 'quantity' | 'unit' | 'unit_price' | 'vat_rate'> & {
   position?: number;
@@ -47,6 +48,7 @@ export const quotesService = {
     payload: Omit<TablesInsert<'quotes'>, 'organization_id' | 'subtotal' | 'vat_amount' | 'total' | 'number'>,
     items: QuoteItemInput[]
   ): Promise<QuoteWithItems> {
+    lineItemsSchema.parse(items);
     const totals = computeLineTotals(items);
     const quote = unwrap(
       await supabase
@@ -102,6 +104,7 @@ export const quotesService = {
     payload: Partial<Pick<Quote, 'title' | 'client_id' | 'issue_date' | 'validity_until' | 'notes' | 'currency'>>,
     items: QuoteItemInput[]
   ): Promise<QuoteWithItems> {
+    lineItemsSchema.parse(items);
     const totals = computeLineTotals(items);
     const quote = unwrap(
       await supabase

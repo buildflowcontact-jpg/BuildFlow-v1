@@ -8,6 +8,7 @@ import { storageService } from './storage.service';
 import { projectsService } from './projects.service';
 import { clientsService } from './clients.service';
 import { organizationsService } from './organizations.service';
+import { lineItemsSchema, paymentFormSchema } from '@/schemas/billing.schema';
 
 export type InvoiceItemInput = Pick<InvoiceItem, 'description' | 'quantity' | 'unit' | 'unit_price' | 'vat_rate'> & {
   position?: number;
@@ -54,6 +55,7 @@ export const invoicesService = {
     >,
     items: InvoiceItemInput[]
   ): Promise<InvoiceWithItems> {
+    lineItemsSchema.parse(items);
     const totals = computeLineTotals(items);
     const invoice = unwrap(
       await supabase
@@ -107,6 +109,7 @@ export const invoicesService = {
     >,
     items: InvoiceItemInput[]
   ): Promise<InvoiceWithItems> {
+    lineItemsSchema.parse(items);
     const totals = computeLineTotals(items);
     const invoice = unwrap(
       await supabase
@@ -162,6 +165,7 @@ export const invoicesService = {
     invoiceId: string,
     payment: Pick<InvoicePayment, 'amount' | 'paid_at' | 'method' | 'notes'>
   ): Promise<InvoicePayment> {
+    paymentFormSchema.parse(payment);
     const inserted = unwrap(
       await supabase
         .from('invoice_payments')
