@@ -10,7 +10,8 @@ import { Spinner } from '@/components/ui/Spinner';
 import { QUOTE_STATUS_LABELS } from '@/types/domain';
 import { formatCurrency } from '@/utils/currency';
 import type { QuoteItemInput } from '@/services/quotes.service';
-import { LineItemsEditor, emptyLineItemRow, lineRowsToItems, type LineItemRow } from './LineItemsEditor';
+import { LineItemsEditor } from './LineItemsEditor';
+import { emptyLineItemRow, lineRowsToItems, type LineItemRow } from './lineItemsForm';
 import { STATUS_TONE, type QuoteFormState } from './quoteForm';
 
 interface QuoteDetailModalProps {

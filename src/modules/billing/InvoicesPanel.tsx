@@ -16,7 +16,8 @@ import type { Invoice } from '@/types/domain';
 import { formatCurrency } from '@/utils/currency';
 import { formatDate } from '@/utils/date';
 import type { InvoiceItemInput } from '@/services/invoices.service';
-import { LineItemsEditor, emptyLineItemRow, lineRowsToItems, type LineItemRow } from './LineItemsEditor';
+import { LineItemsEditor } from './LineItemsEditor';
+import { emptyLineItemRow, lineRowsToItems, type LineItemRow } from './lineItemsForm';
 import { InvoiceDetailModal } from './InvoiceDetailModal';
 import { STATUS_TONE, type InvoiceFormState } from './invoiceForm';
 

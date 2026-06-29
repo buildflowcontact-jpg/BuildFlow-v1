@@ -1,4 +1,4 @@
-import type { LineItemRow } from '@/modules/billing/LineItemsEditor';
+import type { LineItemRow } from '@/modules/billing/lineItemsForm';
 
 export interface DpgfImportResult {
   rows: LineItemRow[];

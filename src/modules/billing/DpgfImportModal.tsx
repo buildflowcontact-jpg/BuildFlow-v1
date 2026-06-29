@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Spinner } from '@/components/ui/Spinner';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
-import { LineItemsEditor, lineRowsToItems, type LineItemRow } from './LineItemsEditor';
+import { LineItemsEditor } from './LineItemsEditor';
+import { lineRowsToItems, type LineItemRow } from './lineItemsForm';
 
 interface DpgfImportModalProps {
   projectId: string;

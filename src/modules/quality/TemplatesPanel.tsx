@@ -10,7 +10,8 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { FullPageSpinner, Spinner } from '@/components/ui/Spinner';
 import type { QualityTemplate } from '@/types/domain';
-import { ChecklistItemsEditor, checklistRowsToItems, emptyChecklistRow, type ChecklistItemRow } from './ChecklistItemsEditor';
+import { ChecklistItemsEditor } from './ChecklistItemsEditor';
+import { checklistRowsToItems, emptyChecklistRow, type ChecklistItemRow } from './checklistForm';
 
 interface TemplateFormState {
   name: string;

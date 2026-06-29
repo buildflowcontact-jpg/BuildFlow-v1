@@ -18,7 +18,8 @@ import { QUALITY_INSPECTION_STATUS_LABELS } from '@/types/domain';
 import type { QualityInspection } from '@/types/domain';
 import type { QualityInspectionResult, QualityInspectionStatus } from '@/types/database.types';
 import { formatDateTime } from '@/utils/date';
-import { ChecklistItemsEditor, checklistRowsToItems, emptyChecklistRow, type ChecklistItemRow } from './ChecklistItemsEditor';
+import { ChecklistItemsEditor } from './ChecklistItemsEditor';
+import { checklistRowsToItems, emptyChecklistRow, type ChecklistItemRow } from './checklistForm';
 
 const STATUS_TONE: Record<QualityInspectionStatus, 'blue' | 'green'> = {
   in_progress: 'blue',

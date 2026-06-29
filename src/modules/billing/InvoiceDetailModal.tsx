@@ -12,7 +12,8 @@ import { INVOICE_STATUS_LABELS } from '@/types/domain';
 import { formatCurrency } from '@/utils/currency';
 import { formatDate } from '@/utils/date';
 import type { InvoiceItemInput } from '@/services/invoices.service';
-import { LineItemsEditor, emptyLineItemRow, lineRowsToItems, type LineItemRow } from './LineItemsEditor';
+import { LineItemsEditor } from './LineItemsEditor';
+import { emptyLineItemRow, lineRowsToItems, type LineItemRow } from './lineItemsForm';
 import { STATUS_TONE, type InvoiceFormState } from './invoiceForm';
 
 interface PaymentFormState {
