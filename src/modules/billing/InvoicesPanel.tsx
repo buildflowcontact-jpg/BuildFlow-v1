@@ -149,13 +149,13 @@ export function InvoicesPanel({ projectId }: InvoicesPanelProps) {
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Nouvelle facture" size="xl">
         <form onSubmit={handleCreateSubmit} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input
+            <Input id="form-title"
               label="Titre"
               required
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
             />
-            <Select
+            <Select id="form-client-id"
               label="Client"
               value={form.client_id}
               onChange={(e) => setForm({ ...form, client_id: e.target.value })}
@@ -167,20 +167,20 @@ export function InvoicesPanel({ projectId }: InvoicesPanelProps) {
                 </option>
               ))}
             </Select>
-            <Input
+            <Input id="form-issue-date"
               type="date"
               label="Date d'émission"
               value={form.issue_date}
               onChange={(e) => setForm({ ...form, issue_date: e.target.value })}
             />
-            <Input
+            <Input id="form-due-date"
               type="date"
               label="Échéance (optionnel)"
               hint="Calculée automatiquement à partir du délai de paiement par défaut si laissée vide."
               value={form.due_date}
               onChange={(e) => setForm({ ...form, due_date: e.target.value })}
             />
-            <Select
+            <Select id="form-operation-category"
               label="Catégorie d'opération"
               value={form.operation_category}
               onChange={(e) => setForm({ ...form, operation_category: e.target.value as Invoice['operation_category'] })}

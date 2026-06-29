@@ -139,12 +139,12 @@ export function ProjectsListPage() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nouveau projet" size="lg">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Nom du projet" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-            <Input label="Référence" value={form.reference} onChange={(e) => setForm({ ...form, reference: e.target.value })} />
+            <Input id="form-name" label="Nom du projet" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <Input id="form-reference" label="Référence" value={form.reference} onChange={(e) => setForm({ ...form, reference: e.target.value })} />
           </div>
           <Textarea label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           <div className="grid grid-cols-2 gap-4">
-            <Select label="Client" value={form.client_id} onChange={(e) => setForm({ ...form, client_id: e.target.value })}>
+            <Select id="form-client-id" label="Client" value={form.client_id} onChange={(e) => setForm({ ...form, client_id: e.target.value })}>
               <option value="">Aucun</option>
               {clients.map((client) => (
                 <option key={client.id} value={client.id}>
@@ -152,7 +152,7 @@ export function ProjectsListPage() {
                 </option>
               ))}
             </Select>
-            <Select
+            <Select id="form-status"
               label="Statut"
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value as ProjectStatus })}
@@ -165,19 +165,19 @@ export function ProjectsListPage() {
             </Select>
           </div>
           <div className="grid grid-cols-3 gap-4">
-            <Input
+            <Input id="form-start-date"
               label="Début"
               type="date"
               value={form.start_date}
               onChange={(e) => setForm({ ...form, start_date: e.target.value })}
             />
-            <Input
+            <Input id="form-end-date-planned"
               label="Fin prévue"
               type="date"
               value={form.end_date_planned}
               onChange={(e) => setForm({ ...form, end_date_planned: e.target.value })}
             />
-            <Input
+            <Input id="form-budget"
               label="Budget (€)"
               type="number"
               min="0"

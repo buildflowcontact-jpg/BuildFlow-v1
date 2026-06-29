@@ -122,13 +122,13 @@ export function ClientsPage() {
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Modifier le client' : 'Nouveau client'}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input label="Nom" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <Input label="Entreprise" value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} />
+          <Input id="form-name" label="Nom" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <Input id="form-company-name" label="Entreprise" value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} />
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            <Input label="Téléphone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <Input id="form-email" label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <Input id="form-phone" label="Téléphone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
-          <Input label="Adresse" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+          <Input id="form-address" label="Adresse" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
           <Textarea label="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>

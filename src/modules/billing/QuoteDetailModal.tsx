@@ -110,8 +110,8 @@ export function QuoteDetailModal({
       ) : editing && form ? (
         <form onSubmit={handleSave} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-            <Input
+            <Input id="form-title" label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            <Input id="form-validity-until"
               type="date"
               label="Valide jusqu'au"
               value={form.validity_until}

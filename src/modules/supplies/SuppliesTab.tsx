@@ -149,35 +149,35 @@ export function SuppliesTab({ projectId }: SuppliesTabProps) {
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Modifier la commande' : 'Nouvelle commande'} size="lg">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input
+          <Input id="form-item-description"
             label="Description du matériel"
             required
             value={form.item_description}
             onChange={(e) => setForm({ ...form, item_description: e.target.value })}
           />
           <div className="grid grid-cols-2 gap-4">
-            <Input
+            <Input id="form-supplier-name"
               label="Fournisseur"
               required
               value={form.supplier_name}
               onChange={(e) => setForm({ ...form, supplier_name: e.target.value })}
             />
-            <Input
+            <Input id="form-order-reference"
               label="Référence commande"
               value={form.order_reference}
               onChange={(e) => setForm({ ...form, order_reference: e.target.value })}
             />
           </div>
           <div className="grid grid-cols-3 gap-4">
-            <Input
+            <Input id="form-quantity"
               label="Quantité"
               type="number"
               min={0}
               value={form.quantity}
               onChange={(e) => setForm({ ...form, quantity: Number(e.target.value) })}
             />
-            <Input label="Unité" value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
-            <Select label="Statut" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as SupplyStatus })}>
+            <Input id="form-unit" label="Unité" value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
+            <Select id="form-status" label="Statut" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as SupplyStatus })}>
               {Object.entries(SUPPLY_STATUS_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
@@ -185,7 +185,7 @@ export function SuppliesTab({ projectId }: SuppliesTabProps) {
               ))}
             </Select>
           </div>
-          <Input
+          <Input id="form-expected-delivery-date"
             label="Date de livraison prévue"
             type="date"
             value={form.expected_delivery_date}

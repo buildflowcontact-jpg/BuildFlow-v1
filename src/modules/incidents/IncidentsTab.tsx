@@ -153,15 +153,15 @@ export function IncidentsTab({ projectId }: IncidentsTabProps) {
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Modifier l'incident" : 'Signaler un incident'} size="lg">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <Input id="form-title" label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           <Textarea
             label="Description"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Localisation" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
-            <Select
+            <Input id="form-location" label="Localisation" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+            <Select id="form-assigned-to"
               label="Assigné à"
               value={form.assigned_to}
               onChange={(e) => setForm({ ...form, assigned_to: e.target.value })}
@@ -177,7 +177,7 @@ export function IncidentsTab({ projectId }: IncidentsTabProps) {
             </Select>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Select
+            <Select id="form-severity"
               label="Gravité"
               value={form.severity}
               onChange={(e) => setForm({ ...form, severity: e.target.value as IncidentSeverity })}
@@ -188,7 +188,7 @@ export function IncidentsTab({ projectId }: IncidentsTabProps) {
                 </option>
               ))}
             </Select>
-            <Select label="Statut" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as IncidentStatus })}>
+            <Select id="form-status" label="Statut" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as IncidentStatus })}>
               {Object.entries(INCIDENT_STATUS_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}

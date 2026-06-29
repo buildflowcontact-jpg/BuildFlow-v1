@@ -112,7 +112,7 @@ export function TaskFormModal({
   return (
     <Modal open={open} onClose={onClose} title={editingTask ? 'Modifier la tâche' : 'Nouvelle tâche'} size="lg">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Input label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+        <Input id="form-title" label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
         <Textarea
           label="Description"
           value={form.description}
@@ -120,7 +120,7 @@ export function TaskFormModal({
         />
 
         <div className="grid grid-cols-2 gap-4">
-          <Select label="Phase" value={form.phase_id} onChange={(e) => setForm({ ...form, phase_id: e.target.value })}>
+          <Select id="form-phase-id" label="Phase" value={form.phase_id} onChange={(e) => setForm({ ...form, phase_id: e.target.value })}>
             <option value="">Aucune</option>
             {phases.map((phase) => (
               <option key={phase.id} value={phase.id}>
@@ -128,7 +128,7 @@ export function TaskFormModal({
               </option>
             ))}
           </Select>
-          <Select
+          <Select id="form-parent-task-id"
             label="Tâche parente"
             value={form.parent_task_id}
             onChange={(e) => setForm({ ...form, parent_task_id: e.target.value })}
@@ -143,14 +143,14 @@ export function TaskFormModal({
         </div>
 
         <div className="grid grid-cols-3 gap-4">
-          <Select label="Statut" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as TaskStatus })}>
+          <Select id="form-status" label="Statut" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as TaskStatus })}>
             {Object.entries(TASK_STATUS_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
               </option>
             ))}
           </Select>
-          <Select
+          <Select id="form-priority"
             label="Priorité"
             value={form.priority}
             onChange={(e) => setForm({ ...form, priority: e.target.value as TaskPriority })}
@@ -161,7 +161,7 @@ export function TaskFormModal({
               </option>
             ))}
           </Select>
-          <Input
+          <Input id="form-progress"
             label="Avancement (%)"
             type="number"
             min={0}
@@ -172,13 +172,13 @@ export function TaskFormModal({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Input
+          <Input id="form-start-date"
             label="Date de début"
             type="date"
             value={form.start_date}
             onChange={(e) => setForm({ ...form, start_date: e.target.value })}
           />
-          <Input
+          <Input id="form-end-date"
             label="Date de fin"
             type="date"
             value={form.end_date}
@@ -187,7 +187,7 @@ export function TaskFormModal({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Select
+          <Select id="form-assignee-id"
             label="Assigné à"
             value={form.assignee_id}
             onChange={(e) => setForm({ ...form, assignee_id: e.target.value })}

@@ -110,7 +110,7 @@ export function ProjectMembersPage() {
 
       <Modal open={inviteOpen} onClose={() => setInviteOpen(false)} title="Inviter un collaborateur">
         <form onSubmit={handleInviteSubmit} className="flex flex-col gap-4">
-          <Input
+          <Input id="inviteemail"
             label="Email"
             type="email"
             required
@@ -118,7 +118,7 @@ export function ProjectMembersPage() {
             onChange={(e) => setInviteEmail(e.target.value)}
             hint="Si la personne possède déjà un compte BuildFlow, elle sera ajoutée immédiatement."
           />
-          <Select label="Rôle" value={inviteRole} onChange={(e) => setInviteRole(e.target.value as ProjectMember['role'])}>
+          <Select id="inviterole" label="Rôle" value={inviteRole} onChange={(e) => setInviteRole(e.target.value as ProjectMember['role'])}>
             <option value="collaborator">Collaborateur</option>
             <option value="owner">Propriétaire</option>
           </Select>

@@ -145,10 +145,10 @@ export function RfisTab({ projectId }: RfisTabProps) {
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nouvelle RFI" size="lg">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <Input id="form-title" label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           <Textarea label="Question" required value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })} />
           <div className="grid grid-cols-2 gap-4">
-            <Select
+            <Select id="form-assigned-to"
               label="Assigné à"
               value={form.assigned_to}
               onChange={(e) => setForm({ ...form, assigned_to: e.target.value })}
@@ -162,7 +162,7 @@ export function RfisTab({ projectId }: RfisTabProps) {
                   </option>
                 ))}
             </Select>
-            <Input type="date" label="Échéance" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} />
+            <Input id="form-due-date" type="date" label="Échéance" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} />
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>

@@ -144,9 +144,9 @@ export function DailyLogsTab({ projectId }: DailyLogsTabProps) {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Modifier le rapport' : 'Nouveau rapport journalier'} size="lg">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid grid-cols-3 gap-4">
-            <Input type="date" label="Date" required value={form.log_date} onChange={(e) => setForm({ ...form, log_date: e.target.value })} />
-            <Input label="Météo" value={form.weather} onChange={(e) => setForm({ ...form, weather: e.target.value })} placeholder="Ensoleillé" />
-            <Input
+            <Input id="form-log-date" type="date" label="Date" required value={form.log_date} onChange={(e) => setForm({ ...form, log_date: e.target.value })} />
+            <Input id="form-weather" label="Météo" value={form.weather} onChange={(e) => setForm({ ...form, weather: e.target.value })} placeholder="Ensoleillé" />
+            <Input id="form-temperature-c"
               type="number"
               step="0.1"
               label="Température (°C)"
@@ -154,7 +154,7 @@ export function DailyLogsTab({ projectId }: DailyLogsTabProps) {
               onChange={(e) => setForm({ ...form, temperature_c: e.target.value })}
             />
           </div>
-          <Input
+          <Input id="form-workers-count"
             type="number"
             label="Effectif sur site"
             value={form.workers_count}

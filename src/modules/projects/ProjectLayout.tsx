@@ -320,13 +320,13 @@ export function ProjectLayout() {
       <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Modifier le projet" size="lg">
         <form onSubmit={handleEditSubmit} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input
+            <Input id="editform-name"
               label="Nom du projet"
               required
               value={editForm.name}
               onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
             />
-            <Input
+            <Input id="editform-reference"
               label="Référence"
               value={editForm.reference}
               onChange={(e) => setEditForm({ ...editForm, reference: e.target.value })}
@@ -338,7 +338,7 @@ export function ProjectLayout() {
             onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
           />
           <div className="flex items-end gap-2">
-            <Input
+            <Input id="editform-address"
               label="Adresse"
               className="flex-1"
               value={editForm.address}
@@ -356,7 +356,7 @@ export function ProjectLayout() {
             </p>
           )}
           <div className="grid grid-cols-2 gap-4">
-            <Select
+            <Select id="editform-client-id"
               label="Client"
               value={editForm.client_id}
               onChange={(e) => setEditForm({ ...editForm, client_id: e.target.value })}
@@ -368,7 +368,7 @@ export function ProjectLayout() {
                 </option>
               ))}
             </Select>
-            <Select
+            <Select id="editform-status"
               label="Statut"
               value={editForm.status}
               onChange={(e) => setEditForm({ ...editForm, status: e.target.value as ProjectStatus })}
@@ -381,19 +381,19 @@ export function ProjectLayout() {
             </Select>
           </div>
           <div className="grid grid-cols-3 gap-4">
-            <Input
+            <Input id="editform-start-date"
               label="Début"
               type="date"
               value={editForm.start_date}
               onChange={(e) => setEditForm({ ...editForm, start_date: e.target.value })}
             />
-            <Input
+            <Input id="editform-end-date-planned"
               label="Fin prévue"
               type="date"
               value={editForm.end_date_planned}
               onChange={(e) => setEditForm({ ...editForm, end_date_planned: e.target.value })}
             />
-            <Input
+            <Input id="editform-budget"
               label="Budget (€)"
               type="number"
               min="0"

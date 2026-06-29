@@ -206,17 +206,17 @@ export function ChangeOrdersTab({ projectId }: ChangeOrdersTabProps) {
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Modifier l'avenant" : 'Nouvel avenant'} size="lg">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <Input id="form-title" label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           <Textarea label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           <div className="grid grid-cols-2 gap-4">
-            <Input
+            <Input id="form-cost-impact"
               type="number"
               step="0.01"
               label="Impact coût (€)"
               value={form.cost_impact}
               onChange={(e) => setForm({ ...form, cost_impact: e.target.value })}
             />
-            <Input
+            <Input id="form-delay-impact-days"
               type="number"
               label="Impact délai (jours)"
               value={form.delay_impact_days}
@@ -242,7 +242,7 @@ export function ChangeOrdersTab({ projectId }: ChangeOrdersTabProps) {
         <form onSubmit={handleDecideSubmit} className="flex flex-col gap-4">
           {decideApprove ? (
             <>
-              <Input label="Nom du signataire" required value={signerName} onChange={(e) => setSignerName(e.target.value)} />
+              <Input id="signername" label="Nom du signataire" required value={signerName} onChange={(e) => setSignerName(e.target.value)} />
               <div>
                 <p className="mb-1.5 text-sm font-medium text-slate-700">Signature</p>
                 <SignaturePad onChange={setSignatureData} />

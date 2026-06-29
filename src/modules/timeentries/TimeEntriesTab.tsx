@@ -171,14 +171,14 @@ export function TimeEntriesTab({ projectId }: TimeEntriesTabProps) {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Modifier l'entrée" : 'Nouvelle entrée'}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input
+            <Input id="form-work-date"
               type="date"
               label="Date"
               required
               value={form.work_date}
               onChange={(e) => setForm({ ...form, work_date: e.target.value })}
             />
-            <Input
+            <Input id="form-hours"
               type="number"
               step="0.25"
               min="0.25"
@@ -189,7 +189,7 @@ export function TimeEntriesTab({ projectId }: TimeEntriesTabProps) {
               onChange={(e) => setForm({ ...form, hours: e.target.value })}
             />
           </div>
-          <Select label="Tâche associée" value={form.task_id} onChange={(e) => setForm({ ...form, task_id: e.target.value })}>
+          <Select id="form-task-id" label="Tâche associée" value={form.task_id} onChange={(e) => setForm({ ...form, task_id: e.target.value })}>
             <option value="">Sans tâche associée</option>
             {tasks.map((task) => (
               <option key={task.id} value={task.id}>

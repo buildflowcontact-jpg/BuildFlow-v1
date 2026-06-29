@@ -156,13 +156,13 @@ export function QuotesPanel({ projectId }: QuotesPanelProps) {
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Nouveau devis" size="xl">
         <form onSubmit={handleCreateSubmit} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input
+            <Input id="form-title"
               label="Titre"
               required
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
             />
-            <Select
+            <Select id="form-client-id"
               label="Client"
               value={form.client_id}
               onChange={(e) => setForm({ ...form, client_id: e.target.value })}
@@ -174,13 +174,13 @@ export function QuotesPanel({ projectId }: QuotesPanelProps) {
                 </option>
               ))}
             </Select>
-            <Input
+            <Input id="form-issue-date"
               type="date"
               label="Date d'émission"
               value={form.issue_date}
               onChange={(e) => setForm({ ...form, issue_date: e.target.value })}
             />
-            <Input
+            <Input id="form-validity-until"
               type="date"
               label="Valide jusqu'au"
               value={form.validity_until}
@@ -260,7 +260,7 @@ export function QuotesPanel({ projectId }: QuotesPanelProps) {
         >
           {decideMode === 'accept' ? (
             <>
-              <Input label="Nom du signataire" required value={signerName} onChange={(e) => setSignerName(e.target.value)} />
+              <Input id="signername" label="Nom du signataire" required value={signerName} onChange={(e) => setSignerName(e.target.value)} />
               <div>
                 <p className="mb-1.5 text-sm font-medium text-slate-700">Signature</p>
                 <SignaturePad onChange={setSignatureData} />

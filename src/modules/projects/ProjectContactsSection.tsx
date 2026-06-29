@@ -182,7 +182,7 @@ export function ProjectContactsSection({ projectId }: { projectId: string }) {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editingId ? 'Modifier le contact' : 'Ajouter un contact'}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {!editingId && (clients.length > 0 || companies.length > 0) && (
-            <Select
+            <Select id="importsource"
               label="Importer depuis un client/entreprise existant (optionnel)"
               value={importSource}
               onChange={(e) => handleImportChange(e.target.value)}
@@ -209,35 +209,35 @@ export function ProjectContactsSection({ projectId }: { projectId: string }) {
             </Select>
           )}
           <div className="grid grid-cols-2 gap-3">
-            <Input
+            <Input id="form-first-name"
               label="Prénom"
               value={form.first_name}
               onChange={(e) => setForm({ ...form, first_name: e.target.value })}
             />
-            <Input
+            <Input id="form-last-name"
               label="Nom"
               value={form.last_name}
               onChange={(e) => setForm({ ...form, last_name: e.target.value })}
             />
           </div>
-          <Input
+          <Input id="form-company-name"
             label="Entreprise"
             value={form.company_name}
             onChange={(e) => setForm({ ...form, company_name: e.target.value })}
           />
-          <Input
+          <Input id="form-job-title"
             label="Intitulé de poste"
             value={form.job_title}
             onChange={(e) => setForm({ ...form, job_title: e.target.value })}
           />
           <div className="grid grid-cols-2 gap-3">
-            <Input
+            <Input id="form-email"
               label="Email"
               type="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
-            <Input
+            <Input id="form-phone"
               label="Téléphone"
               type="tel"
               value={form.phone}

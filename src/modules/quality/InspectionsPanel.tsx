@@ -124,10 +124,10 @@ export function InspectionsPanel({ projectId }: InspectionsPanelProps) {
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Nouvelle inspection" size="lg">
         <form onSubmit={handleCreateSubmit} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-            <Input label="Localisation" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+            <Input id="form-title" label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            <Input id="form-location" label="Localisation" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
           </div>
-          <Select
+          <Select id="form-templateid"
             label="Modèle de checklist"
             value={form.templateId}
             onChange={(e) => setForm({ ...form, templateId: e.target.value })}

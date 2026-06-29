@@ -37,6 +37,7 @@ export function ChecklistItemsEditor({ rows, onChange }: ChecklistItemsEditorPro
             <button
               type="button"
               onClick={() => removeRow(index)}
+              aria-label="Supprimer le point de contrôle"
               className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
             >
               <Trash2 className="h-4 w-4" />

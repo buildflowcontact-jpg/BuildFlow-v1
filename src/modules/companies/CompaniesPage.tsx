@@ -115,20 +115,20 @@ export function CompaniesPage() {
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nouvelle entreprise">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input label="Nom" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <Select label="Type" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as CompanyType })}>
+          <Input id="form-name" label="Nom" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <Select id="form-type" label="Type" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as CompanyType })}>
             {Object.entries(COMPANY_TYPE_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
               </option>
             ))}
           </Select>
-          <Input label="Contact" value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} />
+          <Input id="form-contact-name" label="Contact" value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} />
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            <Input label="Téléphone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <Input id="form-email" label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <Input id="form-phone" label="Téléphone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
-          <Input label="Adresse" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+          <Input id="form-address" label="Adresse" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
               Annuler

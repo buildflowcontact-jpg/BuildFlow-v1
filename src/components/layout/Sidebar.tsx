@@ -267,7 +267,7 @@ export function Sidebar() {
 
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Créer un projet">
         <form onSubmit={handleCreateSubmit} className="flex flex-col gap-4">
-          <Input
+          <Input id="name"
             label="Nom du projet"
             required
             autoFocus
@@ -279,7 +279,7 @@ export function Sidebar() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
-          <Input
+          <Input id="address"
             label="Adresse / localisation"
             value={address}
             onChange={(e) => setAddress(e.target.value)}

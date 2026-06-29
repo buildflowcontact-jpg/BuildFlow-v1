@@ -87,7 +87,7 @@ export function MessageThread({ conversation }: MessageThreadProps) {
           placeholder="Écrire un message…"
           className="flex-1 rounded-full border border-slate-200 px-4 py-2 text-sm outline-none transition-colors duration-150 focus:border-brand-400"
         />
-        <Button type="submit" size="sm" disabled={!draft.trim()} loading={send.isPending}>
+        <Button type="submit" size="sm" disabled={!draft.trim()} loading={send.isPending} aria-label="Envoyer le message">
           <Send className="h-4 w-4" />
         </Button>
       </form>

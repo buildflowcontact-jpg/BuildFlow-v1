@@ -146,8 +146,8 @@ export function DpgfImportModal({ projectId, open, onClose, onImported }: DpgfIm
         {rows && (
           <>
             <div className="grid grid-cols-2 gap-4">
-              <Input label="Titre du devis" required value={title} onChange={(e) => setTitle(e.target.value)} />
-              <Select label="Client" value={clientId} onChange={(e) => setClientId(e.target.value)}>
+              <Input id="title" label="Titre du devis" required value={title} onChange={(e) => setTitle(e.target.value)} />
+              <Select id="clientid" label="Client" value={clientId} onChange={(e) => setClientId(e.target.value)}>
                 <option value="">—</option>
                 {clients.map((c) => (
                   <option key={c.id} value={c.id}>

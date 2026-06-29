@@ -147,8 +147,8 @@ export function PlansTab({ projectId }: PlansTabProps) {
 
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Nouveau plan">
         <form onSubmit={handleCreateSubmit} className="flex flex-col gap-4">
-          <Input label="Nom du plan" required value={newPlanName} onChange={(e) => setNewPlanName(e.target.value)} />
-          <Input label="Fichier (.pdf)" type="file" accept=".pdf,application/pdf" ref={newPlanFileRef} required />
+          <Input id="newplanname" label="Nom du plan" required value={newPlanName} onChange={(e) => setNewPlanName(e.target.value)} />
+          <Input id="fichier-pdf" label="Fichier (.pdf)" type="file" accept=".pdf,application/pdf" ref={newPlanFileRef} required />
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
               Annuler

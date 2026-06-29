@@ -289,13 +289,13 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
         title={editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie'}
       >
         <form onSubmit={handleCategorySubmit} className="flex flex-col gap-4">
-          <Input
+          <Input id="categoryform-name"
             label="Nom"
             required
             value={categoryForm.name}
             onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
           />
-          <Input
+          <Input id="categoryform-planned-amount"
             type="number"
             step="0.01"
             min="0"
@@ -303,7 +303,7 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
             value={categoryForm.planned_amount}
             onChange={(e) => setCategoryForm({ ...categoryForm, planned_amount: e.target.value })}
           />
-          <Select
+          <Select id="categoryform-parent-category-id"
             label="Catégorie parente"
             value={categoryForm.parent_category_id}
             onChange={(e) => setCategoryForm({ ...categoryForm, parent_category_id: e.target.value })}
@@ -334,13 +334,13 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
         title={editingExpense ? 'Modifier la dépense' : 'Nouvelle dépense'}
       >
         <form onSubmit={handleExpenseSubmit} className="flex flex-col gap-4">
-          <Input
+          <Input id="expenseform-description"
             label="Description"
             required
             value={expenseForm.description}
             onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })}
           />
-          <Select
+          <Select id="expenseform-category-id"
             label="Catégorie"
             value={expenseForm.category_id}
             onChange={(e) => setExpenseForm({ ...expenseForm, category_id: e.target.value })}
@@ -353,7 +353,7 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
             ))}
           </Select>
           <div className="grid grid-cols-2 gap-4">
-            <Input
+            <Input id="expenseform-amount"
               type="number"
               step="0.01"
               min="0"
@@ -362,7 +362,7 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
               value={expenseForm.amount}
               onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })}
             />
-            <Input
+            <Input id="expenseform-expense-date"
               type="date"
               label="Date"
               required
@@ -370,7 +370,7 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
               onChange={(e) => setExpenseForm({ ...expenseForm, expense_date: e.target.value })}
             />
           </div>
-          <Select
+          <Select id="expenseform-kind"
             label="Type"
             value={expenseForm.kind}
             onChange={(e) => setExpenseForm({ ...expenseForm, kind: e.target.value as Expense['kind'] })}

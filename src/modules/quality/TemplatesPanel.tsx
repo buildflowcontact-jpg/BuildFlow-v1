@@ -103,7 +103,7 @@ export function TemplatesPanel({ projectId }: TemplatesPanelProps) {
 
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Nouveau modèle de checklist" size="lg">
         <form onSubmit={handleCreateSubmit} className="flex flex-col gap-4">
-          <Input label="Nom" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <Input id="form-name" label="Nom" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           <Textarea
             label="Description"
             value={form.description}
@@ -164,7 +164,7 @@ function TemplateEditModal({ templateId, onClose }: TemplateEditModalProps) {
         <Spinner />
       ) : (
         <form onSubmit={handleSave} className="flex flex-col gap-4">
-          <Input label="Nom" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <Input id="form-name-2" label="Nom" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           <Textarea
             label="Description"
             value={form.description}

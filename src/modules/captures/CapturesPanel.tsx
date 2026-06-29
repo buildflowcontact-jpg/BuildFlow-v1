@@ -283,7 +283,7 @@ function SendCaptureReportModal({
     <Modal open={open} onClose={onClose} title="Envoyer comme rapport">
       <div className="flex flex-col gap-4">
         <p className="text-sm text-slate-500">{captures.length} capture(s) sélectionnée(s).</p>
-        <Input label="Titre du rapport" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex. Réserves visite du 12/06" />
+        <Input id="title" label="Titre du rapport" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex. Réserves visite du 12/06" />
 
         {candidates.length === 0 ? (
           <p className="text-sm text-slate-400">Aucun membre disponible sur ce projet.</p>

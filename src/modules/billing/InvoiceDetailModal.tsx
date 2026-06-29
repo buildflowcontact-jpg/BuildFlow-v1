@@ -146,8 +146,8 @@ export function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }
       ) : editing && form ? (
         <form onSubmit={handleSave} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-            <Input
+            <Input id="form-title" label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            <Input id="form-due-date"
               type="date"
               label="Échéance"
               value={form.due_date}
@@ -260,6 +260,7 @@ export function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }
                       onClick={() => {
                         if (confirm('Supprimer ce paiement ?')) removePayment.mutate(payment.id);
                       }}
+                      aria-label="Supprimer le paiement"
                       className="rounded-lg p-1 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
                     >
                       <X className="h-4 w-4" />
@@ -319,7 +320,7 @@ export function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }
 
       <Modal open={paymentOpen} onClose={() => setPaymentOpen(false)} title="Enregistrer un paiement">
         <form onSubmit={handleAddPayment} className="flex flex-col gap-4">
-          <Input
+          <Input id="paymentform-amount"
             type="number"
             step="0.01"
             label="Montant (€)"
@@ -327,14 +328,14 @@ export function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }
             value={paymentForm.amount}
             onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
           />
-          <Input
+          <Input id="paymentform-paid-at"
             type="date"
             label="Date de paiement"
             required
             value={paymentForm.paid_at}
             onChange={(e) => setPaymentForm({ ...paymentForm, paid_at: e.target.value })}
           />
-          <Input
+          <Input id="paymentform-method"
             label="Moyen de paiement"
             placeholder="Virement, chèque, CB..."
             value={paymentForm.method}

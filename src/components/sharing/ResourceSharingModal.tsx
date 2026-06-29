@@ -83,7 +83,7 @@ export function ResourceSharingModal({
         )}
 
         <form onSubmit={handleGrant} className="flex items-end gap-2 border-t border-slate-100 pt-4">
-          <Select label="Membre" value={granteeId} onChange={(e) => setGranteeId(e.target.value)} className="flex-1">
+          <Select id="granteeid" label="Membre" value={granteeId} onChange={(e) => setGranteeId(e.target.value)} className="flex-1">
             <option value="">Sélectionner…</option>
             {availableMembers.map((m) => (
               <option key={m.profile!.id} value={m.profile!.id}>
@@ -91,7 +91,7 @@ export function ResourceSharingModal({
               </option>
             ))}
           </Select>
-          <Select label="Niveau" value={permission} onChange={(e) => setPermission(e.target.value as PermissionLevel)} className="w-40">
+          <Select id="permission" label="Niveau" value={permission} onChange={(e) => setPermission(e.target.value as PermissionLevel)} className="w-40">
             {Object.entries(PERMISSION_LEVEL_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
                 {label}

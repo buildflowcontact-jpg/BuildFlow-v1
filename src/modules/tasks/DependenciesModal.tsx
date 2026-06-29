@@ -74,7 +74,7 @@ export function DependenciesModal({ open, onClose, task, allTasks, dependencies,
         )}
 
         <div className="flex items-end gap-2 border-t border-slate-100 pt-4">
-          <Select label="Ajouter une dépendance" value={selected} onChange={(e) => setSelected(e.target.value)} className="flex-1">
+          <Select id="selected" label="Ajouter une dépendance" value={selected} onChange={(e) => setSelected(e.target.value)} className="flex-1">
             <option value="">Sélectionner une tâche…</option>
             {options.map((t) => (
               <option key={t.id} value={t.id}>

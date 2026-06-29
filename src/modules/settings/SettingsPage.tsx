@@ -155,7 +155,7 @@ export function SettingsPage() {
             <CardTitle>Organisation</CardTitle>
           </CardHeader>
           <form onSubmit={handleOrgSubmit} className="flex flex-col gap-4">
-            <Input label="Nom de l'organisation" value={orgName} onChange={(e) => setOrgName(e.target.value)} />
+            <Input id="orgname" label="Nom de l'organisation" value={orgName} onChange={(e) => setOrgName(e.target.value)} />
             <div className="flex justify-end">
               <Button type="submit" loading={update.isPending}>
                 Enregistrer
@@ -200,10 +200,10 @@ export function SettingsPage() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Input label="Prénom" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-              <Input label="Nom" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              <Input id="firstname" label="Prénom" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+              <Input id="lastname" label="Nom" value={lastName} onChange={(e) => setLastName(e.target.value)} />
             </div>
-            <Select label="Profession" value={jobTitle} onChange={(e) => setJobTitle(e.target.value)}>
+            <Select id="jobtitle" label="Profession" value={jobTitle} onChange={(e) => setJobTitle(e.target.value)}>
               <option value="" disabled>
                 Sélectionner une profession…
               </option>
@@ -213,9 +213,9 @@ export function SettingsPage() {
                 </option>
               ))}
             </Select>
-            <Input label="Entreprise" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
-            <Input label="Téléphone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
-            <Input label="Email" value={profile.email} disabled hint="L'email ne peut pas être modifié ici." />
+            <Input id="companyname" label="Entreprise" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+            <Input id="phone" label="Téléphone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <Input id="profile-email" label="Email" value={profile.email} disabled hint="L'email ne peut pas être modifié ici." />
             <div className="flex justify-end">
               <Button type="submit" loading={savingProfile}>
                 Enregistrer
@@ -291,7 +291,7 @@ export function SettingsPage() {
       )}
       <Modal open={inviteOpen} onClose={() => setInviteOpen(false)} title="Ajouter un membre">
         <form onSubmit={handleInviteSubmit} className="flex flex-col gap-4">
-          <Input
+          <Input id="inviteemail"
             label="Email"
             type="email"
             required
@@ -299,7 +299,7 @@ export function SettingsPage() {
             onChange={(e) => setInviteEmail(e.target.value)}
             hint="La personne doit déjà posséder un compte BuildFlow."
           />
-          <Select label="Rôle" value={inviteRole} onChange={(e) => setInviteRole(e.target.value as OrgRole)}>
+          <Select id="inviterole" label="Rôle" value={inviteRole} onChange={(e) => setInviteRole(e.target.value as OrgRole)}>
             <option value="member">{ORG_ROLE_LABELS.member}</option>
             <option value="admin">{ORG_ROLE_LABELS.admin}</option>
           </Select>
