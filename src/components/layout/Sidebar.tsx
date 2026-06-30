@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import {
   FolderKanban,
@@ -6,6 +6,7 @@ import {
   Settings,
   ChevronsLeft,
   ChevronDown,
+  LogOut,
   Plus,
   Info,
   ListTree,
@@ -27,6 +28,7 @@ import {
 import { cn } from '@/utils/cn';
 import { useUiStore } from '@/stores/uiStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useAuth } from '@/hooks/useAuth';
 import { useProjects } from '@/hooks/useProjects';
 import { useSyncStatus } from '@/hooks/useSyncStatus';
 import { Avatar } from '@/components/ui/Avatar';
@@ -64,6 +66,19 @@ export function Sidebar() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const syncStatus = useSyncStatus();
+  const { signOut } = useAuth();
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState('');
@@ -259,14 +274,46 @@ export function Sidebar() {
             </span>
           </div>
         )}
-        <button
-          onClick={() => navigate('/settings')}
-          title="Paramètres du compte"
-          aria-label="Paramètres du compte"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-        >
-          <Settings className="h-4 w-4" />
-        </button>
+        <div className="relative shrink-0" ref={accountMenuRef}>
+          <button
+            onClick={() => setAccountMenuOpen((o) => !o)}
+            title="Paramètres du compte"
+            aria-label="Paramètres du compte"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+          >
+            <Settings className="h-4 w-4" />
+          </button>
+
+          {accountMenuOpen && (
+            <div
+              className={cn(
+                'absolute z-40 mt-2 w-48 rounded-xl border border-slate-200/70 bg-white py-1.5 shadow-popover',
+                collapsed ? 'left-0' : 'right-0'
+              )}
+            >
+              <button
+                onClick={() => {
+                  setAccountMenuOpen(false);
+                  navigate('/settings');
+                }}
+                className="flex w-full items-center gap-2 px-4 py-2 text-sm text-slate-600 transition-colors duration-150 hover:bg-slate-50 hover:text-slate-900"
+              >
+                <Settings className="h-4 w-4" />
+                Paramètres
+              </button>
+              <button
+                onClick={() => {
+                  setAccountMenuOpen(false);
+                  void signOut();
+                }}
+                className="flex w-full items-center gap-2 px-4 py-2 text-sm text-slate-600 transition-colors duration-150 hover:bg-slate-50 hover:text-red-600"
+              >
+                <LogOut className="h-4 w-4" />
+                Déconnexion
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Créer un projet">
