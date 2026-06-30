@@ -26,11 +26,13 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key === 'Tab' && dialogRef.current) {
@@ -86,7 +88,11 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
       document.removeEventListener('keydown', onKeyDown);
       document.body.style.overflow = '';
     };
-  }, [open, onClose]);
+    // onClose est lu via onCloseRef pour ne pas relancer cet effet (et donc
+    // resteler le focus vers l'élément précédent) à chaque frappe, quand le
+    // parent passe un callback recréé à chaque rendu (ex. () => setOpen(false)).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   return createPortal(
     <AnimatePresence>
