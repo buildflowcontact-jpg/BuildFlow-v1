@@ -29,6 +29,7 @@ import { useUiStore } from '@/stores/uiStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useProjects } from '@/hooks/useProjects';
 import { useSyncStatus } from '@/hooks/useSyncStatus';
+import { Avatar } from '@/components/ui/Avatar';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
@@ -251,9 +252,12 @@ export function Sidebar() {
           )}
         />
         {!collapsed && (
-          <span className="flex-1 truncate text-sm font-medium text-slate-700" title={displayName}>
-            {displayName}
-          </span>
+          <div className="flex flex-1 items-center gap-2 overflow-hidden">
+            <Avatar name={profile?.full_name} src={profile?.avatar_url} size="xs" />
+            <span className="flex-1 truncate text-sm font-medium text-slate-700" title={displayName}>
+              {displayName}
+            </span>
+          </div>
         )}
         <button
           onClick={() => navigate('/settings')}
