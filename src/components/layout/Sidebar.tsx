@@ -41,24 +41,13 @@ import { Button } from '@/components/ui/Button';
 
 const dashboardItem = { to: '', label: 'Tableau de bord', icon: Info, end: true };
 
+// Ordre aligné sur le déroulement chronologique d'un projet : du devis
+// commercial à la réception client du chantier.
 const projectNavGroups = [
   {
-    label: 'Budget',
-    icon: Wallet,
-    items: [
-      { to: 'budget', label: 'Budget', icon: Wallet },
-      { to: 'billing', label: 'Devis & Facturation', icon: Receipt },
-    ],
-  },
-  {
-    label: 'Planification',
-    icon: GanttChartSquare,
-    items: [
-      { to: 'tasks', label: 'Tâches', icon: ListTree },
-      { to: 'gantt', label: 'Planning', icon: GanttChartSquare },
-      { to: 'time-entries', label: 'Pointage horaire', icon: Clock, restrictedTo: 'Chef de chantier' },
-      { to: 'supplies', label: 'Commandes', icon: Truck },
-    ],
+    label: 'Commercial',
+    icon: Receipt,
+    items: [{ to: 'billing', label: 'Devis & Facturation', icon: Receipt }],
   },
   {
     label: 'Études',
@@ -69,14 +58,37 @@ const projectNavGroups = [
     ],
   },
   {
+    label: 'Planification',
+    icon: GanttChartSquare,
+    items: [
+      { to: 'tasks', label: 'Tâches', icon: ListTree },
+      { to: 'gantt', label: 'Planning', icon: GanttChartSquare },
+    ],
+  },
+  {
+    label: 'Budget',
+    icon: Wallet,
+    items: [{ to: 'budget', label: 'Budget', icon: Wallet }],
+  },
+  {
+    label: 'Achats',
+    icon: Truck,
+    items: [{ to: 'supplies', label: 'Commandes', icon: Truck }],
+  },
+  {
     label: 'Chantier',
     icon: ClipboardList,
     items: [
       { to: 'daily-logs', label: 'Journal de chantier', icon: ClipboardList },
+      { to: 'time-entries', label: 'Pointage horaire', icon: Clock, restrictedTo: 'Chef de chantier' },
       { to: 'incidents', label: 'Incidents', icon: AlertTriangle },
-      { to: 'punchlist', label: 'Réserves', icon: ClipboardCheck },
       { to: 'quality', label: 'Qualité', icon: ShieldCheck },
     ],
+  },
+  {
+    label: 'Réception',
+    icon: ClipboardCheck,
+    items: [{ to: 'punchlist', label: 'Réserves', icon: ClipboardCheck }],
   },
   {
     label: 'Communication',
