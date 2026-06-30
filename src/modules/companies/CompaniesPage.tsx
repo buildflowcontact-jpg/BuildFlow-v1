@@ -28,13 +28,22 @@ const COMPANY_TYPE_TONE: Record<CompanyType, 'blue' | 'purple' | 'green' | 'slat
 type CompanyFormState = {
   name: string;
   type: CompanyType;
-  contact_name: string;
+  contact_first_name: string;
+  contact_last_name: string;
   email: string;
   phone: string;
   address: string;
 };
 
-const emptyForm: CompanyFormState = { name: '', type: 'sous_traitant', contact_name: '', email: '', phone: '', address: '' };
+const emptyForm: CompanyFormState = {
+  name: '',
+  type: 'sous_traitant',
+  contact_first_name: '',
+  contact_last_name: '',
+  email: '',
+  phone: '',
+  address: '',
+};
 
 export function CompaniesPage() {
   const { companies, isLoading, create, remove } = useCompanies();
@@ -46,7 +55,7 @@ export function CompaniesPage() {
     const payload: Omit<TablesInsert<'companies'>, 'organization_id'> = {
       name: form.name,
       type: form.type,
-      contact_name: form.contact_name || null,
+      contact_name: [form.contact_first_name.trim(), form.contact_last_name.trim()].filter(Boolean).join(' ') || null,
       email: form.email || null,
       phone: form.phone || null,
       address: form.address || null,
@@ -123,7 +132,20 @@ export function CompaniesPage() {
               </option>
             ))}
           </Select>
-          <Input id="form-contact-name" label="Contact" value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} />
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              id="form-contact-first-name"
+              label="Prénom du contact"
+              value={form.contact_first_name}
+              onChange={(e) => setForm({ ...form, contact_first_name: e.target.value })}
+            />
+            <Input
+              id="form-contact-last-name"
+              label="Nom du contact"
+              value={form.contact_last_name}
+              onChange={(e) => setForm({ ...form, contact_last_name: e.target.value })}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <Input id="form-email" label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             <Input id="form-phone" label="Téléphone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
