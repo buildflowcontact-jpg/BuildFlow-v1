@@ -2004,6 +2004,131 @@ export type Database = {
           },
         ]
       }
+      meeting_reports: {
+        Row: {
+          agenda: string | null
+          attendees: Json
+          created_at: string
+          created_by: string | null
+          document_id: string | null
+          id: string
+          location: string | null
+          meeting_date: string
+          next_meeting_date: string | null
+          notes: string | null
+          project_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agenda?: string | null
+          attendees?: Json
+          created_at?: string
+          created_by?: string | null
+          document_id?: string | null
+          id?: string
+          location?: string | null
+          meeting_date?: string
+          next_meeting_date?: string | null
+          notes?: string | null
+          project_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agenda?: string | null
+          attendees?: Json
+          created_at?: string
+          created_by?: string | null
+          document_id?: string | null
+          id?: string
+          location?: string | null
+          meeting_date?: string
+          next_meeting_date?: string | null
+          notes?: string | null
+          project_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_reports_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_reports_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_action_items: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          description: string
+          due_date: string | null
+          id: string
+          meeting_report_id: string
+          project_id: string
+          status: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          description: string
+          due_date?: string | null
+          id?: string
+          meeting_report_id: string
+          project_id: string
+          status?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          meeting_report_id?: string
+          project_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_action_items_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_action_items_meeting_report_id_fkey"
+            columns: ["meeting_report_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_action_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quality_inspection_results: {
         Row: {
           comment: string | null
@@ -3322,6 +3447,7 @@ export type ProjectStatus =
   | 'livre'
   | 'annule';
 export type PunchListStatus = 'open' | 'in_progress' | 'resolved' | 'verified';
+export type MeetingActionItemStatus = 'open' | 'done';
 export type SupplyStatus = 'pending' | 'ordered' | 'shipped' | 'delivered' | 'delayed' | 'cancelled';
 export type SupplyCategory = 'materiau' | 'equipement' | 'location';
 export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical';

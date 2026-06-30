@@ -16,6 +16,7 @@ import type {
   QualityInspectionResult,
   NonConformitySeverity,
   NonConformityStatus,
+  MeetingActionItemStatus,
 } from './database.types';
 
 export type Profile = Tables<'profiles'>;
@@ -67,6 +68,8 @@ export type NonConformity = Tables<'non_conformities'>;
 export type Conversation = Tables<'conversations'>;
 export type ConversationParticipant = Tables<'conversation_participants'>;
 export type Message = Tables<'messages'>;
+export type MeetingReport = Tables<'meeting_reports'>;
+export type MeetingActionItem = Tables<'meeting_action_items'>;
 
 export interface DailyReportTimeEntry {
   user_id: string;
@@ -106,6 +109,17 @@ export type CaptureAnnotationShape =
 
 export type CaptureSourceType = 'plan' | 'model3d';
 export type CaptureStatus = 'draft' | 'sent';
+
+/** Participant d'un compte-rendu de réunion : membre interne (avec id) ou contact externe en saisie libre. */
+export interface MeetingAttendee {
+  name: string;
+  role?: string;
+  member_id?: string | null;
+}
+
+export interface MeetingReportWithItems extends MeetingReport {
+  actionItems: MeetingActionItem[];
+}
 
 export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
   prospection: 'Prospection',
@@ -177,6 +191,11 @@ export const PUNCH_LIST_STATUS_LABELS: Record<PunchListStatus, string> = {
   in_progress: 'En cours',
   resolved: 'Résolue',
   verified: 'Vérifiée',
+};
+
+export const MEETING_ACTION_ITEM_STATUS_LABELS: Record<MeetingActionItemStatus, string> = {
+  open: 'À faire',
+  done: 'Fait',
 };
 
 export const QUALITY_INSPECTION_STATUS_LABELS: Record<QualityInspectionStatus, string> = {

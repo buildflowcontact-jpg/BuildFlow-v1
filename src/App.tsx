@@ -44,6 +44,7 @@ const ProjectSuppliesPage = lazy(() => import('@/modules/projects/pages/ProjectS
 const ProjectIncidentsPage = lazy(() => import('@/modules/projects/pages/ProjectIncidentsPage'));
 const ProjectPunchListPage = lazy(() => import('@/modules/projects/pages/ProjectPunchListPage'));
 const ProjectDailyLogsPage = lazy(() => import('@/modules/projects/pages/ProjectDailyLogsPage'));
+const ProjectMeetingReportsPage = lazy(() => import('@/modules/projects/pages/ProjectMeetingReportsPage'));
 const ProjectBudgetPage = lazy(() => import('@/modules/projects/pages/ProjectBudgetPage'));
 const ProjectRfisPage = lazy(() => import('@/modules/projects/pages/ProjectRfisPage'));
 const ProjectChangeOrdersPage = lazy(() => import('@/modules/projects/pages/ProjectChangeOrdersPage'));
@@ -198,6 +199,14 @@ export const router = createBrowserRouter([
             element: (
               <Lazy>
                 <ProjectPunchListPage />
+              </Lazy>
+            ),
+          },
+          {
+            path: 'meeting-reports',
+            element: (
+              <Lazy>
+                <ProjectMeetingReportsPage />
               </Lazy>
             ),
           },

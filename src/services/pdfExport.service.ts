@@ -2,7 +2,13 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { differenceInCalendarDays, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { PROJECT_STATUS_LABELS, PUNCH_LIST_STATUS_LABELS, PHASE_TYPE_LABELS, PHASE_STATUS_LABELS } from '@/types/domain';
+import {
+  PROJECT_STATUS_LABELS,
+  PUNCH_LIST_STATUS_LABELS,
+  PHASE_TYPE_LABELS,
+  PHASE_STATUS_LABELS,
+  MEETING_ACTION_ITEM_STATUS_LABELS,
+} from '@/types/domain';
 import type {
   Project,
   Phase,
@@ -12,8 +18,17 @@ import type {
   ProjectMemberWithProfile,
   DailyReportTimeEntry,
   DailyReportWeatherDay,
+  MeetingReportWithItems,
+  MeetingAttendee,
 } from '@/types/domain';
-import type { ProjectStatus, PhaseType, PhaseStatus, TaskStatus, PunchListStatus } from '@/types/database.types';
+import type {
+  ProjectStatus,
+  PhaseType,
+  PhaseStatus,
+  TaskStatus,
+  PunchListStatus,
+  MeetingActionItemStatus,
+} from '@/types/database.types';
 
 const BRAND_COLOR: [number, number, number] = [37, 99, 235]; // brand-600
 const STATUS_COLORS: Record<TaskStatus, [number, number, number]> = {
@@ -596,6 +611,120 @@ export function buildCaptureReportPdf(
   });
 
   return doc;
+}
+
+/**
+ * Construit le PDF "compte-rendu de réunion de chantier" : infos générales
+ * (date, lieu, participants), ordre du jour, notes, points d'action avec
+ * responsable/échéance/statut, et date de la prochaine réunion. Document
+ * destiné à être archivé dans Documents (type compte_rendu).
+ */
+export function buildMeetingReportPdf(project: Project, report: MeetingReportWithItems, members: ProjectMemberWithProfile[]): jsPDF {
+  const doc = createDocument('Compte-rendu de réunion de chantier', `${project.name} — ${report.title}`);
+
+  const attendees = Array.isArray(report.attendees) ? (report.attendees as unknown as MeetingAttendee[]) : [];
+
+  let y = 110;
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('Informations générales', 40, y);
+  y += 16;
+
+  autoTable(doc, {
+    startY: y,
+    theme: 'plain',
+    styles: { fontSize: 9, textColor: [51, 65, 85] },
+    body: [
+      ['Date de réunion', format(new Date(report.meeting_date), 'EEEE d MMMM yyyy', { locale: fr })],
+      ['Lieu', report.location ?? '—'],
+      ['Prochaine réunion', report.next_meeting_date ? format(new Date(report.next_meeting_date), 'dd/MM/yyyy') : '—'],
+    ],
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 130 } },
+  });
+
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 24;
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('Participants', 40, y);
+
+  autoTable(doc, {
+    startY: y + 10,
+    head: [['Nom', 'Rôle']],
+    body: attendees.length > 0 ? attendees.map((a) => [a.name, a.role ?? '—']) : [['Aucun participant renseigné', '']],
+    headStyles: { fillColor: BRAND_COLOR },
+    styles: { fontSize: 9 },
+  });
+
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 24;
+
+  if (report.agenda) {
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 41, 59);
+    doc.text('Ordre du jour', 40, y);
+    y += 16;
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(51, 65, 85);
+    const agendaLines = doc.splitTextToSize(report.agenda, doc.internal.pageSize.getWidth() - 80);
+    doc.text(agendaLines, 40, y);
+    y += agendaLines.length * 12 + 20;
+  }
+
+  if (report.notes) {
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 41, 59);
+    doc.text('Notes / compte-rendu', 40, y);
+    y += 16;
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(51, 65, 85);
+    const notesLines = doc.splitTextToSize(report.notes, doc.internal.pageSize.getWidth() - 80);
+    doc.text(notesLines, 40, y);
+    y += notesLines.length * 12 + 20;
+  }
+
+  const pageHeight = doc.internal.pageSize.getHeight();
+  if (y + 60 > pageHeight - 50) {
+    doc.addPage();
+    y = 50;
+  }
+
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text("Points d'action", 40, y);
+
+  autoTable(doc, {
+    startY: y + 10,
+    head: [['Description', 'Responsable', 'Échéance', 'Statut']],
+    body:
+      report.actionItems.length > 0
+        ? report.actionItems.map((item) => {
+            const assignee = members.find((m) => m.profile?.id === item.assigned_to);
+            return [
+              item.description,
+              assignee?.profile?.full_name ?? assignee?.invited_email ?? '—',
+              item.due_date ? format(new Date(item.due_date), 'dd/MM/yyyy') : '—',
+              MEETING_ACTION_ITEM_STATUS_LABELS[item.status as MeetingActionItemStatus],
+            ];
+          })
+        : [['Aucun point d’action', '', '', '']],
+    headStyles: { fillColor: BRAND_COLOR },
+    styles: { fontSize: 9 },
+    columnStyles: { 0: { cellWidth: 220 } },
+  });
+
+  return doc;
+}
+
+export function exportMeetingReportPdf(project: Project, report: MeetingReportWithItems, members: ProjectMemberWithProfile[]): File {
+  const doc = buildMeetingReportPdf(project, report, members);
+  const filename = `cr-reunion-${report.meeting_date}-${format(new Date(), 'yyyy-MM-dd-HHmm')}.pdf`;
+  return pdfToFile(doc, filename);
 }
 
 /** Convertit un document jsPDF en File (pour upload direct vers Supabase Storage, ex. archivage auto). */

@@ -30,7 +30,9 @@ export type RealtimeTable =
   | 'non_conformities'
   | 'conversations'
   | 'conversation_participants'
-  | 'messages';
+  | 'messages'
+  | 'meeting_reports'
+  | 'meeting_action_items';
 
 /**
  * Abonnement générique à une table filtrée (par défaut sur project_id).

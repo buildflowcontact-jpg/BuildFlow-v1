@@ -26,6 +26,7 @@ import {
   ShieldCheck,
   MessageCircle,
   Building2,
+  Users2,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useUiStore } from '@/stores/uiStore';
@@ -80,6 +81,7 @@ const projectNavGroups = [
     icon: ClipboardList,
     items: [
       { to: 'daily-logs', label: 'Journal de chantier', icon: ClipboardList },
+      { to: 'meeting-reports', label: 'Comptes-rendus', icon: Users2 },
       { to: 'time-entries', label: 'Pointage horaire', icon: Clock, restrictedTo: 'Chef de chantier' },
       { to: 'incidents', label: 'Incidents', icon: AlertTriangle },
       { to: 'quality', label: 'Qualité', icon: ShieldCheck },
