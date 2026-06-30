@@ -57,6 +57,7 @@ const projectNavGroups = [
       { to: 'tasks', label: 'Tâches', icon: ListTree },
       { to: 'gantt', label: 'Planning', icon: GanttChartSquare },
       { to: 'time-entries', label: 'Pointage horaire', icon: Clock, restrictedTo: 'Chef de chantier' },
+      { to: 'supplies', label: 'Commandes', icon: Truck },
     ],
   },
   {
@@ -65,7 +66,6 @@ const projectNavGroups = [
     items: [
       { to: 'plans', label: 'Plans et 3D', icon: Map },
       { to: 'documents', label: 'Documents', icon: FileText },
-      { to: 'supplies', label: 'Commandes', icon: Truck },
     ],
   },
   {
