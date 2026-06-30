@@ -2673,6 +2673,7 @@ export type Database = {
       supplies: {
         Row: {
           actual_delivery_date: string | null
+          category: string
           created_at: string
           created_by: string | null
           expected_delivery_date: string | null
@@ -2681,6 +2682,7 @@ export type Database = {
           order_reference: string | null
           project_id: string
           quantity: number
+          rental_end_date: string | null
           status: string
           supplier_name: string
           unit: string | null
@@ -2688,6 +2690,7 @@ export type Database = {
         }
         Insert: {
           actual_delivery_date?: string | null
+          category?: string
           created_at?: string
           created_by?: string | null
           expected_delivery_date?: string | null
@@ -2696,6 +2699,7 @@ export type Database = {
           order_reference?: string | null
           project_id: string
           quantity?: number
+          rental_end_date?: string | null
           status?: string
           supplier_name: string
           unit?: string | null
@@ -2703,6 +2707,7 @@ export type Database = {
         }
         Update: {
           actual_delivery_date?: string | null
+          category?: string
           created_at?: string
           created_by?: string | null
           expected_delivery_date?: string | null
@@ -2711,6 +2716,7 @@ export type Database = {
           order_reference?: string | null
           project_id?: string
           quantity?: number
+          rental_end_date?: string | null
           status?: string
           supplier_name?: string
           unit?: string | null
@@ -3317,6 +3323,7 @@ export type ProjectStatus =
   | 'annule';
 export type PunchListStatus = 'open' | 'in_progress' | 'resolved' | 'verified';
 export type SupplyStatus = 'pending' | 'ordered' | 'shipped' | 'delivered' | 'delayed' | 'cancelled';
+export type SupplyCategory = 'materiau' | 'equipement' | 'location';
 export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical';
 export type IncidentStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
 export type OrgRole = 'owner' | 'admin' | 'member';

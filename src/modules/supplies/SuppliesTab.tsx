@@ -9,10 +9,10 @@ import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
-import { SUPPLY_STATUS_LABELS } from '@/types/domain';
+import { SUPPLY_STATUS_LABELS, SUPPLY_CATEGORY_LABELS } from '@/types/domain';
 import { formatDate, isOverdue } from '@/utils/date';
 import type { Supply } from '@/types/domain';
-import type { SupplyStatus, TablesInsert } from '@/types/database.types';
+import type { SupplyStatus, SupplyCategory, TablesInsert } from '@/types/database.types';
 
 const STATUS_TONE: Record<SupplyStatus, 'slate' | 'blue' | 'purple' | 'green' | 'red' | 'yellow'> = {
   pending: 'slate',
@@ -23,6 +23,12 @@ const STATUS_TONE: Record<SupplyStatus, 'slate' | 'blue' | 'purple' | 'green' | 
   cancelled: 'yellow',
 };
 
+const CATEGORY_TONE: Record<SupplyCategory, 'slate' | 'blue' | 'purple'> = {
+  materiau: 'slate',
+  equipement: 'blue',
+  location: 'purple',
+};
+
 type SupplyFormState = {
   supplier_name: string;
   order_reference: string;
@@ -30,7 +36,9 @@ type SupplyFormState = {
   quantity: number;
   unit: string;
   status: SupplyStatus;
+  category: SupplyCategory;
   expected_delivery_date: string;
+  rental_end_date: string;
 };
 
 const emptyForm: SupplyFormState = {
@@ -40,7 +48,9 @@ const emptyForm: SupplyFormState = {
   quantity: 1,
   unit: '',
   status: 'pending',
+  category: 'materiau',
   expected_delivery_date: '',
+  rental_end_date: '',
 };
 
 interface SuppliesTabProps {
@@ -68,7 +78,9 @@ export function SuppliesTab({ projectId }: SuppliesTabProps) {
       quantity: supply.quantity,
       unit: supply.unit ?? '',
       status: supply.status as SupplyStatus,
+      category: (supply.category as SupplyCategory) ?? 'materiau',
       expected_delivery_date: supply.expected_delivery_date ?? '',
+      rental_end_date: supply.rental_end_date ?? '',
     });
     setModalOpen(true);
   }
@@ -82,7 +94,9 @@ export function SuppliesTab({ projectId }: SuppliesTabProps) {
       quantity: form.quantity,
       unit: form.unit || null,
       status: form.status,
+      category: form.category,
       expected_delivery_date: form.expected_delivery_date || null,
+      rental_end_date: form.category === 'location' ? form.rental_end_date || null : null,
     };
     if (editing) {
       update.mutate({ id: editing.id, payload }, { onSuccess: () => setModalOpen(false) });
@@ -97,7 +111,7 @@ export function SuppliesTab({ projectId }: SuppliesTabProps) {
     <Card>
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h3 className="text-base font-semibold text-slate-900">Approvisionnements</h3>
+          <h3 className="text-base font-semibold text-slate-900">Commandes</h3>
           <p className="text-sm text-slate-500">{supplies.length} commande(s)</p>
         </div>
         <Button size="sm" onClick={openCreate}>
@@ -107,7 +121,7 @@ export function SuppliesTab({ projectId }: SuppliesTabProps) {
       </div>
 
       {supplies.length === 0 ? (
-        <EmptyState icon={Truck} title="Aucun approvisionnement" description="Suivez vos commandes de matériaux et équipements." />
+        <EmptyState icon={Truck} title="Aucune commande" description="Suivez vos commandes de matériaux, équipements et locations." />
       ) : (
         <ul className="divide-y divide-slate-100">
           {supplies.map((supply) => {
@@ -123,8 +137,14 @@ export function SuppliesTab({ projectId }: SuppliesTabProps) {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
+                  <Badge tone={CATEGORY_TONE[(supply.category as SupplyCategory) ?? 'materiau']}>
+                    {SUPPLY_CATEGORY_LABELS[(supply.category as SupplyCategory) ?? 'materiau']}
+                  </Badge>
                   <span className={late ? 'text-xs font-medium text-red-500' : 'text-xs text-slate-400'}>
                     {supply.expected_delivery_date ? formatDate(supply.expected_delivery_date) : '—'}
+                    {supply.category === 'location' && supply.rental_end_date
+                      ? ` → ${formatDate(supply.rental_end_date)}`
+                      : ''}
                   </span>
                   <Badge tone={late ? 'red' : STATUS_TONE[supply.status as SupplyStatus]}>
                     {late ? 'En retard' : SUPPLY_STATUS_LABELS[supply.status as SupplyStatus]}
@@ -185,12 +205,33 @@ export function SuppliesTab({ projectId }: SuppliesTabProps) {
               ))}
             </Select>
           </div>
-          <Input id="form-expected-delivery-date"
-            label="Date de livraison prévue"
-            type="date"
-            value={form.expected_delivery_date}
-            onChange={(e) => setForm({ ...form, expected_delivery_date: e.target.value })}
-          />
+          <Select id="form-category"
+            label="Catégorie"
+            value={form.category}
+            onChange={(e) => setForm({ ...form, category: e.target.value as SupplyCategory })}
+          >
+            {Object.entries(SUPPLY_CATEGORY_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <Input id="form-expected-delivery-date"
+              label="Date de livraison prévue"
+              type="date"
+              value={form.expected_delivery_date}
+              onChange={(e) => setForm({ ...form, expected_delivery_date: e.target.value })}
+            />
+            {form.category === 'location' && (
+              <Input id="form-rental-end-date"
+                label="Date de fin de location"
+                type="date"
+                value={form.rental_end_date}
+                onChange={(e) => setForm({ ...form, rental_end_date: e.target.value })}
+              />
+            )}
+          </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
               Annuler

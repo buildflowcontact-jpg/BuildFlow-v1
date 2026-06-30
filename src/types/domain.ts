@@ -6,6 +6,7 @@ import type {
   TaskStatus,
   TaskPriority,
   SupplyStatus,
+  SupplyCategory,
   IncidentSeverity,
   IncidentStatus,
   PunchListStatus,
@@ -149,6 +150,12 @@ export const SUPPLY_STATUS_LABELS: Record<SupplyStatus, string> = {
   delivered: 'Livré',
   delayed: 'En retard',
   cancelled: 'Annulé',
+};
+
+export const SUPPLY_CATEGORY_LABELS: Record<SupplyCategory, string> = {
+  materiau: 'Matériau',
+  equipement: 'Équipement',
+  location: 'Location',
 };
 
 export const INCIDENT_SEVERITY_LABELS: Record<IncidentSeverity, string> = {

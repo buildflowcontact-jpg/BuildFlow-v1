@@ -1,18 +1,19 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { addDays, differenceInCalendarDays, format, isWeekend, isWithinInterval, startOfMonth, startOfWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Plus, Flag, FileDown, LocateFixed } from 'lucide-react';
+import { Plus, Flag, FileDown, LocateFixed, Truck } from 'lucide-react';
 import { useTasks } from '@/hooks/useTasks';
 import { usePhases } from '@/hooks/usePhases';
 import { useProject } from '@/hooks/useProject';
+import { useSupplies } from '@/hooks/useSupplies';
 import { useUiStore, type GanttZoom } from '@/stores/uiStore';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 import { TaskFormModal } from '@/modules/tasks/TaskFormModal';
 import { PHASE_TYPE_LABELS } from '@/types/domain';
-import type { Task, TaskWithChildren, Phase } from '@/types/domain';
-import type { TablesInsert, TablesUpdate, TaskStatus, PhaseType } from '@/types/database.types';
+import type { Task, TaskWithChildren, Phase, Supply } from '@/types/domain';
+import type { TablesInsert, TablesUpdate, TaskStatus, PhaseType, SupplyCategory } from '@/types/database.types';
 import { cn } from '@/utils/cn';
 
 const ROW_HEIGHT = 36;
@@ -32,7 +33,14 @@ const STATUS_COLORS: Record<TaskStatus, string> = {
 
 type LayoutItem =
   | { kind: 'section'; key: string; label: string; y: number; height: number }
-  | { kind: 'task'; key: string; task: TaskWithChildren; depth: number; y: number; height: number };
+  | { kind: 'task'; key: string; task: TaskWithChildren; depth: number; y: number; height: number }
+  | { kind: 'supply'; key: string; supply: Supply; y: number; height: number };
+
+const SUPPLY_CATEGORY_COLORS: Record<SupplyCategory, string> = {
+  materiau: '#0ea5e9',
+  equipement: '#f97316',
+  location: '#a855f7',
+};
 
 function taskDate(task: Task): { start: Date | null; end: Date | null } {
   const start = task.start_date ? new Date(task.start_date) : task.end_date ? new Date(task.end_date) : null;
@@ -40,7 +48,17 @@ function taskDate(task: Task): { start: Date | null; end: Date | null } {
   return { start, end };
 }
 
-function buildLayout(phases: Phase[], tree: TaskWithChildren[]): { items: LayoutItem[]; totalHeight: number } {
+function supplyDate(supply: Supply): { start: Date | null; end: Date | null } {
+  const start = supply.expected_delivery_date ? new Date(supply.expected_delivery_date) : null;
+  const end = supply.category === 'location' && supply.rental_end_date ? new Date(supply.rental_end_date) : start;
+  return { start, end };
+}
+
+function buildLayout(
+  phases: Phase[],
+  tree: TaskWithChildren[],
+  supplies: Supply[]
+): { items: LayoutItem[]; totalHeight: number } {
   const byPhase = new Map<string | null, TaskWithChildren[]>();
   for (const root of tree) {
     const key = root.phase_id;
@@ -74,6 +92,16 @@ function buildLayout(phases: Phase[], tree: TaskWithChildren[]): { items: Layout
     for (const root of orphanRoots) pushNode(root, 0);
   }
 
+  const suppliesWithDate = supplies.filter((s) => s.expected_delivery_date);
+  if (suppliesWithDate.length > 0) {
+    items.push({ kind: 'section', key: 'supplies', label: 'Commandes & livraisons', y, height: SECTION_HEIGHT });
+    y += SECTION_HEIGHT;
+    for (const supply of suppliesWithDate) {
+      items.push({ kind: 'supply', key: `supply-${supply.id}`, supply, y, height: ROW_HEIGHT });
+      y += ROW_HEIGHT;
+    }
+  }
+
   return { items, totalHeight: y };
 }
 
@@ -85,6 +113,7 @@ export function GanttChart({ projectId }: GanttChartProps) {
   const { tasks, tree, dependencies, isLoading, create, update } = useTasks(projectId);
   const { phases } = usePhases(projectId);
   const { project, members } = useProject(projectId);
+  const { supplies } = useSupplies(projectId);
   const zoom = useUiStore((s) => s.ganttZoom);
   const setZoom = useUiStore((s) => s.setGanttZoom);
 
@@ -102,6 +131,11 @@ export function GanttChart({ projectId }: GanttChartProps) {
       if (start) dates.push(start);
       if (end) dates.push(end);
     }
+    for (const supply of supplies) {
+      const { start, end } = supplyDate(supply);
+      if (start) dates.push(start);
+      if (end) dates.push(end);
+    }
     const today = new Date();
     if (dates.length === 0) {
       return { rangeStart: addDays(today, -7), rangeEnd: addDays(today, 30) };
@@ -109,7 +143,7 @@ export function GanttChart({ projectId }: GanttChartProps) {
     const min = new Date(Math.min(...dates.map((d) => d.getTime())));
     const max = new Date(Math.max(...dates.map((d) => d.getTime())));
     return { rangeStart: addDays(min, -4), rangeEnd: addDays(max, 8) };
-  }, [tasks]);
+  }, [tasks, supplies]);
 
   const totalDays = Math.max(1, differenceInCalendarDays(rangeEnd, rangeStart));
   const totalWidth = totalDays * pxPerDay;
@@ -157,7 +191,7 @@ export function GanttChart({ projectId }: GanttChartProps) {
     return bands;
   }, [zoom, rangeStart, rangeEnd, pxPerDay, xForDate]);
 
-  const { items: layout, totalHeight } = useMemo(() => buildLayout(phases, tree), [phases, tree]);
+  const { items: layout, totalHeight } = useMemo(() => buildLayout(phases, tree, supplies), [phases, tree, supplies]);
 
   const taskLayoutById = useMemo(() => {
     const map = new Map<string, LayoutItem & { kind: 'task' }>();
@@ -206,6 +240,9 @@ export function GanttChart({ projectId }: GanttChartProps) {
           </span>
           <span className="flex items-center gap-1.5">
             <Flag className="h-3 w-3 text-amber-500" /> Jalon
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Truck className="h-3 w-3" style={{ color: SUPPLY_CATEGORY_COLORS.materiau }} /> Livraison
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -257,7 +294,7 @@ export function GanttChart({ projectId }: GanttChartProps) {
         </div>
       </div>
 
-      {tasks.length === 0 ? (
+      {tasks.length === 0 && supplies.length === 0 ? (
         <p className="px-5 py-10 text-center text-sm text-slate-400">
           Aucune tâche planifiée. Ajoutez des tâches depuis l'onglet « Tâches » pour les visualiser ici.
         </p>
@@ -280,6 +317,24 @@ export function GanttChart({ projectId }: GanttChartProps) {
                       style={{ top: item.y, height: item.height }}
                     >
                       {item.label}
+                    </div>
+                  ) : item.kind === 'supply' ? (
+                    <div
+                      key={item.key}
+                      onMouseEnter={() => setHoveredKey(item.key)}
+                      onMouseLeave={() => setHoveredKey((k) => (k === item.key ? null : k))}
+                      className={cn(
+                        'absolute left-0 right-0 flex items-center truncate px-3 text-sm text-slate-700',
+                        hoveredKey === item.key ? 'bg-brand-50' : ''
+                      )}
+                      style={{ top: item.y, height: item.height }}
+                      title={`${item.supply.supplier_name} — ${item.supply.item_description}`}
+                    >
+                      <Truck
+                        className="mr-1.5 h-3 w-3 shrink-0"
+                        style={{ color: SUPPLY_CATEGORY_COLORS[(item.supply.category as SupplyCategory) ?? 'materiau'] }}
+                      />
+                      <span className="truncate">{item.supply.item_description}</span>
                     </div>
                   ) : (
                     <button
@@ -336,6 +391,44 @@ export function GanttChart({ projectId }: GanttChartProps) {
                     />
                   )
                 )}
+
+                {layout.map((item) => {
+                  if (item.kind !== 'supply') return null;
+                  const { start, end } = supplyDate(item.supply);
+                  if (!start) return null;
+                  const color = SUPPLY_CATEGORY_COLORS[(item.supply.category as SupplyCategory) ?? 'materiau'];
+                  const isRental = item.supply.category === 'location' && end && end.getTime() !== start.getTime();
+                  const cy = item.y + item.height / 2;
+
+                  if (isRental && end) {
+                    const x = xForDate(start);
+                    const width = Math.max(pxPerDay * 0.6, xForDate(addDays(end, 1)) - x);
+                    return (
+                      <div
+                        key={item.key}
+                        className="absolute z-10 flex items-center overflow-hidden rounded-md text-left shadow-sm"
+                        style={{ left: x, top: item.y + 6, width, height: item.height - 12, backgroundColor: `${color}1f`, border: `1px solid ${color}` }}
+                        title={`${item.supply.item_description} (location du ${format(start, 'dd/MM', { locale: fr })} au ${format(end, 'dd/MM', { locale: fr })})`}
+                      >
+                        <span className="absolute left-2 truncate text-xs font-medium" style={{ color }}>
+                          {item.supply.item_description}
+                        </span>
+                      </div>
+                    );
+                  }
+
+                  const cx = xForDate(start);
+                  return (
+                    <div
+                      key={item.key}
+                      className="absolute z-10"
+                      style={{ left: cx - 7, top: cy - 7, width: 14, height: 14 }}
+                      title={`${item.supply.item_description} — livraison prévue le ${format(start, 'dd/MM', { locale: fr })}`}
+                    >
+                      <Truck className="h-3.5 w-3.5" style={{ color }} />
+                    </div>
+                  );
+                })}
 
                 {todayX != null && (
                   <div className="absolute top-0 z-10 w-px bg-red-400" style={{ left: todayX, height: totalHeight }}>
