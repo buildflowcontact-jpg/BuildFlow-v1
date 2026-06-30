@@ -17,6 +17,8 @@ import type {
   NonConformitySeverity,
   NonConformityStatus,
   MeetingActionItemStatus,
+  FirePermitStatus,
+  PpspsStatus,
 } from './database.types';
 
 export type Profile = Tables<'profiles'>;
@@ -70,6 +72,8 @@ export type ConversationParticipant = Tables<'conversation_participants'>;
 export type Message = Tables<'messages'>;
 export type MeetingReport = Tables<'meeting_reports'>;
 export type MeetingActionItem = Tables<'meeting_action_items'>;
+export type FirePermit = Tables<'fire_permits'>;
+export type PpspsRecord = Tables<'ppsps_records'>;
 
 export interface DailyReportTimeEntry {
   user_id: string;
@@ -120,6 +124,22 @@ export interface MeetingAttendee {
 export interface MeetingReportWithItems extends MeetingReport {
   actionItems: MeetingActionItem[];
 }
+
+/** Élément de checklist d'un permis de feu (mesure de prévention cochée ou non). */
+export interface PrecautionItem {
+  label: string;
+  checked: boolean;
+}
+
+export const DEFAULT_FIRE_PERMIT_PRECAUTIONS: PrecautionItem[] = [
+  { label: 'Zone dégagée de matières combustibles sur un rayon de 10 m', checked: false },
+  { label: 'Extincteur(s) approprié(s) à proximité immédiate', checked: false },
+  { label: 'Protection des éléments combustibles non déplaçables', checked: false },
+  { label: "Vérification de l'absence d'atmosphère explosive", checked: false },
+  { label: 'Surveillance continue pendant les travaux', checked: false },
+  { label: "Surveillance après l'arrêt des travaux (minimum 60 minutes)", checked: false },
+  { label: "Moyens de communication d'urgence disponibles", checked: false },
+];
 
 export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
   prospection: 'Prospection',
@@ -196,6 +216,18 @@ export const PUNCH_LIST_STATUS_LABELS: Record<PunchListStatus, string> = {
 export const MEETING_ACTION_ITEM_STATUS_LABELS: Record<MeetingActionItemStatus, string> = {
   open: 'À faire',
   done: 'Fait',
+};
+
+export const FIRE_PERMIT_STATUS_LABELS: Record<FirePermitStatus, string> = {
+  draft: 'Brouillon',
+  issued: 'Émis',
+  closed: 'Clôturé',
+};
+
+export const PPSPS_STATUS_LABELS: Record<PpspsStatus, string> = {
+  en_attente: 'En attente',
+  recu: 'Reçu',
+  valide: 'Validé',
 };
 
 export const QUALITY_INSPECTION_STATUS_LABELS: Record<QualityInspectionStatus, string> = {

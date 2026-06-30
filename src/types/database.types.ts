@@ -2129,6 +2129,150 @@ export type Database = {
           },
         ]
       }
+      fire_permits: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          document_id: string | null
+          end_time: string | null
+          executant_name: string
+          fire_watch_minutes: number
+          id: string
+          location: string
+          precautions: Json
+          project_id: string
+          start_time: string | null
+          status: string
+          updated_at: string
+          work_date: string
+          work_description: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          document_id?: string | null
+          end_time?: string | null
+          executant_name: string
+          fire_watch_minutes?: number
+          id?: string
+          location: string
+          precautions?: Json
+          project_id: string
+          start_time?: string | null
+          status?: string
+          updated_at?: string
+          work_date?: string
+          work_description: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          document_id?: string | null
+          end_time?: string | null
+          executant_name?: string
+          fire_watch_minutes?: number
+          id?: string
+          location?: string
+          precautions?: Json
+          project_id?: string
+          start_time?: string | null
+          status?: string
+          updated_at?: string
+          work_date?: string
+          work_description?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fire_permits_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fire_permits_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fire_permits_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fire_permits_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ppsps_records: {
+        Row: {
+          company_id: string
+          created_at: string
+          document_id: string | null
+          id: string
+          notes: string | null
+          project_id: string
+          received_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          notes?: string | null
+          project_id: string
+          received_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          notes?: string | null
+          project_id?: string
+          received_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ppsps_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ppsps_records_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ppsps_records_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quality_inspection_results: {
         Row: {
           comment: string | null
@@ -3448,6 +3592,8 @@ export type ProjectStatus =
   | 'annule';
 export type PunchListStatus = 'open' | 'in_progress' | 'resolved' | 'verified';
 export type MeetingActionItemStatus = 'open' | 'done';
+export type FirePermitStatus = 'draft' | 'issued' | 'closed';
+export type PpspsStatus = 'en_attente' | 'recu' | 'valide';
 export type SupplyStatus = 'pending' | 'ordered' | 'shipped' | 'delivered' | 'delayed' | 'cancelled';
 export type SupplyCategory = 'materiau' | 'equipement' | 'location';
 export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical';

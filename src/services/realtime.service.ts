@@ -32,7 +32,9 @@ export type RealtimeTable =
   | 'conversation_participants'
   | 'messages'
   | 'meeting_reports'
-  | 'meeting_action_items';
+  | 'meeting_action_items'
+  | 'fire_permits'
+  | 'ppsps_records';
 
 /**
  * Abonnement générique à une table filtrée (par défaut sur project_id).

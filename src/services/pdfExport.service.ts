@@ -20,6 +20,8 @@ import type {
   DailyReportWeatherDay,
   MeetingReportWithItems,
   MeetingAttendee,
+  FirePermit,
+  PrecautionItem,
 } from '@/types/domain';
 import type {
   ProjectStatus,
@@ -724,6 +726,128 @@ export function buildMeetingReportPdf(project: Project, report: MeetingReportWit
 export function exportMeetingReportPdf(project: Project, report: MeetingReportWithItems, members: ProjectMemberWithProfile[]): File {
   const doc = buildMeetingReportPdf(project, report, members);
   const filename = `cr-reunion-${report.meeting_date}-${format(new Date(), 'yyyy-MM-dd-HHmm')}.pdf`;
+  return pdfToFile(doc, filename);
+}
+
+export interface FirePermitSignature {
+  signerName: string;
+  dataUrl: string;
+}
+
+/**
+ * Construit le PDF "permis de feu" : informations sur l'intervention par
+ * point chaud, checklist des mesures de prévention, puis les deux signatures
+ * électroniques (émetteur + exécutant) en bas de page.
+ */
+export function buildFirePermitPdf(
+  project: Project,
+  permit: FirePermit,
+  companyName: string | null,
+  signatures: { issuer: FirePermitSignature; executant: FirePermitSignature }
+): jsPDF {
+  const doc = createDocument('Permis de feu', project.name);
+
+  const precautions = Array.isArray(permit.precautions) ? (permit.precautions as unknown as PrecautionItem[]) : [];
+
+  let y = 110;
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text("Informations sur l'intervention", 40, y);
+  y += 16;
+
+  autoTable(doc, {
+    startY: y,
+    theme: 'plain',
+    styles: { fontSize: 9, textColor: [51, 65, 85] },
+    body: [
+      ['Date', format(new Date(permit.work_date), 'EEEE d MMMM yyyy', { locale: fr })],
+      ['Localisation', permit.location],
+      ['Nature des travaux', permit.work_description],
+      ['Entreprise exécutante', companyName ?? '—'],
+      ['Exécutant', permit.executant_name],
+      ['Horaires', `${permit.start_time ?? '—'} – ${permit.end_time ?? '—'}`],
+      ['Surveillance après arrêt', `${permit.fire_watch_minutes} minutes`],
+    ],
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 150 } },
+  });
+
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 24;
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('Mesures de prévention', 40, y);
+
+  autoTable(doc, {
+    startY: y + 10,
+    head: [['Mesure', 'Vérifiée']],
+    body:
+      precautions.length > 0
+        ? precautions.map((p) => [p.label, p.checked ? 'Oui' : 'Non'])
+        : [['Aucune mesure renseignée', '']],
+    headStyles: { fillColor: BRAND_COLOR },
+    styles: { fontSize: 9 },
+    columnStyles: { 0: { cellWidth: 380 }, 1: { halign: 'center' } },
+  });
+
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 32;
+  const pageHeight = doc.internal.pageSize.getHeight();
+  if (y + 140 > pageHeight - 50) {
+    doc.addPage();
+    y = 50;
+  }
+
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('Signatures', 40, y);
+  y += 16;
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const colWidth = (pageWidth - 80 - 20) / 2;
+  const sigBlocks: { label: string; signature: FirePermitSignature; x: number }[] = [
+    { label: 'Émetteur du permis', signature: signatures.issuer, x: 40 },
+    { label: 'Exécutant', signature: signatures.executant, x: 40 + colWidth + 20 },
+  ];
+
+  for (const block of sigBlocks) {
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(51, 65, 85);
+    doc.text(block.label, block.x, y);
+
+    const imgTop = y + 8;
+    const imgHeight = 70;
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(block.x, imgTop, colWidth, imgHeight, 4, 4);
+    if (block.signature.dataUrl) {
+      const props = doc.getImageProperties(block.signature.dataUrl);
+      const ratio = Math.min((colWidth - 12) / props.width, (imgHeight - 12) / props.height);
+      const w = props.width * ratio;
+      const h = props.height * ratio;
+      doc.addImage(block.signature.dataUrl, 'PNG', block.x + (colWidth - w) / 2, imgTop + (imgHeight - h) / 2, w, h);
+    }
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 116, 139);
+    doc.text(block.signature.signerName, block.x, imgTop + imgHeight + 14);
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184);
+    doc.text(format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr }), block.x, imgTop + imgHeight + 26);
+  }
+
+  return doc;
+}
+
+export function exportFirePermitPdf(
+  project: Project,
+  permit: FirePermit,
+  companyName: string | null,
+  signatures: { issuer: FirePermitSignature; executant: FirePermitSignature }
+): File {
+  const doc = buildFirePermitPdf(project, permit, companyName, signatures);
+  const filename = `permis-feu-${permit.work_date}-${format(new Date(), 'yyyy-MM-dd-HHmm')}.pdf`;
   return pdfToFile(doc, filename);
 }
 
