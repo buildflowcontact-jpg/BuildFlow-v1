@@ -654,6 +654,8 @@ export type Database = {
       }
       documents: {
         Row: {
+          amount: number | null
+          company_id: string | null
           created_at: string
           folder: string | null
           id: string
@@ -668,6 +670,8 @@ export type Database = {
           version: number
         }
         Insert: {
+          amount?: number | null
+          company_id?: string | null
           created_at?: string
           folder?: string | null
           id?: string
@@ -682,6 +686,8 @@ export type Database = {
           version?: number
         }
         Update: {
+          amount?: number | null
+          company_id?: string | null
           created_at?: string
           folder?: string | null
           id?: string
@@ -696,6 +702,13 @@ export type Database = {
           version?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "documents_project_id_fkey"
             columns: ["project_id"]

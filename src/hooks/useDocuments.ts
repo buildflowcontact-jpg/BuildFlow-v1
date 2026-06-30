@@ -17,8 +17,15 @@ export function useDocuments(projectId: string | undefined) {
   useRealtimeInvalidate('documents', projectId ? { column: 'project_id', value: projectId } : null, queryKey);
 
   const upload = useMutation({
-    mutationFn: (params: { file: File; type: DocumentType; uploadedBy: string; folder?: string | null; silent?: boolean }) =>
-      documentsService.upload({ projectId: projectId!, ...params }),
+    mutationFn: (params: {
+      file: File;
+      type: DocumentType;
+      uploadedBy: string;
+      folder?: string | null;
+      companyId?: string | null;
+      amount?: number | null;
+      silent?: boolean;
+    }) => documentsService.upload({ projectId: projectId!, ...params }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey }),
   });
 

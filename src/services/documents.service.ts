@@ -29,6 +29,10 @@ export const documentsService = {
     type: DocumentType;
     uploadedBy: string;
     folder?: string | null;
+    /** Entreprise (fournisseur/sous-traitant) émettrice — utilisé pour les devis reçus. */
+    companyId?: string | null;
+    /** Montant associé au document — utilisé pour les devis reçus. */
+    amount?: number | null;
     /** Désactive l'activité + la notification : utile pour les archivages automatiques (ex. rapports quotidiens). */
     silent?: boolean;
   }): Promise<Document> {
@@ -47,6 +51,8 @@ export const documentsService = {
           mime_type: params.file.type,
           uploaded_by: params.uploadedBy,
           folder: params.folder ?? null,
+          company_id: params.companyId ?? null,
+          amount: params.amount ?? null,
         })
         .select('*')
         .single()

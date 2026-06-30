@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { FileText, Receipt } from 'lucide-react';
+import { FileText, FileInput, Receipt } from 'lucide-react';
 import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { QuotesPanel } from './QuotesPanel';
+import { ReceivedQuotesPanel } from './ReceivedQuotesPanel';
 import { InvoicesPanel } from './InvoicesPanel';
 
 const TABS: TabItem[] = [
   { key: 'quotes', label: 'Devis', icon: FileText },
+  { key: 'received-quotes', label: 'Devis reçus', icon: FileInput },
   { key: 'invoices', label: 'Factures', icon: Receipt },
 ];
 
@@ -19,7 +21,9 @@ export function BillingTab({ projectId }: BillingTabProps) {
   return (
     <div className="flex flex-col gap-4">
       <Tabs tabs={TABS} active={active} onChange={setActive} />
-      {active === 'quotes' ? <QuotesPanel projectId={projectId} /> : <InvoicesPanel projectId={projectId} />}
+      {active === 'quotes' && <QuotesPanel projectId={projectId} />}
+      {active === 'received-quotes' && <ReceivedQuotesPanel projectId={projectId} />}
+      {active === 'invoices' && <InvoicesPanel projectId={projectId} />}
     </div>
   );
 }
