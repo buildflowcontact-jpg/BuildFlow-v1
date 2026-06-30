@@ -117,6 +117,7 @@ const projectNavGroups = [
 ];
 
 const globalNavItems = [
+  { to: '/crm', label: 'CRM', icon: FolderKanban },
   { to: '/clients', label: 'Clients', icon: Users },
   { to: '/companies', label: 'Entreprises', icon: Building2 },
 ];

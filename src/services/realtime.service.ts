@@ -36,7 +36,9 @@ export type RealtimeTable =
   | 'fire_permits'
   | 'ppsps_records'
   | 'doe_items'
-  | 'waste_trackings';
+  | 'waste_trackings'
+  | 'prospects'
+  | 'prospect_visits';
 
 /**
  * Abonnement générique à une table filtrée (par défaut sur project_id).

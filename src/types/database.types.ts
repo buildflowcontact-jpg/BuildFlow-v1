@@ -2215,6 +2215,148 @@ export type Database = {
           },
         ]
       }
+      prospects: {
+        Row: {
+          address: string | null
+          client_name: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          estimated_budget: number | null
+          id: string
+          name: string
+          next_action: string | null
+          next_action_date: string | null
+          notes: string | null
+          organization_id: string
+          project_id: string | null
+          source: string
+          status: string
+          updated_at: string
+          work_type: string | null
+        }
+        Insert: {
+          address?: string | null
+          client_name?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          estimated_budget?: number | null
+          id?: string
+          name: string
+          next_action?: string | null
+          next_action_date?: string | null
+          notes?: string | null
+          organization_id: string
+          project_id?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          work_type?: string | null
+        }
+        Update: {
+          address?: string | null
+          client_name?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          estimated_budget?: number | null
+          id?: string
+          name?: string
+          next_action?: string | null
+          next_action_date?: string | null
+          notes?: string | null
+          organization_id?: string
+          project_id?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          work_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospects_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prospects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prospects_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prospect_visits: {
+        Row: {
+          attendees: string | null
+          created_at: string
+          created_by: string | null
+          duration_minutes: number | null
+          id: string
+          notes: string | null
+          outcome: string | null
+          prospect_id: string
+          updated_at: string
+          visit_date: string
+        }
+        Insert: {
+          attendees?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          outcome?: string | null
+          prospect_id: string
+          updated_at?: string
+          visit_date: string
+        }
+        Update: {
+          attendees?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          outcome?: string | null
+          prospect_id?: string
+          updated_at?: string
+          visit_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospect_visits_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "prospects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prospect_visits_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       waste_trackings: {
         Row: {
           bsd_number: string | null
@@ -3738,6 +3880,8 @@ export type DoeItemCategory = 'plan' | 'notice_technique' | 'pv_reception' | 'ga
 export type DoeItemStatus = 'manquant' | 'recu' | 'valide';
 export type WasteCategory = 'dangereux' | 'non_dangereux' | 'inerte';
 export type WasteTrackingStatus = 'en_attente' | 'enleve' | 'traite';
+export type ProspectSource = 'bouche_a_oreille' | 'site_web' | 'appel_offre' | 'reseau' | 'partenaire' | 'autre';
+export type ProspectStatus = 'prospect' | 'visite_planifiee' | 'devis_en_cours' | 'gagne' | 'perdu' | 'sans_suite';
 export type SupplyStatus = 'pending' | 'ordered' | 'shipped' | 'delivered' | 'delayed' | 'cancelled';
 export type SupplyCategory = 'materiau' | 'equipement' | 'location';
 export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical';

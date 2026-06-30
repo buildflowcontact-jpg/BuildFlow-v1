@@ -23,6 +23,8 @@ import type {
   DoeItemStatus,
   WasteCategory,
   WasteTrackingStatus,
+  ProspectSource,
+  ProspectStatus,
 } from './database.types';
 
 export type Profile = Tables<'profiles'>;
@@ -80,6 +82,8 @@ export type FirePermit = Tables<'fire_permits'>;
 export type PpspsRecord = Tables<'ppsps_records'>;
 export type DoeItem = Tables<'doe_items'>;
 export type WasteTracking = Tables<'waste_trackings'>;
+export type Prospect = Tables<'prospects'>;
+export type ProspectVisit = Tables<'prospect_visits'>;
 
 export interface DailyReportTimeEntry {
   user_id: string;
@@ -262,6 +266,28 @@ export const WASTE_TRACKING_STATUS_LABELS: Record<WasteTrackingStatus, string> =
   enleve: 'Enlevé',
   traite: 'Traité',
 };
+
+export const PROSPECT_STATUS_LABELS: Record<ProspectStatus, string> = {
+  prospect: 'Prospect',
+  visite_planifiee: 'Visite planifiée',
+  devis_en_cours: 'Devis en cours',
+  gagne: 'Gagné',
+  perdu: 'Perdu',
+  sans_suite: 'Sans suite',
+};
+
+export const PROSPECT_SOURCE_LABELS: Record<ProspectSource, string> = {
+  bouche_a_oreille: 'Bouche à oreille',
+  site_web: 'Site web',
+  appel_offre: "Appel d'offre",
+  reseau: 'Réseau',
+  partenaire: 'Partenaire',
+  autre: 'Autre',
+};
+
+export interface ProspectWithVisits extends Prospect {
+  visits: ProspectVisit[];
+}
 
 export const QUALITY_INSPECTION_STATUS_LABELS: Record<QualityInspectionStatus, string> = {
   in_progress: 'En cours',
