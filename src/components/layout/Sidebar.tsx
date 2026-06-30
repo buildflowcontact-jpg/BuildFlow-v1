@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   FolderKanban,
   Users,
   Settings,
   ChevronsLeft,
   ChevronDown,
+  ChevronRight,
   LogOut,
   Plus,
   Info,
@@ -38,24 +39,53 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
 
-const projectSectionItems = [
-  { to: '', label: 'Tableau de bord', icon: Info, end: true },
-  { to: 'documents', label: 'Documents', icon: FileText },
-  { to: 'budget', label: 'Budget', icon: Wallet },
-  { to: 'billing', label: 'Devis & Facturation', icon: Receipt },
-  { to: 'tasks', label: 'Tâches', icon: ListTree },
-  { to: 'gantt', label: 'Planning', icon: GanttChartSquare },
-  { to: 'plans', label: 'Plans et 3D', icon: Map },
-  { to: 'supplies', label: 'Commandes', icon: Truck },
-  { to: 'daily-logs', label: 'Journal de chantier', icon: ClipboardList },
-  { to: 'rfis', label: 'RFI', icon: HelpCircle },
-  { to: 'time-entries', label: 'Pointage horaire', icon: Clock },
-  { to: 'client-portal', label: 'Portail client', icon: LayoutDashboard },
-  { to: 'incidents', label: 'Incidents', icon: AlertTriangle },
-  { to: 'punchlist', label: 'Réserves', icon: ClipboardCheck },
-  { to: 'quality', label: 'Qualité', icon: ShieldCheck },
-  { to: 'messages', label: 'Messagerie', icon: MessageCircle },
-  { to: 'members', label: 'Membres', icon: Users },
+const dashboardItem = { to: '', label: 'Tableau de bord', icon: Info, end: true };
+
+const projectNavGroups = [
+  {
+    label: 'Planification',
+    icon: GanttChartSquare,
+    items: [
+      { to: 'tasks', label: 'Tâches', icon: ListTree },
+      { to: 'gantt', label: 'Planning', icon: GanttChartSquare },
+      { to: 'time-entries', label: 'Pointage horaire', icon: Clock, restrictedTo: 'Chef de chantier' },
+    ],
+  },
+  {
+    label: 'Chantier',
+    icon: ClipboardList,
+    items: [
+      { to: 'daily-logs', label: 'Journal de chantier', icon: ClipboardList },
+      { to: 'plans', label: 'Plans et 3D', icon: Map },
+      { to: 'incidents', label: 'Incidents', icon: AlertTriangle },
+      { to: 'punchlist', label: 'Réserves', icon: ClipboardCheck },
+      { to: 'quality', label: 'Qualité', icon: ShieldCheck },
+    ],
+  },
+  {
+    label: 'Gestion',
+    icon: Wallet,
+    items: [
+      { to: 'documents', label: 'Documents', icon: FileText },
+      { to: 'budget', label: 'Budget', icon: Wallet },
+      { to: 'billing', label: 'Devis & Facturation', icon: Receipt },
+      { to: 'supplies', label: 'Commandes', icon: Truck },
+    ],
+  },
+  {
+    label: 'Communication',
+    icon: MessageCircle,
+    items: [
+      { to: 'messages', label: 'Messagerie', icon: MessageCircle },
+      { to: 'rfis', label: 'RFI', icon: HelpCircle },
+      { to: 'client-portal', label: 'Portail client', icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: 'Équipe',
+    icon: Users,
+    items: [{ to: 'members', label: 'Membres', icon: Users }],
+  },
 ];
 
 const globalNavItems = [
@@ -71,10 +101,37 @@ export function Sidebar() {
   const profile = useAuthStore((s) => s.profile);
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const syncStatus = useSyncStatus();
   const { signOut } = useAuth();
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    if (!projectId) return;
+    const activeGroup = projectNavGroups.find((group) =>
+      group.items.some((item) => location.pathname === `/projects/${projectId}/${item.to}`)
+    );
+    if (activeGroup) {
+      setExpandedGroups((prev) => {
+        if (prev.has(activeGroup.label)) return prev;
+        return new Set(prev).add(activeGroup.label);
+      });
+    }
+  }, [location.pathname, projectId]);
+
+  function toggleGroup(label: string) {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) {
+        next.delete(label);
+      } else {
+        next.add(label);
+      }
+      return next;
+    });
+  }
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -251,33 +308,87 @@ export function Sidebar() {
             {!collapsed && (
               <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Projet</p>
             )}
-            {projectSectionItems
-              .filter((item) => item.to !== 'time-entries' || profile?.job_title === 'Chef de chantier')
-              .map((item) => (
-              <NavLink
-                key={item.to || 'overview'}
-                to={`/projects/${projectId}${item.to ? `/${item.to}` : ''}`}
-                end={item.end}
-                className={({ isActive }) =>
-                  cn(
-                    'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-smooth',
-                    isActive
-                      ? 'bg-brand-50 text-brand-700'
-                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                  )
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    {isActive && (
-                      <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-brand-600" />
-                    )}
-                    <item.icon className="h-4 w-4 shrink-0" />
-                    {!collapsed && <span>{item.label}</span>}
-                  </>
-                )}
-              </NavLink>
-            ))}
+
+            <NavLink
+              to={`/projects/${projectId}`}
+              end
+              className={({ isActive }) =>
+                cn(
+                  'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-smooth',
+                  isActive ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-brand-600" />
+                  )}
+                  <dashboardItem.icon className="h-4 w-4 shrink-0" />
+                  {!collapsed && <span>{dashboardItem.label}</span>}
+                </>
+              )}
+            </NavLink>
+
+            {projectNavGroups.map((group) => {
+              const visibleItems = group.items.filter(
+                (item) => !item.restrictedTo || profile?.job_title === item.restrictedTo
+              );
+              if (visibleItems.length === 0) return null;
+              const isExpanded = collapsed || expandedGroups.has(group.label);
+              const groupHasActiveItem = visibleItems.some(
+                (item) => location.pathname === `/projects/${projectId}/${item.to}`
+              );
+
+              return (
+                <div key={group.label}>
+                  {!collapsed && (
+                    <button
+                      type="button"
+                      onClick={() => toggleGroup(group.label)}
+                      className={cn(
+                        'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-smooth',
+                        groupHasActiveItem && !isExpanded
+                          ? 'text-brand-700'
+                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                      )}
+                    >
+                      <group.icon className="h-4 w-4 shrink-0" />
+                      <span className="flex-1 text-left">{group.label}</span>
+                      <ChevronRight
+                        className={cn('h-3.5 w-3.5 shrink-0 transition-transform duration-150', isExpanded && 'rotate-90')}
+                      />
+                    </button>
+                  )}
+                  {isExpanded &&
+                    visibleItems.map((item) => (
+                      <NavLink
+                        key={item.to}
+                        to={`/projects/${projectId}/${item.to}`}
+                        className={({ isActive }) =>
+                          cn(
+                            'relative flex items-center gap-3 rounded-xl py-2.5 text-sm font-medium transition-all duration-150 ease-smooth',
+                            collapsed ? 'px-3' : 'pl-9 pr-3',
+                            isActive
+                              ? 'bg-brand-50 text-brand-700'
+                              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                          )
+                        }
+                      >
+                        {({ isActive }) => (
+                          <>
+                            {isActive && (
+                              <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-brand-600" />
+                            )}
+                            <item.icon className="h-4 w-4 shrink-0" />
+                            {!collapsed && <span>{item.label}</span>}
+                          </>
+                        )}
+                      </NavLink>
+                    ))}
+                </div>
+              );
+            })}
           </>
         )}
       </nav>
@@ -320,7 +431,7 @@ export function Sidebar() {
           {accountMenuOpen && (
             <div
               className={cn(
-                'absolute z-40 mt-2 w-48 rounded-xl border border-slate-200/70 bg-white py-1.5 shadow-popover',
+                'absolute bottom-full z-40 mb-2 w-48 rounded-xl border border-slate-200/70 bg-white py-1.5 shadow-popover',
                 collapsed ? 'left-0' : 'right-0'
               )}
             >
