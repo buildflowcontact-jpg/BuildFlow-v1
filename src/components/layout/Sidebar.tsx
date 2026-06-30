@@ -124,7 +124,8 @@ export function Sidebar() {
   const { signOut } = useAuth();
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set());
+  // Un seul sous-menu ouvert à la fois (accordéon).
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
   useEffect(() => {
     if (!projectId) return;
@@ -132,23 +133,12 @@ export function Sidebar() {
       group.items.some((item) => location.pathname === `/projects/${projectId}/${item.to}`)
     );
     if (activeGroup) {
-      setExpandedGroups((prev) => {
-        if (prev.has(activeGroup.label)) return prev;
-        return new Set(prev).add(activeGroup.label);
-      });
+      setExpandedGroup((prev) => (prev === activeGroup.label ? prev : activeGroup.label));
     }
   }, [location.pathname, projectId]);
 
   function toggleGroup(label: string) {
-    setExpandedGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(label)) {
-        next.delete(label);
-      } else {
-        next.add(label);
-      }
-      return next;
-    });
+    setExpandedGroup((prev) => (prev === label ? null : label));
   }
 
   useEffect(() => {
@@ -353,7 +343,7 @@ export function Sidebar() {
                 (item) => !item.restrictedTo || profile?.job_title === item.restrictedTo
               );
               if (visibleItems.length === 0) return null;
-              const isExpanded = collapsed || expandedGroups.has(group.label);
+              const isExpanded = collapsed || expandedGroup === group.label;
               const groupHasActiveItem = visibleItems.some(
                 (item) => location.pathname === `/projects/${projectId}/${item.to}`
               );
