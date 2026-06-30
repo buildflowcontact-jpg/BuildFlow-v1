@@ -12,7 +12,8 @@ import type { Client } from '@/types/domain';
 import type { TablesInsert } from '@/types/database.types';
 
 type ClientFormState = {
-  name: string;
+  first_name: string;
+  last_name: string;
   company_name: string;
   email: string;
   phone: string;
@@ -20,7 +21,23 @@ type ClientFormState = {
   notes: string;
 };
 
-const emptyForm: ClientFormState = { name: '', company_name: '', email: '', phone: '', address: '', notes: '' };
+const emptyForm: ClientFormState = {
+  first_name: '',
+  last_name: '',
+  company_name: '',
+  email: '',
+  phone: '',
+  address: '',
+  notes: '',
+};
+
+// La table clients ne stocke qu'un seul champ "name" : on combine
+// prénom + nom à l'enregistrement, et on les sépare au mieux à l'édition.
+function splitName(fullName: string): { first_name: string; last_name: string } {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length <= 1) return { first_name: parts[0] ?? '', last_name: '' };
+  return { first_name: parts[0]!, last_name: parts.slice(1).join(' ') };
+}
 
 export function ClientsPage() {
   const { clients, isLoading, create, update, remove } = useClients();
@@ -37,7 +54,7 @@ export function ClientsPage() {
   function openEdit(client: Client) {
     setEditing(client);
     setForm({
-      name: client.name,
+      ...splitName(client.name),
       company_name: client.company_name ?? '',
       email: client.email ?? '',
       phone: client.phone ?? '',
@@ -50,7 +67,7 @@ export function ClientsPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const payload: Omit<TablesInsert<'clients'>, 'organization_id'> = {
-      name: form.name,
+      name: [form.first_name.trim(), form.last_name.trim()].filter(Boolean).join(' '),
       company_name: form.company_name || null,
       email: form.email || null,
       phone: form.phone || null,
@@ -122,24 +139,20 @@ export function ClientsPage() {
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Modifier le client' : 'Nouveau client'}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input id="form-name" label="Nom" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <Input id="form-company-name" label="Entreprise" value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} />
           <div className="grid grid-cols-2 gap-4">
-            <Input id="form-email" label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            <Input id="form-phone" label="Téléphone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <Input
+              id="form-first-name"
+              label="Prénom"
+              value={form.first_name}
+              onChange={(e) => setForm({ ...form, first_name: e.target.value })}
+            />
+            <Input
+              id="form-last-name"
+              label="Nom"
+              required
+              value={form.last_name}
+              onChange={(e) => setForm({ ...form, last_name: e.target.value })}
+            />
           </div>
-          <Input id="form-address" label="Adresse" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
-          <Textarea label="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
-              Annuler
-            </Button>
-            <Button type="submit" loading={create.isPending || update.isPending}>
-              Enregistrer
-            </Button>
-          </div>
-        </form>
-      </Modal>
-    </div>
-  );
-}
+          <Input id="form-company-name" label="Entreprise" value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} />
+          <div className="grid grid-cols-2 ga
