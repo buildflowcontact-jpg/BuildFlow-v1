@@ -2215,6 +2215,73 @@ export type Database = {
           },
         ]
       }
+      doe_items: {
+        Row: {
+          category: string
+          company_id: string | null
+          created_at: string
+          document_id: string | null
+          id: string
+          label: string
+          lot: string
+          notes: string | null
+          project_id: string
+          received_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          company_id?: string | null
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          label: string
+          lot: string
+          notes?: string | null
+          project_id: string
+          received_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          company_id?: string | null
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          label?: string
+          lot?: string
+          notes?: string | null
+          project_id?: string
+          received_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doe_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doe_items_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doe_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ppsps_records: {
         Row: {
           company_id: string
@@ -3594,6 +3661,8 @@ export type PunchListStatus = 'open' | 'in_progress' | 'resolved' | 'verified';
 export type MeetingActionItemStatus = 'open' | 'done';
 export type FirePermitStatus = 'draft' | 'issued' | 'closed';
 export type PpspsStatus = 'en_attente' | 'recu' | 'valide';
+export type DoeItemCategory = 'plan' | 'notice_technique' | 'pv_reception' | 'garantie' | 'dossier_entretien' | 'autre';
+export type DoeItemStatus = 'manquant' | 'recu' | 'valide';
 export type SupplyStatus = 'pending' | 'ordered' | 'shipped' | 'delivered' | 'delayed' | 'cancelled';
 export type SupplyCategory = 'materiau' | 'equipement' | 'location';
 export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical';

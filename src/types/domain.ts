@@ -19,6 +19,8 @@ import type {
   MeetingActionItemStatus,
   FirePermitStatus,
   PpspsStatus,
+  DoeItemCategory,
+  DoeItemStatus,
 } from './database.types';
 
 export type Profile = Tables<'profiles'>;
@@ -74,6 +76,7 @@ export type MeetingReport = Tables<'meeting_reports'>;
 export type MeetingActionItem = Tables<'meeting_action_items'>;
 export type FirePermit = Tables<'fire_permits'>;
 export type PpspsRecord = Tables<'ppsps_records'>;
+export type DoeItem = Tables<'doe_items'>;
 
 export interface DailyReportTimeEntry {
   user_id: string;
@@ -228,6 +231,21 @@ export const PPSPS_STATUS_LABELS: Record<PpspsStatus, string> = {
   en_attente: 'En attente',
   recu: 'Reçu',
   valide: 'Validé',
+};
+
+export const DOE_ITEM_STATUS_LABELS: Record<DoeItemStatus, string> = {
+  manquant: 'Manquant',
+  recu: 'Reçu',
+  valide: 'Validé',
+};
+
+export const DOE_ITEM_CATEGORY_LABELS: Record<DoeItemCategory, string> = {
+  plan: "Plan d'exécution / DOE",
+  notice_technique: 'Notice technique',
+  pv_reception: 'PV de réception',
+  garantie: 'Garantie / certificat',
+  dossier_entretien: "Dossier d'entretien",
+  autre: 'Autre',
 };
 
 export const QUALITY_INSPECTION_STATUS_LABELS: Record<QualityInspectionStatus, string> = {

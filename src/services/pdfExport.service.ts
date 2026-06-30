@@ -8,6 +8,8 @@ import {
   PHASE_TYPE_LABELS,
   PHASE_STATUS_LABELS,
   MEETING_ACTION_ITEM_STATUS_LABELS,
+  DOE_ITEM_STATUS_LABELS,
+  DOE_ITEM_CATEGORY_LABELS,
 } from '@/types/domain';
 import type {
   Project,
@@ -22,6 +24,8 @@ import type {
   MeetingAttendee,
   FirePermit,
   PrecautionItem,
+  DoeItem,
+  Company,
 } from '@/types/domain';
 import type {
   ProjectStatus,
@@ -30,6 +34,8 @@ import type {
   TaskStatus,
   PunchListStatus,
   MeetingActionItemStatus,
+  DoeItemStatus,
+  DoeItemCategory,
 } from '@/types/database.types';
 
 const BRAND_COLOR: [number, number, number] = [37, 99, 235]; // brand-600
@@ -849,6 +855,89 @@ export function exportFirePermitPdf(
   const doc = buildFirePermitPdf(project, permit, companyName, signatures);
   const filename = `permis-feu-${permit.work_date}-${format(new Date(), 'yyyy-MM-dd-HHmm')}.pdf`;
   return pdfToFile(doc, filename);
+}
+
+/**
+ * Construit le PDF "synthèse DOE" : récapitulatif des pièces attendues,
+ * groupées par lot, avec entreprise, catégorie, statut et date de réception.
+ * Document de suivi (pas de signatures), destiné à être archivé ou diffusé
+ * au client à la livraison du chantier.
+ */
+export function buildDoeSummaryPdf(project: Project, items: DoeItem[], companies: Company[]): jsPDF {
+  const doc = createDocument('Synthèse DOE', project.name);
+
+  const total = items.length;
+  const validated = items.filter((i) => i.status === 'valide').length;
+  const received = items.filter((i) => i.status === 'recu').length;
+  const missing = items.filter((i) => i.status === 'manquant').length;
+
+  let y = 110;
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('Avancement global', 40, y);
+
+  autoTable(doc, {
+    startY: y + 10,
+    head: [['Total', 'Validées', 'Reçues', 'Manquantes']],
+    body: [[String(total), String(validated), String(received), String(missing)]],
+    headStyles: { fillColor: BRAND_COLOR },
+    styles: { fontSize: 9, halign: 'center' },
+  });
+
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 24;
+
+  const byLot = new Map<string, DoeItem[]>();
+  for (const item of items) {
+    const list = byLot.get(item.lot) ?? [];
+    list.push(item);
+    byLot.set(item.lot, list);
+  }
+
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  for (const [lot, lotItems] of [...byLot.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+    if (y + 40 > pageHeight - 50) {
+      doc.addPage();
+      y = 50;
+    }
+    doc.setFillColor(241, 245, 249);
+    doc.rect(40, y, pageWidth - 80, 16, 'F');
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 41, 59);
+    doc.text(lot, 44, y + 11);
+    doc.setFont('helvetica', 'normal');
+    y += 20;
+
+    autoTable(doc, {
+      startY: y,
+      head: [['Pièce', 'Catégorie', 'Entreprise', 'Statut', 'Reçu le']],
+      body: lotItems.map((item) => {
+        const company = companies.find((c) => c.id === item.company_id);
+        return [
+          item.label,
+          DOE_ITEM_CATEGORY_LABELS[item.category as DoeItemCategory],
+          company?.name ?? '—',
+          DOE_ITEM_STATUS_LABELS[item.status as DoeItemStatus],
+          item.received_date ? format(new Date(item.received_date), 'dd/MM/yyyy') : '—',
+        ];
+      }),
+      headStyles: { fillColor: BRAND_COLOR },
+      styles: { fontSize: 9 },
+      columnStyles: { 0: { cellWidth: 180 } },
+    });
+
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 20;
+  }
+
+  return doc;
+}
+
+export function exportDoeSummaryPdf(project: Project, items: DoeItem[], companies: Company[]): void {
+  const doc = buildDoeSummaryPdf(project, items, companies);
+  downloadDoc(doc, `doe-${project.reference ?? project.name}.pdf`);
 }
 
 /** Convertit un document jsPDF en File (pour upload direct vers Supabase Storage, ex. archivage auto). */

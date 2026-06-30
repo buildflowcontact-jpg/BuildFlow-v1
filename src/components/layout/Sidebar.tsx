@@ -28,6 +28,7 @@ import {
   Building2,
   Users2,
   Flame,
+  FolderArchive,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useUiStore } from '@/stores/uiStore';
@@ -92,7 +93,10 @@ const projectNavGroups = [
   {
     label: 'Réception',
     icon: ClipboardCheck,
-    items: [{ to: 'punchlist', label: 'Réserves', icon: ClipboardCheck }],
+    items: [
+      { to: 'punchlist', label: 'Réserves', icon: ClipboardCheck },
+      { to: 'doe', label: 'DOE', icon: FolderArchive },
+    ],
   },
   {
     label: 'Communication',
