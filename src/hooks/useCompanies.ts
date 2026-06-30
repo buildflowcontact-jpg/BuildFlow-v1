@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { companiesService } from '@/services/companies.service';
 import { useAuthStore } from '@/stores/authStore';
-import type { TablesInsert } from '@/types/database.types';
+import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 
 export function useCompanies() {
   const organization = useAuthStore((s) => s.organization);
@@ -20,12 +20,18 @@ export function useCompanies() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey }),
   });
 
+  const update = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: TablesUpdate<'companies'> }) =>
+      companiesService.update(id, payload),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
   const remove = useMutation({
     mutationFn: (id: string) => companiesService.remove(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey }),
   });
 
-  return { ...query, companies: query.data ?? [], create, remove };
+  return { ...query, companies: query.data ?? [], create, update, remove };
 }
 
 export function useProjectCompanies(projectId: string | undefined) {
