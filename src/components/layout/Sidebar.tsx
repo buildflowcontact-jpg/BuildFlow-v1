@@ -24,6 +24,7 @@ import {
   Receipt,
   ShieldCheck,
   MessageCircle,
+  Building2,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useUiStore } from '@/stores/uiStore';
@@ -55,6 +56,11 @@ const projectSectionItems = [
   { to: 'quality', label: 'Qualité', icon: ShieldCheck },
   { to: 'messages', label: 'Messagerie', icon: MessageCircle },
   { to: 'members', label: 'Membres', icon: Users },
+];
+
+const globalNavItems = [
+  { to: '/clients', label: 'Clients', icon: Users },
+  { to: '/companies', label: 'Entreprises', icon: Building2 },
 ];
 
 export function Sidebar() {
@@ -212,6 +218,33 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+        {!collapsed && (
+          <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Général</p>
+        )}
+        {globalNavItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={({ isActive }) =>
+              cn(
+                'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-smooth',
+                isActive
+                  ? 'bg-brand-50 text-brand-700'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              )
+            }
+          >
+            {({ isActive }) => (
+              <>
+                {isActive && (
+                  <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-brand-600" />
+                )}
+                <item.icon className="h-4 w-4 shrink-0" />
+                {!collapsed && <span>{item.label}</span>}
+              </>
+            )}
+          </NavLink>
+        ))}
         {projectId && (
           <>
             <div className="my-2 border-t border-slate-100" />
