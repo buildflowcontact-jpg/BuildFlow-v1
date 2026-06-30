@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { Plus, ClipboardCheck, Pencil, Trash2, FileDown } from 'lucide-react';
+import { Plus, ClipboardCheck, Pencil, Trash2, FileDown, FileSignature } from 'lucide-react';
 import { usePunchList } from '@/hooks/usePunchList';
 import { useProject } from '@/hooks/useProject';
+import { useDocuments } from '@/hooks/useDocuments';
+import { useClients } from '@/hooks/useClients';
+import { useAuth } from '@/hooks/useAuth';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -11,6 +14,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
+import { SignaturePad } from '@/components/ui/SignaturePad';
 import { PUNCH_LIST_STATUS_LABELS } from '@/types/domain';
 import { formatDate, isOverdue } from '@/utils/date';
 import type { PunchListItem } from '@/types/domain';
@@ -48,10 +52,53 @@ interface PunchListTabProps {
 export function PunchListTab({ projectId }: PunchListTabProps) {
   const { items, isLoading, create, update, remove } = usePunchList(projectId);
   const { project, members } = useProject(projectId);
+  const { upload } = useDocuments(projectId);
+  const { clients } = useClients();
+  const { profile } = useAuth();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<PunchListItem | null>(null);
   const [form, setForm] = useState<PunchListFormState>(emptyForm);
+
+  const [pvOpen, setPvOpen] = useState(false);
+  const [clientSignerName, setClientSignerName] = useState('');
+  const [clientSignature, setClientSignature] = useState<string | null>(null);
+  const [chefSignerName, setChefSignerName] = useState('');
+  const [chefSignature, setChefSignature] = useState<string | null>(null);
+  const [pvGenerating, setPvGenerating] = useState(false);
+
+  const resolvedCount = items.filter((i) => i.status === 'resolved' || i.status === 'verified').length;
+  const remainingCount = items.length - resolvedCount;
+  const client = clients.find((c) => c.id === project?.client_id);
+
+  function openPv() {
+    setClientSignerName(client?.name ?? '');
+    setClientSignature(null);
+    setChefSignerName(profile?.full_name ?? profile?.email ?? '');
+    setChefSignature(null);
+    setPvOpen(true);
+  }
+
+  async function handleGeneratePv() {
+    if (!project || !profile || !clientSignature || !chefSignature) return;
+    setPvGenerating(true);
+    try {
+      const { exportReceptionReportPdf } = await import('@/services/pdfExport.service');
+      const file = exportReceptionReportPdf(project, items, members, {
+        client: { signerName: clientSignerName, dataUrl: clientSignature },
+        chefChantier: { signerName: chefSignerName, dataUrl: chefSignature },
+      });
+      await upload.mutateAsync({
+        file,
+        type: 'compte_rendu',
+        uploadedBy: profile.id,
+        folder: 'Réception',
+      });
+      setPvOpen(false);
+    } finally {
+      setPvGenerating(false);
+    }
+  }
 
   function openCreate() {
     setEditing(null);
@@ -111,6 +158,10 @@ export function PunchListTab({ projectId }: PunchListTabProps) {
           >
             <FileDown className="h-4 w-4" />
             Exporter en PDF
+          </Button>
+          <Button size="sm" variant="outline" disabled={!project || items.length === 0} onClick={openPv}>
+            <FileSignature className="h-4 w-4" />
+            Générer le PV
           </Button>
           <Button size="sm" onClick={openCreate}>
             <Plus className="h-4 w-4" />
@@ -207,6 +258,55 @@ export function PunchListTab({ projectId }: PunchListTabProps) {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal open={pvOpen} onClose={() => setPvOpen(false)} title="Générer le PV de réception" size="lg">
+        <div className="flex flex-col gap-4">
+          <div className="rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
+            <p className="font-medium text-slate-800">Synthèse des réserves</p>
+            <p>
+              {items.length} réserve(s) — {resolvedCount} levée(s), {remainingCount} restante(s).
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Input id="pv-client-name"
+                label="Nom du signataire (client)"
+                required
+                value={clientSignerName}
+                onChange={(e) => setClientSignerName(e.target.value)}
+              />
+              <p className="mb-1.5 mt-3 text-sm font-medium text-slate-700">Signature du client</p>
+              <SignaturePad onChange={setClientSignature} />
+            </div>
+            <div>
+              <Input id="pv-chef-name"
+                label="Nom du signataire (chef de chantier)"
+                required
+                value={chefSignerName}
+                onChange={(e) => setChefSignerName(e.target.value)}
+              />
+              <p className="mb-1.5 mt-3 text-sm font-medium text-slate-700">Signature du chef de chantier</p>
+              <SignaturePad onChange={setChefSignature} />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="outline" onClick={() => setPvOpen(false)}>
+              Annuler
+            </Button>
+            <Button
+              type="button"
+              loading={pvGenerating || upload.isPending}
+              disabled={!clientSignature || !chefSignature || !clientSignerName.trim() || !chefSignerName.trim()}
+              onClick={handleGeneratePv}
+            >
+              <FileSignature className="h-4 w-4" />
+              Générer et archiver
+            </Button>
+          </div>
+        </div>
       </Modal>
     </Card>
   );

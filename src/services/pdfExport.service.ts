@@ -326,6 +326,126 @@ export function exportPunchListPdf(project: Project, items: PunchListItem[], mem
   downloadDoc(doc, `reserves-${project.reference ?? project.name}.pdf`);
 }
 
+export interface ReceptionSignature {
+  signerName: string;
+  dataUrl: string;
+}
+
+/**
+ * Construit le PDF "PV de réception" : synthèse des réserves (levées vs
+ * restantes), détail par réserve, puis les deux signatures électroniques
+ * (client + chef de chantier) en bas de page. Document horodaté destiné à
+ * être archivé dans Documents.
+ */
+export function buildReceptionReportPdf(
+  project: Project,
+  items: PunchListItem[],
+  members: ProjectMemberWithProfile[],
+  signatures: { client: ReceptionSignature; chefChantier: ReceptionSignature }
+): jsPDF {
+  const doc = createDocument('Procès-verbal de réception', project.name);
+
+  const resolvedCount = items.filter((i) => i.status === 'resolved' || i.status === 'verified').length;
+  const remainingCount = items.length - resolvedCount;
+
+  let y = 110;
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('Synthèse des réserves', 40, y);
+
+  autoTable(doc, {
+    startY: y + 10,
+    head: [['Total', 'Levées', 'Restantes']],
+    body: [[String(items.length), String(resolvedCount), String(remainingCount)]],
+    headStyles: { fillColor: BRAND_COLOR },
+    styles: { fontSize: 9, halign: 'center' },
+  });
+
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 24;
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Détail des réserves', 40, y);
+
+  autoTable(doc, {
+    startY: y + 10,
+    head: [['Titre', 'Localisation', 'Statut', 'Assigné à', 'Échéance']],
+    body: items.map((item) => {
+      const assignee = members.find((m) => m.profile?.id === item.assigned_to);
+      return [
+        item.title,
+        item.location ?? '—',
+        PUNCH_LIST_STATUS_LABELS[item.status as PunchListStatus],
+        assignee?.profile?.full_name ?? assignee?.invited_email ?? '—',
+        item.due_date ? format(new Date(item.due_date), 'dd/MM/yyyy') : '—',
+      ];
+    }),
+    headStyles: { fillColor: BRAND_COLOR },
+    styles: { fontSize: 9 },
+    columnStyles: { 0: { cellWidth: 150 } },
+  });
+
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 32;
+  const pageHeight = doc.internal.pageSize.getHeight();
+  if (y + 140 > pageHeight - 50) {
+    doc.addPage();
+    y = 50;
+  }
+
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('Signatures', 40, y);
+  y += 16;
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const colWidth = (pageWidth - 80 - 20) / 2;
+  const sigBlocks: { label: string; signature: ReceptionSignature; x: number }[] = [
+    { label: 'Le client', signature: signatures.client, x: 40 },
+    { label: 'Le chef de chantier', signature: signatures.chefChantier, x: 40 + colWidth + 20 },
+  ];
+
+  for (const block of sigBlocks) {
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(51, 65, 85);
+    doc.text(block.label, block.x, y);
+
+    const imgTop = y + 8;
+    const imgHeight = 70;
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(block.x, imgTop, colWidth, imgHeight, 4, 4);
+    if (block.signature.dataUrl) {
+      const props = doc.getImageProperties(block.signature.dataUrl);
+      const ratio = Math.min((colWidth - 12) / props.width, (imgHeight - 12) / props.height);
+      const w = props.width * ratio;
+      const h = props.height * ratio;
+      doc.addImage(block.signature.dataUrl, 'PNG', block.x + (colWidth - w) / 2, imgTop + (imgHeight - h) / 2, w, h);
+    }
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 116, 139);
+    doc.text(block.signature.signerName, block.x, imgTop + imgHeight + 14);
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184);
+    doc.text(format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr }), block.x, imgTop + imgHeight + 26);
+  }
+
+  return doc;
+}
+
+export function exportReceptionReportPdf(
+  project: Project,
+  items: PunchListItem[],
+  members: ProjectMemberWithProfile[],
+  signatures: { client: ReceptionSignature; chefChantier: ReceptionSignature }
+): File {
+  const doc = buildReceptionReportPdf(project, items, members, signatures);
+  const filename = `pv-reception-${project.reference ?? project.name}-${format(new Date(), 'yyyy-MM-dd-HHmm')}.pdf`;
+  return pdfToFile(doc, filename);
+}
+
 // Codes météo WMO (sous-ensemble Open-Meteo) → libellé FR.
 const WEATHER_CODE_LABELS: Record<number, string> = {
   0: 'Ciel dégagé',
