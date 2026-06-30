@@ -173,8 +173,8 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   }
 
   function categoryName(id: string | null) {
-    if (!id) return 'Sans catégorie';
-    return categories.find((c) => c.id === id)?.name ?? 'Catégorie supprimée';
+    if (!id) return 'Sans poste';
+    return categories.find((c) => c.id === id)?.name ?? 'Poste supprimé';
   }
 
   if (categoriesLoading || expensesLoading) return <FullPageSpinner />;
@@ -199,17 +199,17 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
       <Card>
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">Catégories budgétaires</h3>
-            <p className="text-sm text-slate-500">{categories.length} catégorie(s)</p>
+            <h3 className="text-base font-semibold text-slate-900">Postes budgétaires</h3>
+            <p className="text-sm text-slate-500">{categories.length} poste(s)</p>
           </div>
           <Button size="sm" variant="outline" onClick={() => openCreateCategory()}>
             <FolderPlus className="h-4 w-4" />
-            Nouvelle catégorie
+            Nouveau poste
           </Button>
         </div>
 
         {categories.length === 0 ? (
-          <EmptyState icon={Wallet} title="Aucune catégorie" description="Créez des catégories pour structurer le budget." />
+          <EmptyState icon={Wallet} title="Aucun poste" description="Créez des postes pour structurer le budget." />
         ) : (
           <ul className="divide-y divide-slate-100">
             {categoryTree.map((category) => (
@@ -223,7 +223,7 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
                 onAddSubcategory={openCreateCategory}
                 onEdit={openEditCategory}
                 onRemove={(id) => {
-                  if (confirm('Supprimer cette catégorie (et ses sous-catégories) ?')) removeCategory.mutate(id);
+                  if (confirm('Supprimer ce poste (et ses sous-postes) ?')) removeCategory.mutate(id);
                 }}
               />
             ))}
@@ -286,7 +286,7 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
       <Modal
         open={categoryModalOpen}
         onClose={() => setCategoryModalOpen(false)}
-        title={editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie'}
+        title={editingCategory ? 'Modifier le poste' : 'Nouveau poste'}
       >
         <form onSubmit={handleCategorySubmit} className="flex flex-col gap-4">
           <Input id="categoryform-name"
@@ -304,11 +304,11 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
             onChange={(e) => setCategoryForm({ ...categoryForm, planned_amount: e.target.value })}
           />
           <Select id="categoryform-parent-category-id"
-            label="Catégorie parente"
+            label="Poste parent"
             value={categoryForm.parent_category_id}
             onChange={(e) => setCategoryForm({ ...categoryForm, parent_category_id: e.target.value })}
           >
-            <option value="">Aucune (catégorie racine)</option>
+            <option value="">Aucun (poste racine)</option>
             {categories
               .filter((c) => c.id !== editingCategory?.id)
               .map((c) => (
@@ -341,11 +341,11 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
             onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })}
           />
           <Select id="expenseform-category-id"
-            label="Catégorie"
+            label="Poste"
             value={expenseForm.category_id}
             onChange={(e) => setExpenseForm({ ...expenseForm, category_id: e.target.value })}
           >
-            <option value="">Sans catégorie</option>
+            <option value="">Sans poste</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}

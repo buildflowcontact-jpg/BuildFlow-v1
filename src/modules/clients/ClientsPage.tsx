@@ -155,4 +155,22 @@ export function ClientsPage() {
             />
           </div>
           <Input id="form-company-name" label="Entreprise" value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} />
-          <div className="grid grid-cols-2 ga
+          <div className="grid grid-cols-2 gap-4">
+            <Input id="form-email" label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <Input id="form-phone" label="Téléphone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          </div>
+          <Input id="form-address" label="Adresse" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+          <Textarea label="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
+              Annuler
+            </Button>
+            <Button type="submit" loading={create.isPending || update.isPending}>
+              Enregistrer
+            </Button>
+          </div>
+        </form>
+      </Modal>
+    </div>
+  );
+}

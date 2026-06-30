@@ -62,8 +62,8 @@ export function CategoryRow({
           <div className="flex items-center gap-2">
             <button
               onClick={() => onAddSubcategory(category.id)}
-              title="Ajouter une sous-catégorie"
-              aria-label="Ajouter une sous-catégorie"
+              title="Ajouter un sous-poste"
+              aria-label="Ajouter un sous-poste"
               className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700"
             >
               <FolderPlus className="h-4 w-4" />
