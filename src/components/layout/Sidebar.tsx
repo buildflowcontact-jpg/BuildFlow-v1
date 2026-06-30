@@ -43,22 +43,20 @@ const dashboardItem = { to: '', label: 'Tableau de bord', icon: Info, end: true 
 
 const projectNavGroups = [
   {
+    label: 'Budget',
+    icon: Wallet,
+    items: [
+      { to: 'budget', label: 'Budget', icon: Wallet },
+      { to: 'billing', label: 'Devis & Facturation', icon: Receipt },
+    ],
+  },
+  {
     label: 'Planification',
     icon: GanttChartSquare,
     items: [
       { to: 'tasks', label: 'Tâches', icon: ListTree },
       { to: 'gantt', label: 'Planning', icon: GanttChartSquare },
       { to: 'time-entries', label: 'Pointage horaire', icon: Clock, restrictedTo: 'Chef de chantier' },
-    ],
-  },
-  {
-    label: 'Chantier',
-    icon: ClipboardList,
-    items: [
-      { to: 'daily-logs', label: 'Journal de chantier', icon: ClipboardList },
-      { to: 'incidents', label: 'Incidents', icon: AlertTriangle },
-      { to: 'punchlist', label: 'Réserves', icon: ClipboardCheck },
-      { to: 'quality', label: 'Qualité', icon: ShieldCheck },
     ],
   },
   {
@@ -71,11 +69,13 @@ const projectNavGroups = [
     ],
   },
   {
-    label: 'Budget',
-    icon: Wallet,
+    label: 'Chantier',
+    icon: ClipboardList,
     items: [
-      { to: 'budget', label: 'Budget', icon: Wallet },
-      { to: 'billing', label: 'Devis & Facturation', icon: Receipt },
+      { to: 'daily-logs', label: 'Journal de chantier', icon: ClipboardList },
+      { to: 'incidents', label: 'Incidents', icon: AlertTriangle },
+      { to: 'punchlist', label: 'Réserves', icon: ClipboardCheck },
+      { to: 'quality', label: 'Qualité', icon: ShieldCheck },
     ],
   },
   {
