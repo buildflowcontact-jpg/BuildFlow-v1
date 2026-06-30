@@ -56,20 +56,26 @@ const projectNavGroups = [
     icon: ClipboardList,
     items: [
       { to: 'daily-logs', label: 'Journal de chantier', icon: ClipboardList },
-      { to: 'plans', label: 'Plans et 3D', icon: Map },
       { to: 'incidents', label: 'Incidents', icon: AlertTriangle },
       { to: 'punchlist', label: 'Réserves', icon: ClipboardCheck },
       { to: 'quality', label: 'Qualité', icon: ShieldCheck },
     ],
   },
   {
-    label: 'Gestion',
+    label: 'Études',
+    icon: Map,
+    items: [
+      { to: 'plans', label: 'Plans et 3D', icon: Map },
+      { to: 'documents', label: 'Documents', icon: FileText },
+      { to: 'supplies', label: 'Commandes', icon: Truck },
+    ],
+  },
+  {
+    label: 'Budget',
     icon: Wallet,
     items: [
-      { to: 'documents', label: 'Documents', icon: FileText },
       { to: 'budget', label: 'Budget', icon: Wallet },
       { to: 'billing', label: 'Devis & Facturation', icon: Receipt },
-      { to: 'supplies', label: 'Commandes', icon: Truck },
     ],
   },
   {
