@@ -2,11 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, ChevronDown, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { Avatar } from '@/components/ui/Avatar';
 import { NotificationsDropdown } from './NotificationsDropdown';
 
 export function Topbar({ title, showBack }: { title?: string; showBack?: boolean }) {
-  const { profile, organization, signOut } = useAuth();
+  const { organization, signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -43,11 +42,11 @@ export function Topbar({ title, showBack }: { title?: string; showBack?: boolean
         <div className="relative" ref={ref}>
           <button
             onClick={() => setMenuOpen((o) => !o)}
-            className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 transition-colors duration-150 hover:bg-slate-100"
+            title="Menu du compte"
+            aria-label="Menu du compte"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700"
           >
-            <Avatar name={profile?.full_name} src={profile?.avatar_url} size="sm" />
-            <span className="text-sm font-medium text-slate-700">{profile?.full_name ?? profile?.email}</span>
-            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+            <ChevronDown className="h-4 w-4" />
           </button>
 
           {menuOpen && (
