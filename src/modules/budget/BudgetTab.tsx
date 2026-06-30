@@ -334,12 +334,6 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
         title={editingExpense ? 'Modifier la dépense' : 'Nouvelle dépense'}
       >
         <form onSubmit={handleExpenseSubmit} className="flex flex-col gap-4">
-          <Input id="expenseform-description"
-            label="Description"
-            required
-            value={expenseForm.description}
-            onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })}
-          />
           <Select id="expenseform-category-id"
             label="Poste"
             value={expenseForm.category_id}
@@ -352,6 +346,12 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
               </option>
             ))}
           </Select>
+          <Input id="expenseform-description"
+            label="Description"
+            required
+            value={expenseForm.description}
+            onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })}
+          />
           <div className="grid grid-cols-2 gap-4">
             <Input id="expenseform-amount"
               type="number"
