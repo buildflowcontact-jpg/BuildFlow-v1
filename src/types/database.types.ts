@@ -2215,6 +2215,79 @@ export type Database = {
           },
         ]
       }
+      waste_trackings: {
+        Row: {
+          bsd_number: string | null
+          company_id: string | null
+          created_at: string
+          disposal_site: string | null
+          document_id: string | null
+          id: string
+          notes: string | null
+          project_id: string
+          quantity_tons: number | null
+          removal_date: string | null
+          status: string
+          updated_at: string
+          waste_category: string
+          waste_description: string
+        }
+        Insert: {
+          bsd_number?: string | null
+          company_id?: string | null
+          created_at?: string
+          disposal_site?: string | null
+          document_id?: string | null
+          id?: string
+          notes?: string | null
+          project_id: string
+          quantity_tons?: number | null
+          removal_date?: string | null
+          status?: string
+          updated_at?: string
+          waste_category?: string
+          waste_description: string
+        }
+        Update: {
+          bsd_number?: string | null
+          company_id?: string | null
+          created_at?: string
+          disposal_site?: string | null
+          document_id?: string | null
+          id?: string
+          notes?: string | null
+          project_id?: string
+          quantity_tons?: number | null
+          removal_date?: string | null
+          status?: string
+          updated_at?: string
+          waste_category?: string
+          waste_description?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waste_trackings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waste_trackings_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waste_trackings_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doe_items: {
         Row: {
           category: string
@@ -3663,6 +3736,8 @@ export type FirePermitStatus = 'draft' | 'issued' | 'closed';
 export type PpspsStatus = 'en_attente' | 'recu' | 'valide';
 export type DoeItemCategory = 'plan' | 'notice_technique' | 'pv_reception' | 'garantie' | 'dossier_entretien' | 'autre';
 export type DoeItemStatus = 'manquant' | 'recu' | 'valide';
+export type WasteCategory = 'dangereux' | 'non_dangereux' | 'inerte';
+export type WasteTrackingStatus = 'en_attente' | 'enleve' | 'traite';
 export type SupplyStatus = 'pending' | 'ordered' | 'shipped' | 'delivered' | 'delayed' | 'cancelled';
 export type SupplyCategory = 'materiau' | 'equipement' | 'location';
 export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical';

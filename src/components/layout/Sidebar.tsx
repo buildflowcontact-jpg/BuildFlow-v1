@@ -29,6 +29,7 @@ import {
   Users2,
   Flame,
   FolderArchive,
+  Recycle,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useUiStore } from '@/stores/uiStore';
@@ -88,6 +89,7 @@ const projectNavGroups = [
       { to: 'security', label: 'Sécurité', icon: Flame },
       { to: 'incidents', label: 'Incidents', icon: AlertTriangle },
       { to: 'quality', label: 'Qualité', icon: ShieldCheck },
+      { to: 'waste', label: 'Déchets (BSD)', icon: Recycle },
     ],
   },
   {

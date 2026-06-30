@@ -47,6 +47,7 @@ const ProjectDailyLogsPage = lazy(() => import('@/modules/projects/pages/Project
 const ProjectMeetingReportsPage = lazy(() => import('@/modules/projects/pages/ProjectMeetingReportsPage'));
 const ProjectSecurityPage = lazy(() => import('@/modules/projects/pages/ProjectSecurityPage'));
 const ProjectDoePage = lazy(() => import('@/modules/projects/pages/ProjectDoePage'));
+const ProjectWastePage = lazy(() => import('@/modules/projects/pages/ProjectWastePage'));
 const ProjectBudgetPage = lazy(() => import('@/modules/projects/pages/ProjectBudgetPage'));
 const ProjectRfisPage = lazy(() => import('@/modules/projects/pages/ProjectRfisPage'));
 const ProjectChangeOrdersPage = lazy(() => import('@/modules/projects/pages/ProjectChangeOrdersPage'));
@@ -209,6 +210,14 @@ export const router = createBrowserRouter([
             element: (
               <Lazy>
                 <ProjectDoePage />
+              </Lazy>
+            ),
+          },
+          {
+            path: 'waste',
+            element: (
+              <Lazy>
+                <ProjectWastePage />
               </Lazy>
             ),
           },

@@ -21,6 +21,8 @@ import type {
   PpspsStatus,
   DoeItemCategory,
   DoeItemStatus,
+  WasteCategory,
+  WasteTrackingStatus,
 } from './database.types';
 
 export type Profile = Tables<'profiles'>;
@@ -77,6 +79,7 @@ export type MeetingActionItem = Tables<'meeting_action_items'>;
 export type FirePermit = Tables<'fire_permits'>;
 export type PpspsRecord = Tables<'ppsps_records'>;
 export type DoeItem = Tables<'doe_items'>;
+export type WasteTracking = Tables<'waste_trackings'>;
 
 export interface DailyReportTimeEntry {
   user_id: string;
@@ -246,6 +249,18 @@ export const DOE_ITEM_CATEGORY_LABELS: Record<DoeItemCategory, string> = {
   garantie: 'Garantie / certificat',
   dossier_entretien: "Dossier d'entretien",
   autre: 'Autre',
+};
+
+export const WASTE_CATEGORY_LABELS: Record<WasteCategory, string> = {
+  dangereux: 'Déchets dangereux (DIS)',
+  non_dangereux: 'Déchets non dangereux (DIB)',
+  inerte: 'Déchets inertes (gravats)',
+};
+
+export const WASTE_TRACKING_STATUS_LABELS: Record<WasteTrackingStatus, string> = {
+  en_attente: 'En attente',
+  enleve: 'Enlevé',
+  traite: 'Traité',
 };
 
 export const QUALITY_INSPECTION_STATUS_LABELS: Record<QualityInspectionStatus, string> = {

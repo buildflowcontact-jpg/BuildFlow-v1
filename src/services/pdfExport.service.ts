@@ -10,6 +10,8 @@ import {
   MEETING_ACTION_ITEM_STATUS_LABELS,
   DOE_ITEM_STATUS_LABELS,
   DOE_ITEM_CATEGORY_LABELS,
+  WASTE_CATEGORY_LABELS,
+  WASTE_TRACKING_STATUS_LABELS,
 } from '@/types/domain';
 import type {
   Project,
@@ -26,6 +28,7 @@ import type {
   PrecautionItem,
   DoeItem,
   Company,
+  WasteTracking,
 } from '@/types/domain';
 import type {
   ProjectStatus,
@@ -36,6 +39,8 @@ import type {
   MeetingActionItemStatus,
   DoeItemStatus,
   DoeItemCategory,
+  WasteCategory,
+  WasteTrackingStatus,
 } from '@/types/database.types';
 
 const BRAND_COLOR: [number, number, number] = [37, 99, 235]; // brand-600
@@ -938,6 +943,77 @@ export function buildDoeSummaryPdf(project: Project, items: DoeItem[], companies
 export function exportDoeSummaryPdf(project: Project, items: DoeItem[], companies: Company[]): void {
   const doc = buildDoeSummaryPdf(project, items, companies);
   downloadDoc(doc, `doe-${project.reference ?? project.name}.pdf`);
+}
+
+/**
+ * Construit le PDF "synthèse déchets de chantier" (BSD) : bilan par catégorie
+ * réglementaire (dangereux / non dangereux / inertes), puis liste détaillée de
+ * chaque bordereau avec transporteur, exutoire, quantité et statut.
+ */
+export function buildWasteSummaryPdf(project: Project, trackings: WasteTracking[], companies: Company[]): jsPDF {
+  const doc = createDocument('Suivi des déchets de chantier (BSD)', project.name);
+
+  // Synthèse par catégorie
+  const categories: WasteCategory[] = ['dangereux', 'non_dangereux', 'inerte'];
+  const summaryRows = categories.map((cat) => {
+    const items = trackings.filter((t) => t.waste_category === cat);
+    const totalTons = items.reduce((sum, t) => sum + (t.quantity_tons ?? 0), 0);
+    const treated = items.filter((t) => t.status === 'traite').length;
+    return [
+      WASTE_CATEGORY_LABELS[cat],
+      String(items.length),
+      totalTons > 0 ? `${totalTons.toFixed(3)} t` : '—',
+      `${treated} / ${items.length}`,
+    ];
+  });
+
+  let y = 110;
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('Bilan par catégorie', 40, y);
+
+  autoTable(doc, {
+    startY: y + 10,
+    head: [['Catégorie', 'Bordereaux', 'Quantité (t)', 'Traités']],
+    body: summaryRows,
+    headStyles: { fillColor: BRAND_COLOR },
+    styles: { fontSize: 9 },
+  });
+
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 24;
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('Détail des bordereaux', 40, y);
+
+  autoTable(doc, {
+    startY: y + 10,
+    head: [['Description', 'Catégorie', 'N° BSD', 'Transporteur', 'Exutoire', 'Qté (t)', 'Enlèvement', 'Statut']],
+    body: trackings.map((t) => {
+      const company = companies.find((c) => c.id === t.company_id);
+      return [
+        t.waste_description,
+        WASTE_CATEGORY_LABELS[t.waste_category as WasteCategory],
+        t.bsd_number ?? '—',
+        company?.name ?? '—',
+        t.disposal_site ?? '—',
+        t.quantity_tons != null ? `${t.quantity_tons} t` : '—',
+        t.removal_date ? format(new Date(t.removal_date), 'dd/MM/yyyy') : '—',
+        WASTE_TRACKING_STATUS_LABELS[t.status as WasteTrackingStatus],
+      ];
+    }),
+    headStyles: { fillColor: BRAND_COLOR },
+    styles: { fontSize: 8 },
+    columnStyles: { 0: { cellWidth: 120 } },
+  });
+
+  return doc;
+}
+
+export function exportWasteSummaryPdf(project: Project, trackings: WasteTracking[], companies: Company[]): void {
+  const doc = buildWasteSummaryPdf(project, trackings, companies);
+  downloadDoc(doc, `dechets-chantier-${project.reference ?? project.name}.pdf`);
 }
 
 /** Convertit un document jsPDF en File (pour upload direct vers Supabase Storage, ex. archivage auto). */
