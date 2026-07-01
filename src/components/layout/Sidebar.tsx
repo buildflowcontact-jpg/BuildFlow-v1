@@ -45,6 +45,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
 import { Tooltip } from '@/components/ui/Tooltip';
+import { useUnreadMessagesCount } from '@/hooks/useUnreadMessagesCount';
 
 const dashboardItem = { to: '', label: 'Tableau de bord', icon: Info, end: true };
 
@@ -142,6 +143,8 @@ export function Sidebar() {
   const accountMenuRef = useRef<HTMLDivElement>(null);
   // Un seul sous-menu ouvert à la fois (accordéon).
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+
+  const unreadMessages = useUnreadMessagesCount(projectId, profile?.id);
 
   useEffect(() => {
     if (!projectId) return;
@@ -382,32 +385,40 @@ export function Sidebar() {
                     </button>
                   )}
                   {isExpanded &&
-                    visibleItems.map((item) => (
-                      <Tooltip key={item.to} label={item.label} side="right" disabled={!collapsed}>
-                        <NavLink
-                          to={`/projects/${projectId}/${item.to}`}
-                          className={({ isActive }) =>
-                            cn(
-                              'relative flex items-center gap-3 rounded-xl py-2.5 text-sm font-medium transition-all duration-150 ease-smooth',
-                              collapsed ? 'px-3' : 'pl-9 pr-3',
-                              isActive
-                                ? 'bg-brand-50 text-brand-700'
-                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                            )
-                          }
-                        >
-                          {({ isActive }) => (
-                            <>
-                              {isActive && (
-                                <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-brand-600" />
-                              )}
-                              <item.icon className="h-4 w-4 shrink-0" />
-                              {!collapsed && <span>{item.label}</span>}
-                            </>
-                          )}
-                        </NavLink>
-                      </Tooltip>
-                    ))}
+                    visibleItems.map((item) => {
+                      const badge = item.to === 'messages' && unreadMessages > 0 ? unreadMessages : 0;
+                      return (
+                        <Tooltip key={item.to} label={item.label} side="right" disabled={!collapsed}>
+                          <NavLink
+                            to={`/projects/${projectId}/${item.to}`}
+                            className={({ isActive }) =>
+                              cn(
+                                'relative flex items-center gap-3 rounded-xl py-2.5 text-sm font-medium transition-all duration-150 ease-smooth',
+                                collapsed ? 'px-3' : 'pl-9 pr-3',
+                                isActive
+                                  ? 'bg-brand-50 text-brand-700'
+                                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                              )
+                            }
+                          >
+                            {({ isActive }) => (
+                              <>
+                                {isActive && (
+                                  <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-brand-600" />
+                                )}
+                                <item.icon className="h-4 w-4 shrink-0" />
+                                {!collapsed && <span className="flex-1">{item.label}</span>}
+                                {badge > 0 && (
+                                  <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand-600 px-1.5 text-[10px] font-semibold text-white">
+                                    {badge > 99 ? '99+' : badge}
+                                  </span>
+                                )}
+                              </>
+                            )}
+                          </NavLink>
+                        </Tooltip>
+                      );
+                    })}
                 </div>
               );
             })}
