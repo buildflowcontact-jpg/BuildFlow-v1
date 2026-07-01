@@ -1,38 +1,39 @@
--- Migration 0046 : sécuriser le trigger email via secret webhook
+-- Migration 0046 : sécuriser le trigger email via secret webhook (Supabase Vault)
 --
 -- Met à jour trigger_send_email_notification pour inclure le header
--- x-webhook-secret lorsqu'un secret est configuré via le paramètre
--- de base de données app.notification_webhook_secret.
+-- x-webhook-secret lu depuis le Vault Supabase.
 --
--- Étapes de configuration (après déploiement) :
+-- Étapes de configuration (une seule fois, dans le SQL Editor) :
 --
--- 1. Générer un secret fort (ex. openssl rand -hex 32)
+-- 1. Stocker le secret dans le Vault :
+--      SELECT vault.create_secret(
+--        'VALEUR_DU_SECRET',
+--        'notification_webhook_secret',
+--        'Secret partagé entre le trigger DB et l''Edge Function email'
+--      );
 --
--- 2. L'enregistrer comme paramètre PostgreSQL :
---      ALTER DATABASE postgres
---        SET app.notification_webhook_secret TO 'votre-secret-ici';
---    Puis recharger la config :
---      SELECT pg_reload_conf();
+-- 2. Ajouter le même secret dans Supabase Dashboard →
+--    Edge Functions → Manage secrets → NOTIFICATION_WEBHOOK_SECRET
 --
--- 3. Ajouter le même secret dans Supabase Dashboard →
---    Edge Functions → Secrets → NOTIFICATION_WEBHOOK_SECRET
---
--- Sans ce paramètre DB, le trigger fonctionne sans header (comportement
--- identique à avant), et l'Edge Function accepte la requête car
--- WEBHOOK_SECRET est vide côté fonction.
+-- Sans secret dans le Vault, le trigger fonctionne sans header
+-- (comportement identique à avant la migration 0042).
 
 CREATE OR REPLACE FUNCTION public.trigger_send_email_notification()
   RETURNS trigger
   LANGUAGE plpgsql
   SECURITY DEFINER
-  SET search_path = public, extensions
+  SET search_path = public, extensions, vault
 AS $$
 DECLARE
   v_secret  text;
   v_headers jsonb;
 BEGIN
-  -- Lire le secret depuis les paramètres de la DB (null si non défini)
-  v_secret := current_setting('app.notification_webhook_secret', true);
+  -- Lire le secret depuis le Vault Supabase (null si non configuré)
+  SELECT decrypted_secret
+    INTO v_secret
+    FROM vault.decrypted_secrets
+   WHERE name = 'notification_webhook_secret'
+   LIMIT 1;
 
   -- Construire les headers : toujours Content-Type, + x-webhook-secret si disponible
   v_headers := jsonb_build_object('Content-Type', 'application/json');
