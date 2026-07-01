@@ -128,7 +128,7 @@ export function ReceivedQuotesPanel({ projectId }: ReceivedQuotesPanelProps) {
                 </button>
                 <button
                   onClick={() => {
-                    if (confirm('Supprimer ce devis reçu ?')) remove.mutate(doc);
+                    confirmStore.getState().show({ message: 'Supprimer ce devis reçu ?' }).then((ok) => { if (ok) remove.mutate(doc); });
                   }}
                   aria-label="Supprimer"
                   className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"

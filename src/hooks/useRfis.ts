@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { rfisService } from '@/services/rfis.service';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function useRfis(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -18,7 +19,7 @@ export function useRfis(projectId: string | undefined) {
   const create = useMutation({
     mutationFn: (payload: Omit<TablesInsert<'rfis'>, 'project_id'>) =>
       rfisService.create({ ...payload, project_id: projectId! }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('RFI créée'); },
   });
 
   const respond = useMutation({
@@ -38,7 +39,7 @@ export function useRfis(projectId: string | undefined) {
 
   const remove = useMutation({
     mutationFn: (id: string) => rfisService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('RFI supprimée'); },
   });
 
   return { ...query, rfis: query.data ?? [], create, respond, update, close, remove };

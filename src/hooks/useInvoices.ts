@@ -3,6 +3,7 @@ import { invoicesService, type InvoiceItemInput } from '@/services/invoices.serv
 import type { InvoicePayment } from '@/types/domain';
 import type { TablesInsert } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function useInvoices(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -27,7 +28,7 @@ export function useInvoices(projectId: string | undefined) {
       >;
       items: InvoiceItemInput[];
     }) => invoicesService.create({ ...payload, project_id: projectId! }, items),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Facture créée'); },
   });
 
   const send = useMutation({
@@ -77,7 +78,7 @@ export function useInvoice(invoiceId: string | undefined) {
 
   const generateFacturX = useMutation({
     mutationFn: () => invoicesService.generateFacturX(invoiceId!),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Facture supprimée'); },
   });
 
   return { ...query, addPayment, removePayment, generateFacturX };

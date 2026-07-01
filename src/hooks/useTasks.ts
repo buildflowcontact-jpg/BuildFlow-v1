@@ -4,6 +4,7 @@ import { tasksService, buildTaskTree } from '@/services/tasks.service';
 import { taskDependenciesService } from '@/services/taskDependencies.service';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function useTasks(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -32,7 +33,7 @@ export function useTasks(projectId: string | undefined) {
   const create = useMutation({
     mutationFn: (payload: Omit<TablesInsert<'tasks'>, 'project_id'>) =>
       tasksService.create({ ...payload, project_id: projectId! }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Tâche créée'); },
   });
 
   const update = useMutation({
@@ -42,7 +43,7 @@ export function useTasks(projectId: string | undefined) {
 
   const remove = useMutation({
     mutationFn: (id: string) => tasksService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Tâche supprimée'); },
   });
 
   const addDependency = useMutation({

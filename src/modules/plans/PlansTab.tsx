@@ -130,7 +130,7 @@ export function PlansTab({ projectId }: PlansTabProps) {
                 <button
                   onClick={() => {
                     if (!canManage) return;
-                    if (confirm(`Supprimer le plan "${plan.name}" ?`)) remove.mutate(plan);
+                    confirmStore.getState().show({ message: `Supprimer le plan "${plan.name}" ?` }).then((ok) => { if (ok) remove.mutate(plan); });
                   }}
                   disabled={!canManage}
                   title={canManage ? 'Supprimer' : 'Droits insuffisants pour supprimer ce plan'}

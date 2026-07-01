@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { firePermitsService } from '@/services/firePermits.service';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function useFirePermits(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -18,7 +19,7 @@ export function useFirePermits(projectId: string | undefined) {
   const create = useMutation({
     mutationFn: (payload: Omit<TablesInsert<'fire_permits'>, 'project_id'>) =>
       firePermitsService.create({ ...payload, project_id: projectId! }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Permis créé'); },
   });
 
   const update = useMutation({
@@ -29,7 +30,7 @@ export function useFirePermits(projectId: string | undefined) {
 
   const remove = useMutation({
     mutationFn: (id: string) => firePermitsService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Permis supprimé'); },
   });
 
   return { ...query, permits: query.data ?? [], create, update, remove };

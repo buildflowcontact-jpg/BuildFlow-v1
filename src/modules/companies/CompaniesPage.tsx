@@ -127,7 +127,7 @@ export function CompaniesPage() {
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm('Supprimer cette entreprise ?')) remove.mutate(company.id);
+                      confirmStore.getState().show({ message: 'Supprimer cette entreprise ?' }).then((ok) => { if (ok) remove.mutate(company.id); });
                     }}
                     className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
                   >

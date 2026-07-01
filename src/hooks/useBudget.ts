@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { budgetService } from '@/services/budget.service';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function useBudgetCategories(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -18,7 +19,7 @@ export function useBudgetCategories(projectId: string | undefined) {
   const create = useMutation({
     mutationFn: (payload: Omit<TablesInsert<'budget_categories'>, 'project_id'>) =>
       budgetService.createCategory({ ...payload, project_id: projectId! }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Poste créé'); },
   });
 
   const update = useMutation({
@@ -61,7 +62,7 @@ export function useExpenses(projectId: string | undefined) {
 
   const remove = useMutation({
     mutationFn: (id: string) => budgetService.removeExpense(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Poste supprimé'); },
   });
 
   return { ...query, expenses: query.data ?? [], create, update, remove };

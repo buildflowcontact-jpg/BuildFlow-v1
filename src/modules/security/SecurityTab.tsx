@@ -182,7 +182,7 @@ export function SecurityTab({ projectId }: SecurityTabProps) {
                     </Badge>
                     <button
                       onClick={() => {
-                        if (confirm('Supprimer ce permis de feu ?')) removePermit.mutate(permit.id);
+                        confirmStore.getState().show({ message: 'Supprimer ce permis de feu ?' }).then((ok) => { if (ok) removePermit.mutate(permit.id); });
                       }}
                       className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
                       aria-label="Supprimer le permis"

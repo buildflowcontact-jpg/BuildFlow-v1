@@ -157,7 +157,7 @@ export function NonConformitiesPanel({ projectId }: NonConformitiesPanelProps) {
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm('Supprimer cette non-conformité ?')) remove.mutate(nc.id);
+                      confirmStore.getState().show({ message: 'Supprimer cette non-conformité ?' }).then((ok) => { if (ok) remove.mutate(nc.id); });
                     }}
                     className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
                   >

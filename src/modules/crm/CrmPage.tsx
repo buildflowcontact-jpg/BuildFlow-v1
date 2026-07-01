@@ -163,7 +163,7 @@ function VisitsPanel({ prospect }: { prospect: Prospect }) {
                 {v.outcome && <p className="text-xs text-slate-600 mt-0.5 font-medium">→ {v.outcome}</p>}
               </div>
               <button
-                onClick={() => { if (confirm('Supprimer cette visite ?')) remove.mutate(v.id); }}
+                onClick={() => { confirmStore.getState().show({ message: 'Supprimer cette visite ?' }).then((ok) => { if (ok) remove.mutate(v.id); }); }}
                 className="ml-2 rounded-lg p-1 text-slate-400 hover:bg-red-50 hover:text-red-600"
                 aria-label="Supprimer la visite"
               >
@@ -202,7 +202,7 @@ function ProspectCard({
       <div className="mb-1 flex items-start justify-between gap-2">
         <p className="text-sm font-semibold text-slate-800 leading-snug">{prospect.name}</p>
         <button
-          onClick={(e) => { e.stopPropagation(); if (confirm('Supprimer ce prospect ?')) onDelete(prospect.id); }}
+          onClick={(e) => { e.stopPropagation(); confirmStore.getState().show({ message: 'Supprimer ce prospect ?' }).then((ok) => { if (ok) onDelete(prospect.id); }); }}
           className="shrink-0 rounded-lg p-1 text-slate-300 hover:bg-red-50 hover:text-red-500"
           aria-label="Supprimer le prospect"
         >

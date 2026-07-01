@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { phasesService } from '@/services/phases.service';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function usePhases(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -18,7 +19,7 @@ export function usePhases(projectId: string | undefined) {
   const create = useMutation({
     mutationFn: (payload: Omit<TablesInsert<'phases'>, 'project_id'>) =>
       phasesService.create({ ...payload, project_id: projectId! }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Phase créée'); },
   });
 
   const update = useMutation({
@@ -33,7 +34,7 @@ export function usePhases(projectId: string | undefined) {
 
   const reorder = useMutation({
     mutationFn: (phaseIds: string[]) => phasesService.reorder(phaseIds),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Phase supprimée'); },
   });
 
   return { ...query, phases: query.data ?? [], create, update, remove, reorder };

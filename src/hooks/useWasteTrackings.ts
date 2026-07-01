@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { wasteTrackingService } from '@/services/wasteTracking.service';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function useWasteTrackings(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -18,7 +19,7 @@ export function useWasteTrackings(projectId: string | undefined) {
   const create = useMutation({
     mutationFn: (payload: Omit<TablesInsert<'waste_trackings'>, 'project_id'>) =>
       wasteTrackingService.create({ ...payload, project_id: projectId! }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('BSD créé'); },
   });
 
   const update = useMutation({
@@ -29,7 +30,7 @@ export function useWasteTrackings(projectId: string | undefined) {
 
   const remove = useMutation({
     mutationFn: (id: string) => wasteTrackingService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('BSD supprimé'); },
   });
 
   return { ...query, trackings: query.data ?? [], create, update, remove };

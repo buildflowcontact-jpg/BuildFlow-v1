@@ -275,7 +275,7 @@ export function SettingsPage() {
                     {member.role !== 'owner' && (isViewerOwner || member.role === 'member') && (
                       <button
                         onClick={() => {
-                          if (confirm("Retirer ce membre de l'organisation ?")) removeMember.mutate(member.id);
+                          confirmStore.getState().show({ message: 'Retirer ce membre de l\'organisation ?' }).then((ok) => { if (ok) removeMember.mutate(member.id); });
                         }}
                         className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
                       >

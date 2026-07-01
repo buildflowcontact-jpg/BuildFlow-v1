@@ -138,7 +138,7 @@ export function IncidentsTab({ projectId }: IncidentsTabProps) {
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm('Supprimer cet incident ?')) remove.mutate(incident.id);
+                      confirmStore.getState().show({ message: 'Supprimer cet incident ?' }).then((ok) => { if (ok) remove.mutate(incident.id); });
                     }}
                     className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
                   >

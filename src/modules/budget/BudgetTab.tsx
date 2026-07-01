@@ -223,7 +223,7 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
                 onAddSubcategory={openCreateCategory}
                 onEdit={openEditCategory}
                 onRemove={(id) => {
-                  if (confirm('Supprimer ce poste (et ses sous-postes) ?')) removeCategory.mutate(id);
+                  confirmStore.getState().show({ message: 'Supprimer ce poste (et ses sous-postes) ?' }).then((ok) => { if (ok) removeCategory.mutate(id); });
                 }}
               />
             ))}
@@ -269,7 +269,7 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm('Supprimer cette dépense ?')) removeExpense.mutate(expense.id);
+                      confirmStore.getState().show({ message: 'Supprimer cette dépense ?' }).then((ok) => { if (ok) removeExpense.mutate(expense.id); });
                     }}
                     aria-label="Supprimer"
                     className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"

@@ -154,7 +154,7 @@ export function TimeEntriesTab({ projectId }: TimeEntriesTabProps) {
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm('Supprimer cette entrée ?')) remove.mutate(entry.id);
+                        confirmStore.getState().show({ message: 'Supprimer cette entrée ?' }).then((ok) => { if (ok) remove.mutate(entry.id); });
                       }}
                       className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
                     >

@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useMemo } from 'react';
-import { Outlet, useParams, useLocation } from 'react-router-dom';
-import { FileDown, ChevronDown, FileSpreadsheet, FileArchive, Columns2, X, MapPin } from 'lucide-react';
+import { Outlet, useParams, useLocation, Link } from 'react-router-dom';
+import { FileDown, ChevronDown, ChevronRight, FileSpreadsheet, FileArchive, Columns2, X, MapPin } from 'lucide-react';
 import { useProject } from '@/hooks/useProject';
 import { PROJECT_SECTIONS } from '@/modules/projects/projectSections';
 import { ProjectSplitView } from '@/modules/projects/ProjectSplitView';
@@ -58,11 +58,37 @@ export function ProjectLayout() {
   const [archiving, setArchiving] = useState<string | null>(null);
   const exportMenuRef = useRef<HTMLDivElement>(null);
 
+  // Libellés de tous les onglets projet (y compris ceux hors PROJECT_SECTIONS)
+  const SECTION_LABELS: Record<string, string> = {
+    ...Object.fromEntries(PROJECT_SECTIONS.map((s) => [s.key, s.label])),
+    rfis: 'RFI',
+    'change-orders': 'Avenants',
+    incidents: 'Incidents',
+    punchlist: 'Réserves',
+    doe: 'DOE',
+    warranty: 'Garanties / SAV',
+    'plan-validations': 'Révisions de plans',
+    waste: 'Déchets (BSD)',
+    'meeting-reports': 'Réunions',
+    security: 'Sécurité',
+    quality: 'Qualité',
+    messages: 'Messagerie',
+    members: 'Membres',
+  };
+
   const currentSectionKey = useMemo(() => {
     const segments = location.pathname.split('/').filter(Boolean);
     const last = segments[segments.length - 1];
     return PROJECT_SECTIONS.some((s) => s.key === last) ? last! : PROJECT_SECTIONS[0]!.key;
   }, [location.pathname]);
+
+  const breadcrumbSection = useMemo(() => {
+    const segments = location.pathname.split('/').filter(Boolean);
+    const last = segments[segments.length - 1];
+    if (!last || last === projectId) return null; // on est sur l'onglet "Vue d'ensemble"
+    return SECTION_LABELS[last] ?? null;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, projectId]);
 
   const [splitOpen, setSplitOpen] = useState(false);
   const [leftKey, setLeftKey] = useState(currentSectionKey);
@@ -208,6 +234,22 @@ export function ProjectLayout() {
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between">
         <div>
+          {/* Breadcrumb */}
+          <nav aria-label="Fil d'Ariane" className="mb-1.5 flex items-center gap-1 text-xs text-slate-400">
+            <Link to="/projects" className="transition-colors hover:text-slate-600">
+              Projets
+            </Link>
+            <ChevronRight className="h-3 w-3" />
+            <Link to={`/projects/${projectId}`} className="transition-colors hover:text-slate-600">
+              {project.name}
+            </Link>
+            {breadcrumbSection && (
+              <>
+                <ChevronRight className="h-3 w-3" />
+                <span className="font-medium text-slate-600">{breadcrumbSection}</span>
+              </>
+            )}
+          </nav>
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold text-slate-900">{project.name}</h1>
             <Badge tone="blue">{PROJECT_STATUS_LABELS[project.status as ProjectStatus]}</Badge>

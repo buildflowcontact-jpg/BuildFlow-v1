@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { changeOrdersService } from '@/services/changeOrders.service';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function useChangeOrders(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -18,7 +19,7 @@ export function useChangeOrders(projectId: string | undefined) {
   const create = useMutation({
     mutationFn: (payload: Omit<TablesInsert<'change_orders'>, 'project_id'>) =>
       changeOrdersService.create({ ...payload, project_id: projectId! }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Avenant créé'); },
   });
 
   const update = useMutation({
@@ -50,7 +51,7 @@ export function useChangeOrders(projectId: string | undefined) {
 
   const remove = useMutation({
     mutationFn: (id: string) => changeOrdersService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Avenant supprimé'); },
   });
 
   return { ...query, changeOrders: query.data ?? [], create, update, submitForApproval, decide, remove };

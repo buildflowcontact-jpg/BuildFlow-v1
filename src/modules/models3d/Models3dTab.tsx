@@ -121,7 +121,7 @@ export function Models3dTab({ projectId }: Models3dTabProps) {
                 <button
                   onClick={() => {
                     if (!canManage) return;
-                    if (confirm(`Supprimer "${model.name}" ?`)) remove.mutate(model);
+                    confirmStore.getState().show({ message: `Supprimer "${model.name}" ?` }).then((ok) => { if (ok) remove.mutate(model); });
                   }}
                   disabled={!canManage}
                   title={canManage ? 'Supprimer' : 'Droits insuffisants pour supprimer cette maquette'}

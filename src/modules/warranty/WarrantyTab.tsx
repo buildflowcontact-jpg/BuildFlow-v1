@@ -1,6 +1,6 @@
 import { useRef, useState, useMemo } from 'react';
 import { Plus, Trash2, Upload, Download, ShieldCheck, AlertTriangle, FileDown } from 'lucide-react';
-import { exportWarrantyClaimsPdf } from '@/utils/pdfExport';
+import { exportWarrantyClaimsPdf } from '@/services/pdfExport.service';
 import { useWarranty } from '@/hooks/useWarranty';
 import { useProject } from '@/hooks/useProject';
 import { useDocuments } from '@/hooks/useDocuments';
@@ -394,7 +394,7 @@ export function WarrantyTab({ projectId }: { projectId: string }) {
 
                     <button
                       onClick={() => {
-                        if (confirm('Supprimer cette réclamation ?')) remove.mutate(claim.id);
+                        confirmStore.getState().show({ message: 'Supprimer cette réclamation ?' }).then((ok) => { if (ok) remove.mutate(claim.id); });
                       }}
                       title="Supprimer"
                       aria-label="Supprimer la réclamation"

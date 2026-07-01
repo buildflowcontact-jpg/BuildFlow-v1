@@ -110,7 +110,7 @@ export function ClientsPage() {
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm('Supprimer ce client ?')) remove.mutate(client.id);
+                      confirmStore.getState().show({ message: 'Supprimer ce client ?' }).then((ok) => { if (ok) remove.mutate(client.id); });
                     }}
                     className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
                   >

@@ -29,6 +29,7 @@ import type {
   DoeItem,
   Company,
   WasteTracking,
+  WarrantyClaim,
 } from '@/types/domain';
 import type {
   ProjectStatus,
@@ -41,6 +42,9 @@ import type {
   DoeItemCategory,
   WasteCategory,
   WasteTrackingStatus,
+  WarrantyType,
+  WarrantyPriority,
+  WarrantyStatus,
 } from '@/types/database.types';
 
 const BRAND_COLOR: [number, number, number] = [37, 99, 235]; // brand-600
@@ -1014,6 +1018,85 @@ export function buildWasteSummaryPdf(project: Project, trackings: WasteTracking[
 export function exportWasteSummaryPdf(project: Project, trackings: WasteTracking[], companies: Company[]): void {
   const doc = buildWasteSummaryPdf(project, trackings, companies);
   downloadDoc(doc, `dechets-chantier-${project.reference ?? project.name}.pdf`);
+}
+
+// ── Labels garanties (locaux, évite import circulaire) ─────────────────────
+
+const WARRANTY_TYPE_LABELS_PDF: Record<WarrantyType, string> = {
+  parfait_achevement: 'Parfait achèvement',
+  biennale: 'Biennale',
+  decennale: 'Décennale',
+  hors_garantie: 'Hors garantie',
+};
+const WARRANTY_PRIORITY_LABELS_PDF: Record<WarrantyPriority, string> = {
+  basse: 'Basse',
+  normale: 'Normale',
+  haute: 'Haute',
+  urgente: 'URGENTE',
+};
+const WARRANTY_STATUS_LABELS_PDF: Record<WarrantyStatus, string> = {
+  ouvert: 'Ouvert',
+  en_cours: 'En cours',
+  resolu: 'Résolu',
+  clos: 'Clos',
+};
+
+/**
+ * Exporte un tableau récapitulatif de toutes les réclamations garantie/SAV du
+ * projet en PDF paysage (une ligne par réclamation, 10 colonnes).
+ */
+export function exportWarrantyClaimsPdf(
+  claims: WarrantyClaim[],
+  projectName: string,
+  getCompanyName: (id: string | null) => string
+): void {
+  const doc = createDocument('Récapitulatif Garanties / SAV', projectName);
+  // Override orientation: rebuild with landscape
+  const docL = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'landscape' });
+  const pageWidth = docL.internal.pageSize.getWidth();
+  docL.setFillColor(...BRAND_COLOR);
+  docL.rect(0, 0, pageWidth, 64, 'F');
+  docL.setTextColor(255, 255, 255);
+  docL.setFontSize(18);
+  docL.setFont('helvetica', 'bold');
+  docL.text('BuildFlow', 40, 30);
+  docL.setFontSize(11);
+  docL.setFont('helvetica', 'normal');
+  docL.text('Récapitulatif Garanties / SAV', 40, 48);
+  docL.setTextColor(30, 41, 59);
+  docL.setFontSize(10);
+  docL.text(projectName, 40, 84);
+  docL.setFontSize(9);
+  docL.setTextColor(148, 163, 184);
+  docL.text(
+    `Généré le ${format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}`,
+    pageWidth - 40,
+    84,
+    { align: 'right' }
+  );
+  void doc; // discard the portrait one
+
+  autoTable(docL, {
+    startY: 110,
+    head: [['#', 'Titre', 'Type', 'Priorité', 'Statut', 'Signalé le', 'Échéance', 'Entreprise', 'Lot', 'Localisation']],
+    body: claims.map((c, i) => [
+      i + 1,
+      c.title,
+      WARRANTY_TYPE_LABELS_PDF[c.warranty_type as WarrantyType] ?? c.warranty_type,
+      WARRANTY_PRIORITY_LABELS_PDF[c.priority as WarrantyPriority] ?? c.priority,
+      WARRANTY_STATUS_LABELS_PDF[c.status as WarrantyStatus] ?? c.status,
+      c.reported_date ? format(new Date(c.reported_date), 'dd/MM/yyyy') : '—',
+      c.due_date ? format(new Date(c.due_date), 'dd/MM/yyyy') : '—',
+      getCompanyName(c.company_id),
+      c.lot ?? '—',
+      c.location ?? '—',
+    ]),
+    headStyles: { fillColor: BRAND_COLOR },
+    styles: { fontSize: 8 },
+    columnStyles: { 1: { cellWidth: 100 } },
+  });
+
+  downloadDoc(docL, `garanties-${(projectName).toLowerCase().replace(/[^a-z0-9]+/g, '-')}.pdf`);
 }
 
 /** Convertit un document jsPDF en File (pour upload direct vers Supabase Storage, ex. archivage auto). */

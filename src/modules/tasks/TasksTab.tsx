@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 import { useTasks } from '@/hooks/useTasks';
 import { usePhases } from '@/hooks/usePhases';
 import { useProject } from '@/hooks/useProject';
@@ -44,12 +45,13 @@ export function TasksTab({ projectId }: TasksTabProps) {
   }
 
   function handleDelete(task: TaskWithChildren) {
-    if (task.children.length > 0) {
-      if (!confirm(`Supprimer "${task.title}" supprimera aussi ses ${task.children.length} sous-tâche(s). Continuer ?`)) return;
-    } else if (!confirm(`Supprimer la tâche "${task.title}" ?`)) {
-      return;
-    }
-    remove.mutate(task.id);
+    const message =
+      task.children.length > 0
+        ? `Supprimer "${task.title}" supprimera aussi ses ${task.children.length} sous-tâche(s). Continuer ?`
+        : `Supprimer la tâche "${task.title}" ?`;
+    confirmStore.getState().show({ message }).then((ok) => {
+      if (ok) remove.mutate(task.id);
+    });
   }
 
   function handleFormSubmit(payload: Omit<TablesInsert<'tasks'>, 'project_id'> | TablesUpdate<'tasks'>, current: Task | null) {

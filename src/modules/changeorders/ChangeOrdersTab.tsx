@@ -171,7 +171,7 @@ export function ChangeOrdersTab({ projectId }: ChangeOrdersTabProps) {
                       </button>
                       <button
                         onClick={() => {
-                          if (confirm('Supprimer cet avenant ?')) remove.mutate(co.id);
+                          confirmStore.getState().show({ message: 'Supprimer cet avenant ?' }).then((ok) => { if (ok) remove.mutate(co.id); });
                         }}
                         className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
                       >

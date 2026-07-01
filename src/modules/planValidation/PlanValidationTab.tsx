@@ -290,7 +290,7 @@ export function PlanValidationTab({ projectId }: { projectId: string }) {
                     onNewRevision={() => handleNewRevision(rev)}
                     onUpload={() => { uploadTargetRef.current = rev; fileInputRef.current?.click(); }}
                     onDownload={() => handleDownload(rev)}
-                    onDelete={() => { if (confirm('Supprimer cette révision ?')) remove.mutate(rev.id); }}
+                    onDelete={() => { confirmStore.getState().show({ message: 'Supprimer cette révision ?' }).then((ok) => { if (ok) remove.mutate(rev.id); }); }}
                   />
                 ))}
               </div>

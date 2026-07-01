@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { dailyLogsService } from '@/services/dailyLogs.service';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function useDailyLogs(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -18,7 +19,7 @@ export function useDailyLogs(projectId: string | undefined) {
   const create = useMutation({
     mutationFn: (payload: Omit<TablesInsert<'daily_logs'>, 'project_id'>) =>
       dailyLogsService.create({ ...payload, project_id: projectId! }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Journal créé'); },
   });
 
   const update = useMutation({
@@ -29,7 +30,7 @@ export function useDailyLogs(projectId: string | undefined) {
 
   const remove = useMutation({
     mutationFn: (id: string) => dailyLogsService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Journal supprimé'); },
   });
 
   return { ...query, dailyLogs: query.data ?? [], create, update, remove };

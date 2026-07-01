@@ -199,7 +199,7 @@ export function QuoteDetailModal({
                   variant="outline"
                   className="text-red-600"
                   onClick={() => {
-                    if (confirm('Supprimer ce devis ?')) onDelete(quote.id);
+                    confirmStore.getState().show({ message: 'Supprimer ce devis ?' }).then((ok) => { if (ok) onDelete(quote.id); });
                   }}
                 >
                   <Trash2 className="h-4 w-4" />

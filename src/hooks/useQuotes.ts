@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { quotesService, type QuoteItemInput } from '@/services/quotes.service';
 import type { TablesInsert } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function useQuotes(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -26,7 +27,7 @@ export function useQuotes(projectId: string | undefined) {
       >;
       items: QuoteItemInput[];
     }) => quotesService.create({ ...payload, project_id: projectId! }, items),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Devis créé'); },
   });
 
   const send = useMutation({
@@ -60,7 +61,7 @@ export function useQuotes(projectId: string | undefined) {
 
   const remove = useMutation({
     mutationFn: (quoteId: string) => quotesService.remove(quoteId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Devis supprimé'); },
   });
 
   return { ...query, quotes: query.data ?? [], create, send, decide, convertToInvoice, remove };

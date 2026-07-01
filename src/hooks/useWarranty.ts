@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { warrantyService } from '@/services/warranty.service';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function useWarranty(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -22,7 +23,7 @@ export function useWarranty(projectId: string | undefined) {
   const create = useMutation({
     mutationFn: (payload: Omit<TablesInsert<'warranty_claims'>, 'project_id'>) =>
       warrantyService.create({ ...payload, project_id: projectId! }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Réclamation créée'); },
   });
 
   const update = useMutation({
@@ -33,7 +34,7 @@ export function useWarranty(projectId: string | undefined) {
 
   const remove = useMutation({
     mutationFn: (id: string) => warrantyService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Réclamation supprimée'); },
   });
 
   return { ...query, claims: query.data ?? [], create, update, remove };

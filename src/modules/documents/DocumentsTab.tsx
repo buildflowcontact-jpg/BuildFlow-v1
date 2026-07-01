@@ -195,7 +195,7 @@ export function DocumentsTab({ projectId }: DocumentsTabProps) {
                 <button
                   onClick={() => {
                     if (!canManage) return;
-                    if (confirm(`Supprimer le document "${doc.name}" ?`)) remove.mutate(doc);
+                    confirmStore.getState().show({ message: `Supprimer le document "${doc.name}" ?` }).then((ok) => { if (ok) remove.mutate(doc); });
                   }}
                   disabled={!canManage}
                   title={canManage ? 'Supprimer' : 'Droits insuffisants pour supprimer ce document'}

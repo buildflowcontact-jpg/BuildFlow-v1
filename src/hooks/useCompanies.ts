@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { companiesService } from '@/services/companies.service';
 import { useAuthStore } from '@/stores/authStore';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
+import { toast } from '@/stores/toastStore';
 
 export function useCompanies() {
   const organization = useAuthStore((s) => s.organization);
@@ -17,7 +18,7 @@ export function useCompanies() {
   const create = useMutation({
     mutationFn: (payload: Omit<TablesInsert<'companies'>, 'organization_id'>) =>
       companiesService.create({ ...payload, organization_id: organization!.id }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Entreprise créée'); },
   });
 
   const update = useMutation({
@@ -52,7 +53,7 @@ export function useProjectCompanies(projectId: string | undefined) {
 
   const detach = useMutation({
     mutationFn: (projectCompanyId: string) => companiesService.detachFromProject(projectCompanyId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Entreprise supprimée'); },
   });
 
   return { ...query, projectCompanies: query.data ?? [], attach, detach };

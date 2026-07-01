@@ -89,7 +89,7 @@ export function TemplatesPanel({ projectId }: TemplatesPanelProps) {
                 </button>
                 <button
                   onClick={() => {
-                    if (confirm('Supprimer ce modèle ?')) remove.mutate(template.id);
+                    confirmStore.getState().show({ message: 'Supprimer ce modèle ?' }).then((ok) => { if (ok) remove.mutate(template.id); });
                   }}
                   className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
                 >

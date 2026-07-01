@@ -129,7 +129,7 @@ export function DailyLogsTab({ projectId }: DailyLogsTabProps) {
                 </button>
                 <button
                   onClick={() => {
-                    if (confirm('Supprimer ce rapport ?')) remove.mutate(log.id);
+                    confirmStore.getState().show({ message: 'Supprimer ce rapport ?' }).then((ok) => { if (ok) remove.mutate(log.id); });
                   }}
                   className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
                 >

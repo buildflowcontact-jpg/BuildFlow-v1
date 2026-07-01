@@ -3,6 +3,7 @@ import { documentsService } from '@/services/documents.service';
 import type { Document } from '@/types/domain';
 import type { DocumentType } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function useDocuments(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -26,12 +27,12 @@ export function useDocuments(projectId: string | undefined) {
       amount?: number | null;
       silent?: boolean;
     }) => documentsService.upload({ projectId: projectId!, ...params }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Document ajouté'); },
   });
 
   const remove = useMutation({
     mutationFn: (doc: Document) => documentsService.remove(doc),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Document supprimé'); },
   });
 
   return { ...query, documents: query.data ?? [], upload, remove };

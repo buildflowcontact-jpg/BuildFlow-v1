@@ -105,7 +105,7 @@ export function CapturesPanel({ projectId }: CapturesPanelProps) {
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm('Supprimer ce brouillon de capture ?')) remove.mutate(capture);
+                      confirmStore.getState().show({ message: 'Supprimer ce brouillon de capture ?' }).then((ok) => { if (ok) remove.mutate(capture); });
                     }}
                     className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
                     title="Supprimer"

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, FolderKanban, Trash2 } from 'lucide-react';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 import { useProjects, useProjectsProgress } from '@/hooks/useProjects';
 import { useClients } from '@/hooks/useClients';
 import { Button } from '@/components/ui/Button';
@@ -61,9 +62,10 @@ export function ProjectsListPage() {
   function handleDelete(e: React.MouseEvent, projectId: string, projectName: string) {
     e.preventDefault();
     e.stopPropagation();
-    if (confirm(`Supprimer définitivement le projet "${projectName}" ? Cette action est irréversible.`)) {
-      remove.mutate(projectId);
-    }
+    confirmStore.getState().show({
+      message: `Supprimer définitivement le projet "${projectName}" ? Cette action est irréversible.`,
+      confirmLabel: 'Supprimer définitivement',
+    }).then((ok) => { if (ok) remove.mutate(projectId); });
   }
 
   function handleSubmit(e: React.FormEvent) {

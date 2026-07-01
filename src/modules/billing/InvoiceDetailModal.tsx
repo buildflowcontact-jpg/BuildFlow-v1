@@ -258,7 +258,7 @@ export function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }
                     </div>
                     <button
                       onClick={() => {
-                        if (confirm('Supprimer ce paiement ?')) removePayment.mutate(payment.id);
+                        confirmStore.getState().show({ message: 'Supprimer ce paiement ?' }).then((ok) => { if (ok) removePayment.mutate(payment.id); });
                       }}
                       aria-label="Supprimer le paiement"
                       className="rounded-lg p-1 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
@@ -289,7 +289,7 @@ export function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }
                   variant="outline"
                   className="text-red-600"
                   onClick={() => {
-                    if (confirm('Supprimer cette facture ?')) remove.mutate(invoice.id, { onSuccess: onClose });
+                    confirmStore.getState().show({ message: 'Supprimer cette facture ?' }).then((ok) => { if (ok) remove.mutate(invoice.id, { onSuccess: onClose }); });
                   }}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -307,7 +307,7 @@ export function InvoiceDetailModal({ invoiceId, projectId, clientName, onClose }
                 className="text-red-600"
                 loading={cancel.isPending}
                 onClick={() => {
-                  if (confirm('Annuler cette facture ?')) cancel.mutate(invoice.id);
+                  confirmStore.getState().show({ message: 'Annuler cette facture ?' }).then((ok) => { if (ok) cancel.mutate(invoice.id); });
                 }}
               >
                 <Ban className="h-4 w-4" />

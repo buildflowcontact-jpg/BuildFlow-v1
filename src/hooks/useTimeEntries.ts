@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { timeEntriesService } from '@/services/timeEntries.service';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function useTimeEntries(projectId: string | undefined, userId?: string) {
   const queryClient = useQueryClient();
@@ -18,7 +19,7 @@ export function useTimeEntries(projectId: string | undefined, userId?: string) {
   const create = useMutation({
     mutationFn: (payload: Omit<TablesInsert<'time_entries'>, 'project_id'>) =>
       timeEntriesService.create({ ...payload, project_id: projectId! }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Entrée créée'); },
   });
 
   const update = useMutation({
@@ -29,7 +30,7 @@ export function useTimeEntries(projectId: string | undefined, userId?: string) {
 
   const remove = useMutation({
     mutationFn: (id: string) => timeEntriesService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Entrée supprimée'); },
   });
 
   return { ...query, timeEntries: query.data ?? [], create, update, remove };

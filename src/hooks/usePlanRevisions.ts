@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { planRevisionsService } from '@/services/planRevisions.service';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function usePlanRevisions(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -22,7 +23,7 @@ export function usePlanRevisions(projectId: string | undefined) {
   const create = useMutation({
     mutationFn: (payload: Omit<TablesInsert<'plan_revisions'>, 'project_id'>) =>
       planRevisionsService.create({ ...payload, project_id: projectId! }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Révision soumise'); },
   });
 
   const update = useMutation({
@@ -33,7 +34,7 @@ export function usePlanRevisions(projectId: string | undefined) {
 
   const remove = useMutation({
     mutationFn: (id: string) => planRevisionsService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Révision supprimée'); },
   });
 
   return { ...query, revisions: query.data ?? [], create, update, remove };

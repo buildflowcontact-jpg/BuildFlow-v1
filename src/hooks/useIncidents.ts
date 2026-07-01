@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { incidentsService } from '@/services/incidents.service';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function useIncidents(projectId: string | undefined) {
   const queryClient = useQueryClient();
@@ -18,7 +19,7 @@ export function useIncidents(projectId: string | undefined) {
   const create = useMutation({
     mutationFn: (payload: Omit<TablesInsert<'incidents'>, 'project_id'>) =>
       incidentsService.create({ ...payload, project_id: projectId! }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Incident créé'); },
   });
 
   const update = useMutation({
@@ -28,7 +29,7 @@ export function useIncidents(projectId: string | undefined) {
 
   const remove = useMutation({
     mutationFn: (id: string) => incidentsService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Incident supprimé'); },
   });
 
   return { ...query, incidents: query.data ?? [], create, update, remove };

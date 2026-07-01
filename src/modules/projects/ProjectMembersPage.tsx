@@ -92,7 +92,7 @@ export function ProjectMembersPage() {
                   {member.role !== 'owner' && (
                     <button
                       onClick={() => {
-                        if (confirm('Retirer ce membre du projet ?')) removeMember.mutate(member.id);
+                        confirmStore.getState().show({ message: 'Retirer ce membre du projet ?' }).then((ok) => { if (ok) removeMember.mutate(member.id); });
                       }}
                       title="Retirer ce membre"
                       aria-label="Retirer ce membre"

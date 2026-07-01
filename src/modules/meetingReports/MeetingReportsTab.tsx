@@ -233,7 +233,7 @@ export function MeetingReportsTab({ projectId }: MeetingReportsTabProps) {
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm('Supprimer ce compte-rendu ?')) remove.mutate(report.id);
+                        confirmStore.getState().show({ message: 'Supprimer ce compte-rendu ?' }).then((ok) => { if (ok) remove.mutate(report.id); });
                       }}
                       className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
                       aria-label="Supprimer"

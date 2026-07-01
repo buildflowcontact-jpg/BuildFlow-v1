@@ -3,6 +3,7 @@ import { prospectsService } from '@/services/prospects.service';
 import { useAuthStore } from '@/stores/authStore';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 
 export function useProspects() {
   const organizationId = useAuthStore((s) => s.organization?.id);
@@ -24,7 +25,7 @@ export function useProspects() {
   const create = useMutation({
     mutationFn: (payload: Omit<TablesInsert<'prospects'>, 'organization_id'>) =>
       prospectsService.create({ ...payload, organization_id: organizationId! }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Prospect créé'); },
   });
 
   const update = useMutation({
@@ -65,7 +66,7 @@ export function useProspectVisits(prospectId: string | undefined) {
 
   const remove = useMutation({
     mutationFn: (id: string) => prospectsService.removeVisit(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Prospect supprimé'); },
   });
 
   return { ...query, visits: query.data ?? [], create, remove };

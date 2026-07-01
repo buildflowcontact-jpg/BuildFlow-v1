@@ -4,6 +4,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { OfflineBanner } from './OfflineBanner';
+import { ToastContainer } from '@/components/ui/Toast';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface RouteHandle {
   title?: string;
@@ -38,6 +40,9 @@ export function AppShell() {
           <Outlet />
         </main>
       </div>
+      {/* Singletons globaux — montés une seule fois hors du flux du contenu */}
+      <ToastContainer />
+      <ConfirmModal />
     </div>
   );
 }

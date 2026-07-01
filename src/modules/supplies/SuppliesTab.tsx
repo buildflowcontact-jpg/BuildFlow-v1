@@ -154,7 +154,7 @@ export function SuppliesTab({ projectId }: SuppliesTabProps) {
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm('Supprimer cette commande ?')) remove.mutate(supply.id);
+                      confirmStore.getState().show({ message: 'Supprimer cette commande ?' }).then((ok) => { if (ok) remove.mutate(supply.id); });
                     }}
                     className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
                   >

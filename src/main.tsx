@@ -8,6 +8,7 @@ import { router } from './App';
 import { AuthProvider } from './app/AuthProvider';
 import { ErrorBoundary } from './app/ErrorBoundary';
 import { initSentry } from './lib/sentry';
+import { toast } from '@/stores/toastStore';
 import './index.css';
 
 initSentry();
@@ -29,6 +30,18 @@ const queryClient = new QueryClient({
     mutations: {
       networkMode: 'online',
       retry: 1,
+      // Gestionnaire d'erreur global : toutes les mutations qui échouent sans
+      // onError explicite affichent un toast. Évite le silence total en cas
+      // d'erreur réseau ou de violation RLS.
+      onError: (error: unknown) => {
+        const msg =
+          error instanceof Error
+            ? error.message
+            : typeof error === 'string'
+              ? error
+              : 'Une erreur est survenue';
+        toast.error(msg);
+      },
     },
   },
 });
@@ -67,14 +80,4 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 // Retire l'écran de lancement statique (défini dans index.html, visible dès le
 // premier octet HTML) une fois que React a peint son propre écran de chargement
-// (le SplashScreen affiché par AuthProvider pendant l'initialisation). Le double
-// requestAnimationFrame garantit qu'on attend bien le rendu effectif avant de
-// faire disparaître l'écran statique, évitant tout flash d'écran blanc.
-requestAnimationFrame(() => {
-  requestAnimationFrame(() => {
-    const splash = document.getElementById('initial-splash');
-    if (!splash) return;
-    splash.classList.add('is-hidden');
-    splash.addEventListener('transitionend', () => splash.remove(), { once: true });
-  });
-});
+// (le SplashS
