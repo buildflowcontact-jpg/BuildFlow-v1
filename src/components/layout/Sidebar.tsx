@@ -7,6 +7,7 @@ import {
   ChevronsLeft,
   ChevronDown,
   ChevronRight,
+  Check,
   LogOut,
   Plus,
   Info,
@@ -146,6 +147,21 @@ export function Sidebar() {
 
   const unreadMessages = useUnreadMessagesCount(projectId, profile?.id);
 
+  const [projectJustChanged, setProjectJustChanged] = useState(false);
+  const projectChangedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleProjectChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    if (!e.target.value) return;
+    navigate(`/projects/${e.target.value}`);
+    setProjectJustChanged(true);
+    if (projectChangedTimerRef.current) clearTimeout(projectChangedTimerRef.current);
+    projectChangedTimerRef.current = setTimeout(() => setProjectJustChanged(false), 1500);
+  }
+
+  useEffect(() => () => {
+    if (projectChangedTimerRef.current) clearTimeout(projectChangedTimerRef.current);
+  }, []);
+
   useEffect(() => {
     if (!projectId) return;
     const activeGroup = projectNavGroups.find((group) =>
@@ -264,12 +280,13 @@ export function Sidebar() {
             <div className="relative">
               <select
                 value={projectId ?? ''}
-                onChange={(e) => {
-                  if (e.target.value) navigate(`/projects/${e.target.value}`);
-                }}
+                onChange={handleProjectChange}
                 className={cn(
-                  'h-9 w-full appearance-none rounded-lg border border-slate-300 bg-white pl-3 pr-8 text-sm text-slate-700',
-                  'focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20'
+                  'h-9 w-full appearance-none rounded-lg border bg-white pl-3 pr-8 text-sm text-slate-700 transition-colors duration-300',
+                  'focus:outline-none focus:ring-2',
+                  projectJustChanged
+                    ? 'border-emerald-500 focus:border-emerald-500 focus:ring-emerald-500/20'
+                    : 'border-slate-300 focus:border-brand-500 focus:ring-brand-500/20'
                 )}
               >
                 <option value="" disabled>
@@ -281,7 +298,11 @@ export function Sidebar() {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              {projectJustChanged ? (
+                <Check className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" />
+              ) : (
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              )}
             </div>
             <button
               type="button"
