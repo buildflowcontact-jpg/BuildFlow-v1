@@ -1,4 +1,5 @@
 import { cn } from '@/utils/cn';
+import { PageSkeleton } from './Skeleton';
 
 export function Spinner({ className }: { className?: string }) {
   return (
@@ -8,10 +9,11 @@ export function Spinner({ className }: { className?: string }) {
   );
 }
 
+/**
+ * Remplacé par un squelette de page (audit 2026-07-01 : les spinners plein
+ * écran bloquent la perception de réactivité). Le spinner inline `<Spinner />`
+ * reste disponible pour les cas d'usage locaux (boutons, formulaires…).
+ */
 export function FullPageSpinner() {
-  return (
-    <div className="flex h-full w-full items-center justify-center py-20">
-      <Spinner className="h-8 w-8" />
-    </div>
-  );
+  return <PageSkeleton />;
 }
