@@ -243,24 +243,18 @@ export function Sidebar() {
 
       <div className="flex flex-col gap-2 border-b border-slate-100 p-3">
         {collapsed ? (
-          <>
-            <button
-              onClick={toggleSidebar}
-              title="Sélectionner un projet"
-              aria-label="Sélectionner un projet"
-              className="flex h-9 w-full items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100"
-            >
-              <FolderKanban className="h-4 w-4" />
-            </button>
-            <button
-              onClick={openCreateModal}
-              title="Créer un projet"
-              aria-label="Créer un projet"
-              className="flex h-9 w-full items-center justify-center rounded-lg text-brand-600 hover:bg-brand-50"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </>
+          // Sidebar réduite : un seul bouton pour ouvrir la sidebar et
+          // accéder au sélecteur + bouton de création. Deux icônes superposées
+          // dans un espace de 68 px provoquaient des clics accidentels sur
+          // "Créer un projet" (bug modal intempestive — audit 2026-07-01).
+          <button
+            onClick={toggleSidebar}
+            title="Ouvrir la barre latérale"
+            aria-label="Ouvrir la barre latérale"
+            className="flex h-9 w-full items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100"
+          >
+            <FolderKanban className="h-4 w-4" />
+          </button>
         ) : (
           <>
             <div className="relative">
