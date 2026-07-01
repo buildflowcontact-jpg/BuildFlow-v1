@@ -31,10 +31,15 @@ export function useRfis(projectId: string | undefined) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey }),
   });
 
+  const close = useMutation({
+    mutationFn: (id: string) => rfisService.close(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+  });
+
   const remove = useMutation({
     mutationFn: (id: string) => rfisService.remove(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey }),
   });
 
-  return { ...query, rfis: query.data ?? [], create, respond, update, remove };
+  return { ...query, rfis: query.data ?? [], create, respond, update, close, remove };
 }

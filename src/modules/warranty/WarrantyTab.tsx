@@ -1,5 +1,6 @@
 import { useRef, useState, useMemo } from 'react';
-import { Plus, Trash2, Upload, Download, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, Upload, Download, ShieldCheck, AlertTriangle, FileDown } from 'lucide-react';
+import { exportWarrantyClaimsPdf } from '@/utils/pdfExport';
 import { useWarranty } from '@/hooks/useWarranty';
 import { useProject } from '@/hooks/useProject';
 import { useDocuments } from '@/hooks/useDocuments';
@@ -214,10 +215,28 @@ export function WarrantyTab({ projectId }: { projectId: string }) {
           <ShieldCheck className="w-5 h-5 text-blue-600" />
           <h2 className="text-xl font-semibold text-gray-900">Garanties &amp; SAV</h2>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="w-4 h-4 mr-1" />
-          Nouvelle réclamation
-        </Button>
+        <div className="flex items-center gap-2">
+          {claims.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                exportWarrantyClaimsPdf(
+                  claims,
+                  project?.name ?? 'Projet',
+                  (id) => companies.find((c) => c.id === id)?.name ?? '—'
+                )
+              }
+            >
+              <FileDown className="w-4 h-4" />
+              Exporter PDF
+            </Button>
+          )}
+          <Button onClick={openCreate}>
+            <Plus className="w-4 h-4 mr-1" />
+            Nouvelle réclamation
+          </Button>
+        </div>
       </div>
 
       {/* KPIs */}

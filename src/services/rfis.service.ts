@@ -36,13 +36,14 @@ export const rfisService = {
 
   async respond(id: string, response: string): Promise<Rfi> {
     const { data: userData } = await supabase.auth.getUser();
+    const responderId = userData.user?.id ?? null;
     const rfi = unwrap(
       await supabase
         .from('rfis')
         .update({
           response,
           status: 'answered',
-          responded_by: userData.user?.id ?? null,
+          responded_by: responderId,
           responded_at: new Date().toISOString(),
         })
         .eq('id', id)
@@ -56,7 +57,23 @@ export const rfisService = {
       entity_id: rfi.id,
       metadata: { number: rfi.number },
     });
+    // Notifie l'auteur de la RFI si différent du répondant
+    if (rfi.raised_by && rfi.raised_by !== responderId) {
+      await supabase.from('notifications').insert({
+        user_id: rfi.raised_by,
+        type: 'rfi.answered',
+        title: `RFI #${rfi.number} — Réponse reçue`,
+        message: rfi.title,
+        link: `/projects/${rfi.project_id}/rfis`,
+      });
+    }
     return rfi;
+  },
+
+  async close(id: string): Promise<Rfi> {
+    return unwrap(
+      await supabase.from('rfis').update({ status: 'closed' }).eq('id', id).select('*').single()
+    );
   },
 
   async update(id: string, payload: TablesUpdate<'rfis'>): Promise<Rfi> {

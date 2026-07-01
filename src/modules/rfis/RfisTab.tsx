@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, HelpCircle, Trash2, MessageSquareReply } from 'lucide-react';
+import { Plus, HelpCircle, Trash2, MessageSquareReply, CheckCircle } from 'lucide-react';
 import { useRfis } from '@/hooks/useRfis';
 import { useProject } from '@/hooks/useProject';
 import { useAuthStore } from '@/stores/authStore';
@@ -39,7 +39,7 @@ interface RfisTabProps {
 }
 
 export function RfisTab({ projectId }: RfisTabProps) {
-  const { rfis, isLoading, create, respond, remove } = useRfis(projectId);
+  const { rfis, isLoading, create, respond, close, remove } = useRfis(projectId);
   const { members } = useProject(projectId);
   const userId = useAuthStore((s) => s.session?.user.id);
 
@@ -125,9 +125,24 @@ export function RfisTab({ projectId }: RfisTabProps) {
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge tone={STATUS_TONE[rfi.status]}>{RFI_STATUS_LABELS[rfi.status]}</Badge>
-                  <button onClick={() => openRespond(rfi)} title="Répondre" className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700">
-                    <MessageSquareReply className="h-4 w-4" />
-                  </button>
+                  {rfi.status !== 'closed' && (
+                    <button
+                      onClick={() => openRespond(rfi)}
+                      title="Répondre"
+                      className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700"
+                    >
+                      <MessageSquareReply className="h-4 w-4" />
+                    </button>
+                  )}
+                  {rfi.status === 'answered' && (
+                    <button
+                      onClick={() => close.mutate(rfi.id)}
+                      title="Clôturer"
+                      className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-green-50 hover:text-green-600"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       if (confirm('Supprimer cette RFI ?')) remove.mutate(rfi.id);

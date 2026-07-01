@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Plus, Calendar, Euro, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
+import { cn } from '@/utils/cn';
 import { useProspects, useProspectVisits } from '@/hooks/useProspects';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
@@ -183,15 +184,21 @@ function ProspectCard({
   onEdit,
   onDelete,
   onStatusChange,
+  onDragStart,
 }: {
   prospect: Prospect;
   onEdit: (p: Prospect) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: ProspectStatus) => void;
+  onDragStart: (id: string) => void;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-         onClick={() => onEdit(prospect)}>
+    <div
+      draggable
+      onDragStart={(e) => { e.stopPropagation(); onDragStart(prospect.id); }}
+      className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing"
+      onClick={() => onEdit(prospect)}
+    >
       <div className="mb-1 flex items-start justify-between gap-2">
         <p className="text-sm font-semibold text-slate-800 leading-snug">{prospect.name}</p>
         <button
@@ -245,6 +252,26 @@ export default function CrmPage() {
   const [form, setForm] = useState<ProspectFormState>(emptyProspectForm());
   const [detailProspect, setDetailProspect] = useState<Prospect | null>(null);
   const [showClosed, setShowClosed] = useState(false);
+
+  // Drag & drop
+  const dragIdRef = useRef<string | null>(null);
+  const [dragOverStage, setDragOverStage] = useState<ProspectStatus | null>(null);
+
+  function handleDragStart(id: string) {
+    dragIdRef.current = id;
+  }
+
+  function handleDrop(targetStage: ProspectStatus) {
+    const id = dragIdRef.current;
+    if (id) {
+      const prospect = prospects.find((p) => p.id === id);
+      if (prospect && prospect.status !== targetStage) {
+        update.mutate({ id, payload: { status: targetStage } });
+      }
+    }
+    dragIdRef.current = null;
+    setDragOverStage(null);
+  }
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -343,13 +370,22 @@ export default function CrmPage() {
         <div className="grid grid-cols-3 gap-4">
           {PIPELINE_STAGES.map((stage) => {
             const items = pipelineProspects(stage);
+            const isOver = dragOverStage === stage;
             return (
-              <div key={stage}>
+              <div
+                key={stage}
+                onDragOver={(e) => { e.preventDefault(); setDragOverStage(stage); }}
+                onDragLeave={() => setDragOverStage(null)}
+                onDrop={() => handleDrop(stage)}
+              >
                 <div className="mb-2 flex items-center gap-2">
                   <Badge tone={STATUS_TONE[stage]}>{PROSPECT_STATUS_LABELS[stage]}</Badge>
                   <span className="text-xs text-slate-400">({items.length})</span>
                 </div>
-                <div className="flex flex-col gap-2 min-h-[80px]">
+                <div className={cn(
+                  'flex flex-col gap-2 min-h-[80px] rounded-xl p-1 transition-colors duration-150',
+                  isOver && 'bg-brand-50 ring-1 ring-brand-200'
+                )}>
                   {items.map((p) => (
                     <ProspectCard
                       key={p.id}
@@ -357,6 +393,7 @@ export default function CrmPage() {
                       onEdit={openDetail}
                       onDelete={(id) => remove.mutate(id)}
                       onStatusChange={(id, status) => update.mutate({ id, payload: { status } })}
+                      onDragStart={handleDragStart}
                     />
                   ))}
                 </div>
@@ -395,6 +432,7 @@ export default function CrmPage() {
                           onEdit={openDetail}
                           onDelete={(id) => remove.mutate(id)}
                           onStatusChange={(id, status) => update.mutate({ id, payload: { status } })}
+                          onDragStart={handleDragStart}
                         />
                       ))}
                     </div>

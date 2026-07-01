@@ -1,7 +1,10 @@
 import { useOutletContext } from 'react-router-dom';
+import { FileDown } from 'lucide-react';
 import { useClients } from '@/hooks/useClients';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { formatDate } from '@/utils/date';
+import { exportProjectSummaryPdf } from '@/utils/pdfExport';
 import { ProjectContactsSection } from './ProjectContactsSection';
 import type { ProjectOutletContext } from './ProjectLayout';
 
@@ -11,6 +14,17 @@ export function ProjectOverviewPage() {
   const client = clients.find((c) => c.id === project.client_id);
 
   return (
+    <div className="flex flex-col gap-6">
+      <div className="flex justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => exportProjectSummaryPdf(project, client?.name ?? null)}
+        >
+          <FileDown className="h-4 w-4" />
+          Exporter PDF
+        </Button>
+      </div>
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <div className="flex flex-col gap-6 lg:col-span-2">
         <Card>
@@ -52,6 +66,7 @@ export function ProjectOverviewPage() {
           </div>
         </dl>
       </Card>
+    </div>
     </div>
   );
 }
