@@ -31,6 +31,7 @@ import {
   FolderArchive,
   Recycle,
   BadgeCheck,
+  GitBranch,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useUiStore } from '@/stores/uiStore';
@@ -59,6 +60,7 @@ const projectNavGroups = [
     icon: Map,
     items: [
       { to: 'plans', label: 'Plans et 3D', icon: Map },
+      { to: 'plan-validations', label: 'Validation plans', icon: GitBranch },
       { to: 'documents', label: 'Documents', icon: FileText },
     ],
   },

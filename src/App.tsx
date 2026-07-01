@@ -58,6 +58,7 @@ const ProjectQualityPage = lazy(() => import('@/modules/projects/pages/ProjectQu
 const ProjectMessagingPage = lazy(() => import('@/modules/projects/pages/ProjectMessagingPage'));
 const CrmPage = lazy(() => import('@/modules/crm/CrmPage'));
 const ProjectWarrantyPage = lazy(() => import('@/modules/projects/pages/ProjectWarrantyPage'));
+const ProjectPlanValidationPage = lazy(() => import('@/modules/projects/pages/ProjectPlanValidationPage'));
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -220,6 +221,14 @@ export const router = createBrowserRouter([
             element: (
               <Lazy>
                 <ProjectWarrantyPage />
+              </Lazy>
+            ),
+          },
+          {
+            path: 'plan-validations',
+            element: (
+              <Lazy>
+                <ProjectPlanValidationPage />
               </Lazy>
             ),
           },

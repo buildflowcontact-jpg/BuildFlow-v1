@@ -2215,6 +2215,78 @@ export type Database = {
           },
         ]
       }
+      plan_revisions: {
+        Row: {
+          id: string
+          project_id: string
+          document_id: string | null
+          title: string
+          revision_index: string
+          discipline: string
+          lot: string | null
+          status: string
+          submitted_by: string | null
+          submitted_at: string | null
+          reviewed_by: string | null
+          reviewed_at: string | null
+          reviewer_comment: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          document_id?: string | null
+          title: string
+          revision_index?: string
+          discipline?: string
+          lot?: string | null
+          status?: string
+          submitted_by?: string | null
+          submitted_at?: string | null
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+          reviewer_comment?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          document_id?: string | null
+          title?: string
+          revision_index?: string
+          discipline?: string
+          lot?: string | null
+          status?: string
+          submitted_by?: string | null
+          submitted_at?: string | null
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+          reviewer_comment?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_revisions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_revisions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       warranty_claims: {
         Row: {
           id: string
@@ -3970,6 +4042,8 @@ export type ProspectStatus = 'prospect' | 'visite_planifiee' | 'devis_en_cours' 
 export type WarrantyType = 'parfait_achevement' | 'biennale' | 'decennale' | 'hors_garantie';
 export type WarrantyPriority = 'basse' | 'normale' | 'haute' | 'urgente';
 export type WarrantyStatus = 'ouvert' | 'en_cours' | 'resolu' | 'clos';
+export type PlanRevisionStatus = 'en_attente' | 'soumis' | 'en_revision' | 'approuve' | 'refuse';
+export type PlanDiscipline = 'architecture' | 'structure' | 'fluides' | 'electricite' | 'vrd' | 'autre';
 export type SupplyStatus = 'pending' | 'ordered' | 'shipped' | 'delivered' | 'delayed' | 'cancelled';
 export type SupplyCategory = 'materiau' | 'equipement' | 'location';
 export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical';

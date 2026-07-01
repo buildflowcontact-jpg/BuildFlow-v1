@@ -28,6 +28,8 @@ import type {
   WarrantyType,
   WarrantyPriority,
   WarrantyStatus,
+  PlanRevisionStatus,
+  PlanDiscipline,
 } from './database.types';
 
 export type Profile = Tables<'profiles'>;
@@ -85,6 +87,7 @@ export type FirePermit = Tables<'fire_permits'>;
 export type PpspsRecord = Tables<'ppsps_records'>;
 export type DoeItem = Tables<'doe_items'>;
 export type WasteTracking = Tables<'waste_trackings'>;
+export type PlanRevision = Tables<'plan_revisions'>;
 export type Prospect = Tables<'prospects'>;
 export type ProspectVisit = Tables<'prospect_visits'>;
 export type WarrantyClaim = Tables<'warranty_claims'>;
@@ -312,6 +315,23 @@ export const WARRANTY_STATUS_LABELS: Record<WarrantyStatus, string> = {
   en_cours: 'En cours',
   resolu: 'Résolu',
   clos: 'Clos',
+};
+
+export const PLAN_REVISION_STATUS_LABELS: Record<PlanRevisionStatus, string> = {
+  en_attente: 'En attente',
+  soumis: 'Soumis',
+  en_revision: 'En révision',
+  approuve: 'Approuvé',
+  refuse: 'Refusé',
+};
+
+export const PLAN_DISCIPLINE_LABELS: Record<PlanDiscipline, string> = {
+  architecture: 'Architecture',
+  structure: 'Structure',
+  fluides: 'Fluides / CVC',
+  electricite: 'Électricité',
+  vrd: 'VRD',
+  autre: 'Autre',
 };
 
 export const QUALITY_INSPECTION_STATUS_LABELS: Record<QualityInspectionStatus, string> = {

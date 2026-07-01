@@ -39,7 +39,8 @@ export type RealtimeTable =
   | 'waste_trackings'
   | 'prospects'
   | 'prospect_visits'
-  | 'warranty_claims';
+  | 'warranty_claims'
+  | 'plan_revisions';
 
 /**
  * Abonnement générique à une table filtrée (par défaut sur project_id).
