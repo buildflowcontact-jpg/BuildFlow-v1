@@ -19,6 +19,7 @@ import { WASTE_CATEGORY_LABELS, WASTE_TRACKING_STATUS_LABELS } from '@/types/dom
 import type { WasteTracking } from '@/types/domain';
 import type { WasteCategory, WasteTrackingStatus, TablesInsert } from '@/types/database.types';
 import { formatDate } from '@/utils/date';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 const STATUS_TONE: Record<WasteTrackingStatus, 'red' | 'blue' | 'green' | 'purple'> = {
   en_attente: 'red',

@@ -16,6 +16,7 @@ import { INCIDENT_SEVERITY_LABELS, INCIDENT_STATUS_LABELS } from '@/types/domain
 import { formatDateTime } from '@/utils/date';
 import type { Incident } from '@/types/domain';
 import type { IncidentSeverity, IncidentStatus, TablesInsert } from '@/types/database.types';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 const SEVERITY_TONE: Record<IncidentSeverity, 'slate' | 'blue' | 'yellow' | 'red'> = {
   low: 'slate',

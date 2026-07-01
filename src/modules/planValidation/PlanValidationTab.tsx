@@ -18,6 +18,7 @@ import {
 import type { PlanRevision } from '@/types/domain';
 import type { PlanRevisionStatus, PlanDiscipline, TablesInsert } from '@/types/database.types';
 import { formatDate } from '@/utils/date';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 // ── Badges ────────────────────────────────────────────────────────────────────
 const STATUS_TONE: Record<PlanRevisionStatus, 'blue' | 'yellow' | 'green' | 'red' | 'purple'> = {

@@ -13,6 +13,7 @@ import { SUPPLY_STATUS_LABELS, SUPPLY_CATEGORY_LABELS } from '@/types/domain';
 import { formatDate, isOverdue } from '@/utils/date';
 import type { Supply } from '@/types/domain';
 import type { SupplyStatus, SupplyCategory, TablesInsert } from '@/types/database.types';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 const STATUS_TONE: Record<SupplyStatus, 'slate' | 'blue' | 'purple' | 'green' | 'red' | 'yellow'> = {
   pending: 'slate',

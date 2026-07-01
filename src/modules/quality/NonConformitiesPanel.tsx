@@ -16,6 +16,7 @@ import { NON_CONFORMITY_SEVERITY_LABELS, NON_CONFORMITY_STATUS_LABELS } from '@/
 import type { NonConformity } from '@/types/domain';
 import type { NonConformitySeverity, NonConformityStatus, TablesInsert } from '@/types/database.types';
 import { formatDate, isOverdue } from '@/utils/date';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 const SEVERITY_TONE: Record<NonConformitySeverity, 'slate' | 'yellow' | 'red'> = {
   mineure: 'slate',

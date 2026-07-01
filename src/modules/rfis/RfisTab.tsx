@@ -59,7 +59,7 @@ function RfiAttachments({ rfiId, projectId }: { rfiId: string; projectId: string
         uploadedBy: userId,
         silent: true,
       });
-      await attach.mutateAsync({ document_id: doc.id });
+      await attach.mutateAsync({ document_id: doc.id, project_id: projectId });
       toast.success('Pièce jointe ajoutée');
     } catch {
       toast.error("Erreur lors de l'ajout de la pièce jointe");

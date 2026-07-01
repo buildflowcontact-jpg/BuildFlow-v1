@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { GlobalSearch } from './GlobalSearch';
 import { NotificationsDropdown } from './NotificationsDropdown';
 
 export function Topbar({ title, showBack }: { title?: string; showBack?: boolean }) {
@@ -27,6 +28,7 @@ export function Topbar({ title, showBack }: { title?: string; showBack?: boolean
       </div>
 
       <div className="flex items-center gap-3">
+        <GlobalSearch />
         <NotificationsDropdown />
       </div>
     </header>

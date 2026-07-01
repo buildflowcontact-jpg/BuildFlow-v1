@@ -16,6 +16,7 @@ import { formatDateTime } from '@/utils/date';
 import type { Plan } from '@/types/domain';
 import { PlanViewer } from './PlanViewer';
 import { PlanVersionsList } from './PlanVersionsList';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 function isPdfFile(file: File) {
   return file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf';

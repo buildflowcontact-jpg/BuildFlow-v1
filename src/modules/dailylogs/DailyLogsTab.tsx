@@ -11,6 +11,7 @@ import { FullPageSpinner } from '@/components/ui/Spinner';
 import { formatDate } from '@/utils/date';
 import type { DailyLog } from '@/types/domain';
 import type { TablesInsert } from '@/types/database.types';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 type DailyLogFormState = {
   log_date: string;

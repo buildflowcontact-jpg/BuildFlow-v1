@@ -24,6 +24,7 @@ import {
 import type { PrecautionItem, FirePermit, PpspsRecord } from '@/types/domain';
 import type { FirePermitStatus, PpspsStatus, TablesInsert } from '@/types/database.types';
 import { formatDate } from '@/utils/date';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 const FIRE_PERMIT_TONE: Record<FirePermitStatus, 'red' | 'blue' | 'green' | 'purple'> = {
   draft: 'blue',

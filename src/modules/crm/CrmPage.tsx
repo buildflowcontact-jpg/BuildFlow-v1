@@ -18,6 +18,7 @@ import {
 import type { Prospect } from '@/types/domain';
 import type { ProspectStatus, ProspectSource, TablesInsert } from '@/types/database.types';
 import { formatDate } from '@/utils/date';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 const STATUS_TONE: Record<ProspectStatus, 'blue' | 'purple' | 'red' | 'green'> = {
   prospect: 'blue',

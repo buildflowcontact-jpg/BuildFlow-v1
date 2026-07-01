@@ -15,6 +15,7 @@ import { EXPENSE_KIND_LABELS } from '@/types/domain';
 import type { BudgetCategory, BudgetCategoryWithChildren, Expense } from '@/types/domain';
 import type { TablesInsert } from '@/types/database.types';
 import { CategoryRow } from './CategoryRow';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 type CategoryFormState = { name: string; planned_amount: string; parent_category_id: string };
 

@@ -19,6 +19,7 @@ import { PUNCH_LIST_STATUS_LABELS } from '@/types/domain';
 import { formatDate, isOverdue } from '@/utils/date';
 import type { PunchListItem } from '@/types/domain';
 import type { PunchListStatus, TablesInsert } from '@/types/database.types';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 const STATUS_TONE: Record<PunchListStatus, 'red' | 'blue' | 'green' | 'purple'> = {
   open: 'red',

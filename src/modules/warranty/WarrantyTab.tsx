@@ -22,6 +22,7 @@ import {
 import type { WarrantyClaim, Company } from '@/types/domain';
 import type { WarrantyType, WarrantyPriority, WarrantyStatus, TablesInsert } from '@/types/database.types';
 import { formatDate } from '@/utils/date';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 // ── Couleurs des badges ───────────────────────────────────────────────────────
 const PRIORITY_TONE: Record<WarrantyPriority, 'blue' | 'yellow' | 'red' | 'purple'> = {

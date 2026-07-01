@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 import type { Company } from '@/types/domain';
 import type { CompanyType, TablesInsert } from '@/types/database.types';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 const COMPANY_TYPE_LABELS: Record<CompanyType, string> = {
   principale: 'Entreprise principale',

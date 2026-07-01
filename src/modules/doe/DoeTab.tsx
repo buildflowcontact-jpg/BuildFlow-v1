@@ -18,6 +18,7 @@ import { DOE_ITEM_STATUS_LABELS, DOE_ITEM_CATEGORY_LABELS } from '@/types/domain
 import type { DoeItem } from '@/types/domain';
 import type { DoeItemStatus, DoeItemCategory, TablesInsert } from '@/types/database.types';
 import { formatDate } from '@/utils/date';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 const DOE_STATUS_TONE: Record<DoeItemStatus, 'red' | 'blue' | 'green' | 'purple'> = {
   manquant: 'red',

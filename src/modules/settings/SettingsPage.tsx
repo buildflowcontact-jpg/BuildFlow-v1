@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/Badge';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 import type { OrgRole } from '@/types/database.types';
 import { JOB_TITLE_OPTIONS } from '@/types/domain';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 const TABS = [
   { key: 'organization', label: 'Organisation', icon: Building },

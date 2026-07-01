@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 import type { Client } from '@/types/domain';
 import type { TablesInsert } from '@/types/database.types';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 type ClientFormState = {
   first_name: string;

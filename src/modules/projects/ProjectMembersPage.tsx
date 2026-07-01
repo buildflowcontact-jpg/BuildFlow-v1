@@ -13,6 +13,7 @@ import { FullPageSpinner } from '@/components/ui/Spinner';
 import { useMyProjectAccess } from '@/hooks/useMyProjectAccess';
 import type { ProjectMember, ProjectMemberWithProfile } from '@/types/domain';
 import type { ProjectOutletContext } from './ProjectLayout';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 export function ProjectMembersPage() {
   const { members, membersLoading, inviteMember, removeMember, transferOwnership } =

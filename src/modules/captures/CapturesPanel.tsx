@@ -14,6 +14,7 @@ import { FullPageSpinner } from '@/components/ui/Spinner';
 import { formatDateTime } from '@/utils/date';
 import { cn } from '@/utils/cn';
 import type { AnnotatedCapture, CaptureAnnotationShape, CaptureReport } from '@/types/domain';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 interface CapturesPanelProps {
   projectId: string;

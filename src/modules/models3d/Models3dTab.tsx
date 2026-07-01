@@ -16,6 +16,7 @@ import { FullPageSpinner } from '@/components/ui/Spinner';
 import { formatDateTime } from '@/utils/date';
 import { IfcViewer } from './IfcViewer';
 import type { Model3D } from '@/types/domain';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 interface Models3dTabProps {
   projectId: string;

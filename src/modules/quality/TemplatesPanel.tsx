@@ -12,6 +12,7 @@ import { FullPageSpinner, Spinner } from '@/components/ui/Spinner';
 import type { QualityTemplate } from '@/types/domain';
 import { ChecklistItemsEditor } from './ChecklistItemsEditor';
 import { checklistRowsToItems, emptyChecklistRow, type ChecklistItemRow } from './checklistForm';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 interface TemplateFormState {
   name: string;

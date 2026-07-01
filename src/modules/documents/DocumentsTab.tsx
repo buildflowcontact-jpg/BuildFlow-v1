@@ -18,6 +18,7 @@ import { DOCUMENT_TYPE_LABELS } from '@/types/domain';
 import type { DocumentType } from '@/types/database.types';
 import type { Document } from '@/types/domain';
 import { formatDateTime } from '@/utils/date';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 function formatSize(bytes: number | null): string {
   if (!bytes) return '—';

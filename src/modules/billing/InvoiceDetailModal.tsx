@@ -16,6 +16,7 @@ import { LineItemsEditor } from './LineItemsEditor';
 import { emptyLineItemRow, lineRowsToItems, type LineItemRow } from './lineItemsForm';
 import { STATUS_TONE, type InvoiceFormState } from './invoiceForm';
 import { invoiceFormSchema, lineItemsSchema, paymentFormSchema, validateOrError } from '@/schemas/billing.schema';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 interface PaymentFormState {
   amount: string;

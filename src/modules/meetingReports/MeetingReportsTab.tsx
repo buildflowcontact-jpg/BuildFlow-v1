@@ -17,6 +17,7 @@ import { MEETING_ACTION_ITEM_STATUS_LABELS } from '@/types/domain';
 import { formatDate } from '@/utils/date';
 import type { MeetingAttendee, MeetingReportWithItems } from '@/types/domain';
 import type { MeetingActionItemStatus, TablesInsert } from '@/types/database.types';
+import { confirmStore } from '@/components/ui/ConfirmModal';
 
 type ReportFormState = {
   title: string;
