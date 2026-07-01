@@ -25,6 +25,9 @@ import type {
   WasteTrackingStatus,
   ProspectSource,
   ProspectStatus,
+  WarrantyType,
+  WarrantyPriority,
+  WarrantyStatus,
 } from './database.types';
 
 export type Profile = Tables<'profiles'>;
@@ -84,6 +87,7 @@ export type DoeItem = Tables<'doe_items'>;
 export type WasteTracking = Tables<'waste_trackings'>;
 export type Prospect = Tables<'prospects'>;
 export type ProspectVisit = Tables<'prospect_visits'>;
+export type WarrantyClaim = Tables<'warranty_claims'>;
 
 export interface DailyReportTimeEntry {
   user_id: string;
@@ -288,6 +292,27 @@ export const PROSPECT_SOURCE_LABELS: Record<ProspectSource, string> = {
 export interface ProspectWithVisits extends Prospect {
   visits: ProspectVisit[];
 }
+
+export const WARRANTY_TYPE_LABELS: Record<WarrantyType, string> = {
+  parfait_achevement: 'Parfait achèvement (1 an)',
+  biennale: 'Biennale (2 ans)',
+  decennale: 'Décennale (10 ans)',
+  hors_garantie: 'Hors garantie',
+};
+
+export const WARRANTY_PRIORITY_LABELS: Record<WarrantyPriority, string> = {
+  basse: 'Basse',
+  normale: 'Normale',
+  haute: 'Haute',
+  urgente: 'Urgente',
+};
+
+export const WARRANTY_STATUS_LABELS: Record<WarrantyStatus, string> = {
+  ouvert: 'Ouvert',
+  en_cours: 'En cours',
+  resolu: 'Résolu',
+  clos: 'Clos',
+};
 
 export const QUALITY_INSPECTION_STATUS_LABELS: Record<QualityInspectionStatus, string> = {
   in_progress: 'En cours',

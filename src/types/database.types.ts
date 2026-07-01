@@ -2215,6 +2215,91 @@ export type Database = {
           },
         ]
       }
+      warranty_claims: {
+        Row: {
+          id: string
+          project_id: string
+          title: string
+          description: string | null
+          company_id: string | null
+          warranty_type: string
+          priority: string
+          status: string
+          reported_date: string
+          due_date: string | null
+          resolved_date: string | null
+          lot: string | null
+          location: string | null
+          document_id: string | null
+          notes: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          title: string
+          description?: string | null
+          company_id?: string | null
+          warranty_type?: string
+          priority?: string
+          status?: string
+          reported_date?: string
+          due_date?: string | null
+          resolved_date?: string | null
+          lot?: string | null
+          location?: string | null
+          document_id?: string | null
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          title?: string
+          description?: string | null
+          company_id?: string | null
+          warranty_type?: string
+          priority?: string
+          status?: string
+          reported_date?: string
+          due_date?: string | null
+          resolved_date?: string | null
+          lot?: string | null
+          location?: string | null
+          document_id?: string | null
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warranty_claims_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "warranty_claims_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "warranty_claims_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prospects: {
         Row: {
           address: string | null
@@ -3882,6 +3967,9 @@ export type WasteCategory = 'dangereux' | 'non_dangereux' | 'inerte';
 export type WasteTrackingStatus = 'en_attente' | 'enleve' | 'traite';
 export type ProspectSource = 'bouche_a_oreille' | 'site_web' | 'appel_offre' | 'reseau' | 'partenaire' | 'autre';
 export type ProspectStatus = 'prospect' | 'visite_planifiee' | 'devis_en_cours' | 'gagne' | 'perdu' | 'sans_suite';
+export type WarrantyType = 'parfait_achevement' | 'biennale' | 'decennale' | 'hors_garantie';
+export type WarrantyPriority = 'basse' | 'normale' | 'haute' | 'urgente';
+export type WarrantyStatus = 'ouvert' | 'en_cours' | 'resolu' | 'clos';
 export type SupplyStatus = 'pending' | 'ordered' | 'shipped' | 'delivered' | 'delayed' | 'cancelled';
 export type SupplyCategory = 'materiau' | 'equipement' | 'location';
 export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical';

@@ -30,6 +30,7 @@ import {
   Flame,
   FolderArchive,
   Recycle,
+  BadgeCheck,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useUiStore } from '@/stores/uiStore';
@@ -98,6 +99,7 @@ const projectNavGroups = [
     items: [
       { to: 'punchlist', label: 'Réserves', icon: ClipboardCheck },
       { to: 'doe', label: 'DOE', icon: FolderArchive },
+      { to: 'warranty', label: 'Garanties / SAV', icon: BadgeCheck },
     ],
   },
   {
