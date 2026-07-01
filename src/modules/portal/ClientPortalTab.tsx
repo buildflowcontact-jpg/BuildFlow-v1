@@ -1,19 +1,120 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ClipboardList, HelpCircle, FileSignature, FileText, ArrowRight } from 'lucide-react';
+import { ClipboardList, HelpCircle, FileSignature, FileText, ArrowRight, Link2, Plus, Trash2, Copy, Check } from 'lucide-react';
 import { useProject } from '@/hooks/useProject';
 import { useTasks } from '@/hooks/useTasks';
 import { useDailyLogs } from '@/hooks/useDailyLogs';
 import { useRfis } from '@/hooks/useRfis';
 import { useChangeOrders } from '@/hooks/useChangeOrders';
 import { useDocuments } from '@/hooks/useDocuments';
+import { usePortalTokens } from '@/hooks/usePortalTokens';
+import { confirmStore } from '@/components/ui/ConfirmModal';
+import { toast } from '@/stores/toastStore';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 import { PROJECT_STATUS_LABELS, RFI_STATUS_LABELS, CHANGE_ORDER_STATUS_LABELS, parsePortalWidgets } from '@/types/domain';
 import { formatDate, formatDateTime } from '@/utils/date';
 import type { ProjectStatus } from '@/types/database.types';
+
+// ── Panneau de gestion des liens portail ──────────────────────────────────────
+
+function PortalLinksPanel({ projectId }: { projectId: string }) {
+  const { tokens, isLoading, create, revoke } = usePortalTokens(projectId);
+  const [email, setEmail] = useState('');
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const portalBase = `${window.location.origin}/portal`;
+
+  function getUrl(token: string) {
+    return `${portalBase}/${token}`;
+  }
+
+  async function handleCopy(token: string, id: string) {
+    await navigator.clipboard.writeText(getUrl(token));
+    setCopiedId(id);
+    toast.success('Lien copié !');
+    setTimeout(() => setCopiedId(null), 2000);
+  }
+
+  function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    create.mutate(email.trim(), {
+      onSuccess: () => {
+        toast.success('Lien portail créé');
+        setEmail('');
+      },
+    });
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Link2 className="h-4 w-4 text-brand-500" />
+          <CardTitle>Liens portail client</CardTitle>
+        </div>
+      </CardHeader>
+      <p className="mb-4 text-sm text-slate-500">
+        Générez un lien de portail en lecture seule à partager avec votre client. Valide 30 jours.
+      </p>
+
+      <form onSubmit={handleCreate} className="mb-4 flex gap-2">
+        <Input
+          id="portal-email"
+          type="email"
+          placeholder="email@client.fr"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="flex-1"
+        />
+        <Button type="submit" size="sm" loading={create.isPending}>
+          <Plus className="h-4 w-4" />
+          Créer
+        </Button>
+      </form>
+
+      {isLoading ? (
+        <p className="text-sm text-slate-400">Chargement…</p>
+      ) : tokens.length === 0 ? (
+        <p className="text-sm text-slate-400">Aucun lien actif.</p>
+      ) : (
+        <ul className="divide-y divide-slate-100">
+          {tokens.map((t) => (
+            <li key={t.id} className="flex items-center gap-3 py-2.5 text-sm">
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-slate-700 truncate">{t.client_email}</p>
+                <p className="text-xs text-slate-400">Expire le {formatDate(t.expires_at)}</p>
+              </div>
+              <button
+                onClick={() => handleCopy(t.token, t.id)}
+                title="Copier le lien"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-brand-50 hover:text-brand-600 transition-colors"
+              >
+                {copiedId === t.id ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+              </button>
+              <button
+                onClick={() =>
+                  confirmStore.getState().show({ message: `Révoquer le lien de ${t.client_email} ?` }).then((ok) => {
+                    if (ok) revoke.mutate(t.id, { onSuccess: () => toast.success('Lien révoqué') });
+                  })
+                }
+                title="Révoquer"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
 
 interface ClientPortalTabProps {
   projectId: string;
@@ -209,6 +310,9 @@ export function ClientPortalTab({ projectId }: ClientPortalTabProps) {
             description="Le chef de projet n'a encore activé aucune section pour ce portail."
           />
         )}
+
+      {/* Panneau de partage de liens portail */}
+      <PortalLinksPanel projectId={projectId} />
     </div>
   );
 }

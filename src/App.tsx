@@ -10,6 +10,7 @@ import { ResetPasswordPage } from '@/modules/auth/ResetPasswordPage';
 import { ProjectLayout } from '@/modules/projects/ProjectLayout';
 import { ProjectOverviewPage } from '@/modules/projects/ProjectOverviewPage';
 import { NotFoundPage } from '@/modules/misc/NotFoundPage';
+import { PublicPortalPage } from '@/modules/portal/PublicPortalPage';
 
 // Chargement différé (route-level code-splitting) : chaque page ci-dessous
 // part dans son propre chunk JS, téléchargé seulement à la navigation vers
@@ -65,6 +66,7 @@ export const router = createBrowserRouter([
   { path: '/register', element: <RegisterPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
+  { path: '/portal/:token', element: <PublicPortalPage /> },
   {
     element: (
       <ProtectedRoute>
