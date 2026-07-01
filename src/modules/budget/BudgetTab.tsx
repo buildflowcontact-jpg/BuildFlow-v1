@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Plus, Wallet, Pencil, Trash2, FolderPlus } from 'lucide-react';
+import { Plus, Wallet, Pencil, Trash2, FolderPlus, FileCheck } from 'lucide-react';
 import { useBudgetCategories, useExpenses } from '@/hooks/useBudget';
+import { useQuotes } from '@/hooks/useQuotes';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -60,8 +61,9 @@ interface BudgetTabProps {
 export function BudgetTab({ projectId }: BudgetTabProps) {
   const { categories, isLoading: categoriesLoading, create: createCategory, update: updateCategory, remove: removeCategory } =
     useBudgetCategories(projectId);
-  const { expenses, isLoading: expensesLoading, create: createExpense, update: updateExpense, remove: removeExpense } =
+  const { expenses, isLoading: expensesLoading, create: createExpense, update: updateExpense, remove: removeExpense, createFromQuote } =
     useExpenses(projectId);
+  const { quotes, isLoading: quotesLoading } = useQuotes(projectId);
 
 const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<BudgetCategory | null>(null);
@@ -178,7 +180,39 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
     return categories.find((c) => c.id === id)?.name ?? 'Poste supprimé';
   }
 
-  if (categoriesLoading || expensesLoading) return <FullPageSpinner />;
+  // Devis acceptés pas encore liés à une ligne budgétaire
+  const linkedQuoteIds = useMemo(() => new Set(expenses.map((e) => e.quote_id).filter(Boolean)), [expenses]);
+  const acceptedUnlinkedQuotes = useMemo(
+    () => quotes.filter((q) => q.status === 'accepted' && !linkedQuoteIds.has(q.id)),
+    [quotes, linkedQuoteIds],
+  );
+
+  // Modal "Budgétiser ce devis"
+  const [budgetizeQuote, setBudgetizeQuote] = useState<{ id: string; title: string; total: number } | null>(null);
+  const [budgetizeCategoryId, setBudgetizeCategoryId] = useState('');
+
+  function handleBudgetizeSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!budgetizeQuote) return;
+    createFromQuote.mutate(
+      {
+        projectId,
+        quoteId: budgetizeQuote.id,
+        title: budgetizeQuote.title,
+        amount: budgetizeQuote.total,
+        categoryId: budgetizeCategoryId || null,
+        expenseDate: new Date().toISOString().slice(0, 10),
+      },
+      {
+        onSuccess: () => {
+          setBudgetizeQuote(null);
+          setBudgetizeCategoryId('');
+        },
+      },
+    );
+  }
+
+  if (categoriesLoading || expensesLoading || quotesLoading) return <FullPageSpinner />;
 
   return (
     <div className="flex flex-col gap-6">
@@ -196,6 +230,42 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
           <p className="mt-1 text-2xl font-semibold text-emerald-600">{formatCurrency(totals.actual)}</p>
         </Card>
       </div>
+
+      {acceptedUnlinkedQuotes.length > 0 && (
+        <Card>
+          <div className="mb-4 flex items-center gap-2">
+            <FileCheck className="h-4 w-4 text-emerald-500" />
+            <h3 className="text-base font-semibold text-slate-900">Devis acceptés à budgétiser</h3>
+            <span className="ml-auto rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600">
+              {acceptedUnlinkedQuotes.length}
+            </span>
+          </div>
+          <ul className="divide-y divide-slate-100">
+            {acceptedUnlinkedQuotes.map((q) => (
+              <li key={q.id} className="flex items-center justify-between gap-4 py-3 text-sm">
+                <div className="flex-1">
+                  <p className="font-medium text-slate-800">{q.title}</p>
+                  <p className="text-xs text-slate-400">
+                    N°{q.number} · {formatDate(q.created_at)}
+                  </p>
+                </div>
+                <p className="w-28 text-right font-medium text-slate-700">{formatCurrency(q.total)}</p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setBudgetizeQuote({ id: q.id, title: q.title, total: q.total });
+                    setBudgetizeCategoryId('');
+                  }}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Budgétiser
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <Card>
         <div className="mb-4 flex items-center justify-between">
@@ -327,6 +397,42 @@ const [categoryModalOpen, setCategoryModalOpen] = useState(false);
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        open={Boolean(budgetizeQuote)}
+        onClose={() => setBudgetizeQuote(null)}
+        title="Ajouter au budget"
+      >
+        {budgetizeQuote && (
+          <form onSubmit={handleBudgetizeSubmit} className="flex flex-col gap-4">
+            <div className="rounded-lg bg-slate-50 p-3 text-sm">
+              <p className="font-medium text-slate-800">{budgetizeQuote.title}</p>
+              <p className="text-slate-500">{formatCurrency(budgetizeQuote.total)}</p>
+            </div>
+            <Select
+              id="budgetize-category-id"
+              label="Affecter au poste"
+              value={budgetizeCategoryId}
+              onChange={(e) => setBudgetizeCategoryId(e.target.value)}
+            >
+              <option value="">Sans poste</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setBudgetizeQuote(null)}>
+                Annuler
+              </Button>
+              <Button type="submit" loading={createFromQuote.isPending}>
+                Ajouter au budget
+              </Button>
+            </div>
+          </form>
+        )}
       </Modal>
 
       <Modal

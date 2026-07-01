@@ -65,5 +65,11 @@ export function useExpenses(projectId: string | undefined) {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Poste supprimé'); },
   });
 
-  return { ...query, expenses: query.data ?? [], create, update, remove };
+  const createFromQuote = useMutation({
+    mutationFn: (params: Parameters<typeof budgetService.createFromQuote>[0]) =>
+      budgetService.createFromQuote(params),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Devis ajouté au budget'); },
+  });
+
+  return { ...query, expenses: query.data ?? [], create, update, remove, createFromQuote };
 }

@@ -61,7 +61,8 @@ export type ResourcePermission = Tables<'resource_permissions'>;
 export type PlanningSnapshot = Tables<'planning_snapshots'>;
 export type DailyLog = Tables<'daily_logs'>;
 export type BudgetCategory = Tables<'budget_categories'>;
-export type Expense = Tables<'expenses'>;
+// quote_id ajouté en migration 0044 — non encore dans les types générés
+export type Expense = Tables<'expenses'> & { quote_id?: string | null };
 export type Rfi = Tables<'rfis'>;
 export type ChangeOrder = Tables<'change_orders'>;
 export type TimeEntry = Tables<'time_entries'>;

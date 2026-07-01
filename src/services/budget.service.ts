@@ -50,4 +50,42 @@ export const budgetService = {
     const { error } = await supabase.from('expenses').delete().eq('id', id);
     if (error) throw error;
   },
+
+  /**
+   * Crée une dépense liée à un devis accepté (migration 0044).
+   * quote_id n'est pas encore dans les types Supabase générés → insertion via rpc raw.
+   */
+  async createFromQuote(params: {
+    projectId: string;
+    quoteId: string;
+    title: string;
+    amount: number;
+    categoryId: string | null;
+    expenseDate: string;
+  }): Promise<Expense> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.from('expenses') as any)
+      .insert({
+        project_id: params.projectId,
+        description: params.title,
+        amount: params.amount,
+        kind: 'committed',
+        expense_date: params.expenseDate,
+        category_id: params.categoryId ?? null,
+        quote_id: params.quoteId,
+      })
+      .select('*')
+      .single();
+    if (error) throw error;
+    const expense = data as Expense;
+
+    await activityLogsService.log({
+      project_id: params.projectId,
+      action: 'expense.created',
+      entity_type: 'expense',
+      entity_id: expense.id,
+      metadata: { amount: expense.amount, kind: 'committed', from_quote: params.quoteId },
+    });
+    return expense;
+  },
 };
