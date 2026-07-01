@@ -44,6 +44,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
+import { Tooltip } from '@/components/ui/Tooltip';
 
 const dashboardItem = { to: '', label: 'Tableau de bord', icon: Info, end: true };
 
@@ -296,43 +297,15 @@ export function Sidebar() {
           <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Général</p>
         )}
         {globalNavItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              cn(
-                'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-smooth',
-                isActive
-                  ? 'bg-brand-50 text-brand-700'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-brand-600" />
-                )}
-                <item.icon className="h-4 w-4 shrink-0" />
-                {!collapsed && <span>{item.label}</span>}
-              </>
-            )}
-          </NavLink>
-        ))}
-        {projectId && (
-          <>
-            <div className="my-2 border-t border-slate-100" />
-            {!collapsed && (
-              <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Projet</p>
-            )}
-
+          <Tooltip key={item.to} label={item.label} side="right" disabled={!collapsed}>
             <NavLink
-              to={`/projects/${projectId}`}
-              end
+              to={item.to}
               className={({ isActive }) =>
                 cn(
                   'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-smooth',
-                  isActive ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  isActive
+                    ? 'bg-brand-50 text-brand-700'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 )
               }
             >
@@ -341,11 +314,42 @@ export function Sidebar() {
                   {isActive && (
                     <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-brand-600" />
                   )}
-                  <dashboardItem.icon className="h-4 w-4 shrink-0" />
-                  {!collapsed && <span>{dashboardItem.label}</span>}
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  {!collapsed && <span>{item.label}</span>}
                 </>
               )}
             </NavLink>
+          </Tooltip>
+        ))}
+        {projectId && (
+          <>
+            <div className="my-2 border-t border-slate-100" />
+            {!collapsed && (
+              <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Projet</p>
+            )}
+
+            <Tooltip label={dashboardItem.label} side="right" disabled={!collapsed}>
+              <NavLink
+                to={`/projects/${projectId}`}
+                end
+                className={({ isActive }) =>
+                  cn(
+                    'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-smooth',
+                    isActive ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  )
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-brand-600" />
+                    )}
+                    <dashboardItem.icon className="h-4 w-4 shrink-0" />
+                    {!collapsed && <span>{dashboardItem.label}</span>}
+                  </>
+                )}
+              </NavLink>
+            </Tooltip>
 
             {projectNavGroups.map((group) => {
               const visibleItems = group.items.filter(
@@ -379,29 +383,30 @@ export function Sidebar() {
                   )}
                   {isExpanded &&
                     visibleItems.map((item) => (
-                      <NavLink
-                        key={item.to}
-                        to={`/projects/${projectId}/${item.to}`}
-                        className={({ isActive }) =>
-                          cn(
-                            'relative flex items-center gap-3 rounded-xl py-2.5 text-sm font-medium transition-all duration-150 ease-smooth',
-                            collapsed ? 'px-3' : 'pl-9 pr-3',
-                            isActive
-                              ? 'bg-brand-50 text-brand-700'
-                              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                          )
-                        }
-                      >
-                        {({ isActive }) => (
-                          <>
-                            {isActive && (
-                              <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-brand-600" />
-                            )}
-                            <item.icon className="h-4 w-4 shrink-0" />
-                            {!collapsed && <span>{item.label}</span>}
-                          </>
-                        )}
-                      </NavLink>
+                      <Tooltip key={item.to} label={item.label} side="right" disabled={!collapsed}>
+                        <NavLink
+                          to={`/projects/${projectId}/${item.to}`}
+                          className={({ isActive }) =>
+                            cn(
+                              'relative flex items-center gap-3 rounded-xl py-2.5 text-sm font-medium transition-all duration-150 ease-smooth',
+                              collapsed ? 'px-3' : 'pl-9 pr-3',
+                              isActive
+                                ? 'bg-brand-50 text-brand-700'
+                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                            )
+                          }
+                        >
+                          {({ isActive }) => (
+                            <>
+                              {isActive && (
+                                <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-brand-600" />
+                              )}
+                              <item.icon className="h-4 w-4 shrink-0" />
+                              {!collapsed && <span>{item.label}</span>}
+                            </>
+                          )}
+                        </NavLink>
+                      </Tooltip>
                     ))}
                 </div>
               );
