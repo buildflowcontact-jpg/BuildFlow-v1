@@ -1,10 +1,13 @@
+import { useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { FileDown } from 'lucide-react';
 import { useClients } from '@/hooks/useClients';
 import { useTasks } from '@/hooks/useTasks';
+import { useBudgetCategories, useExpenses } from '@/hooks/useBudget';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { formatDate } from '@/utils/date';
+import { formatCurrency } from '@/utils/currency';
 import { ProjectContactsSection } from './ProjectContactsSection';
 import type { ProjectOutletContext } from './ProjectLayout';
 
@@ -12,7 +15,18 @@ export function ProjectOverviewPage() {
   const { project, projectId, phases, members } = useOutletContext<ProjectOutletContext>();
   const { clients } = useClients();
   const { tasks } = useTasks(projectId);
+  const { categories } = useBudgetCategories(projectId);
+  const { expenses } = useExpenses(projectId);
   const client = clients.find((c) => c.id === project.client_id);
+
+  const budgetTotals = useMemo(() => {
+    const planned = categories
+      .filter((c) => !c.parent_category_id)
+      .reduce((sum, c) => sum + Number(c.planned_amount), 0);
+    const committed = expenses.filter((e) => e.kind === 'committed').reduce((sum, e) => sum + Number(e.amount), 0);
+    const actual = expenses.filter((e) => e.kind === 'actual').reduce((sum, e) => sum + Number(e.amount), 0);
+    return { planned, committed, actual, hasData: categories.length > 0 || expenses.length > 0 };
+  }, [categories, expenses]);
 
   function handleExportPdf() {
     // Import dynamique : pdfExport.service n'est chargé qu'à la demande (hors bundle initial).
@@ -64,12 +78,29 @@ export function ProjectOverviewPage() {
                 {project.end_date_planned ? formatDate(project.end_date_planned) : '—'}
               </dd>
             </div>
-            <div className="flex justify-between">
-              <dt className="text-slate-500">Budget</dt>
-              <dd className="font-medium text-slate-800">
-                {project.budget != null ? `${project.budget.toLocaleString('fr-FR')} €` : '—'}
-              </dd>
-            </div>
+            {budgetTotals.hasData ? (
+              <>
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Budget prévu</dt>
+                  <dd className="font-medium text-slate-800">{formatCurrency(budgetTotals.planned)}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Engagé</dt>
+                  <dd className="font-medium text-slate-800">{formatCurrency(budgetTotals.committed)}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Dépensé</dt>
+                  <dd className="font-medium text-slate-800">{formatCurrency(budgetTotals.actual)}</dd>
+                </div>
+              </>
+            ) : (
+              <div className="flex justify-between">
+                <dt className="text-slate-500">Budget</dt>
+                <dd className="font-medium text-slate-800">
+                  {project.budget != null ? `${project.budget.toLocaleString('fr-FR')} €` : '—'}
+                </dd>
+              </div>
+            )}
           </dl>
         </Card>
       </div>
