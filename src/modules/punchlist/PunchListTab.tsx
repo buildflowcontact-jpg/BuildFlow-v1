@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, ClipboardCheck, Pencil, Trash2, FileDown, FileSignature } from 'lucide-react';
+import { Plus, ClipboardCheck, Pencil, Trash2, FileDown, FileSignature, Camera } from 'lucide-react';
 import { usePunchList } from '@/hooks/usePunchList';
 import { useProject } from '@/hooks/useProject';
 import { useDocuments } from '@/hooks/useDocuments';
@@ -20,6 +20,7 @@ import { formatDate, isOverdue } from '@/utils/date';
 import type { PunchListItem } from '@/types/domain';
 import type { PunchListStatus, TablesInsert } from '@/types/database.types';
 import { confirmStore } from '@/components/ui/ConfirmModal';
+import { PhotoUploadField } from '@/components/ui/PhotoUploadField';
 
 const STATUS_TONE: Record<PunchListStatus, 'red' | 'blue' | 'green' | 'purple'> = {
   open: 'red',
@@ -35,6 +36,7 @@ type PunchListFormState = {
   status: PunchListStatus;
   assigned_to: string;
   due_date: string;
+  photo_document_id: string | null;
 };
 
 const emptyForm: PunchListFormState = {
@@ -44,6 +46,7 @@ const emptyForm: PunchListFormState = {
   status: 'open',
   assigned_to: '',
   due_date: '',
+  photo_document_id: null,
 };
 
 interface PunchListTabProps {
@@ -116,6 +119,7 @@ export function PunchListTab({ projectId }: PunchListTabProps) {
       status: item.status as PunchListStatus,
       assigned_to: item.assigned_to ?? '',
       due_date: item.due_date ?? '',
+      photo_document_id: item.photo_document_id ?? null,
     });
     setModalOpen(true);
   }
@@ -129,6 +133,7 @@ export function PunchListTab({ projectId }: PunchListTabProps) {
       status: form.status,
       assigned_to: form.assigned_to || null,
       due_date: form.due_date || null,
+      photo_document_id: form.photo_document_id ?? null,
     };
     if (editing) {
       update.mutate({ id: editing.id, payload }, { onSuccess: () => setModalOpen(false) });
@@ -188,6 +193,9 @@ export function PunchListTab({ projectId }: PunchListTabProps) {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
+                  {item.photo_document_id && (
+                    <Camera className="h-4 w-4 shrink-0 text-slate-400" title="Photo attachée" />
+                  )}
                   <span className={late ? 'text-xs font-medium text-red-500' : 'text-xs text-slate-400'}>
                     {item.due_date ? formatDate(item.due_date) : '—'}
                   </span>
@@ -250,6 +258,14 @@ export function PunchListTab({ projectId }: PunchListTabProps) {
               onChange={(e) => setForm({ ...form, due_date: e.target.value })}
             />
           </div>
+          {profile && (
+            <PhotoUploadField
+              projectId={projectId}
+              uploadedBy={profile.id}
+              existingDocumentId={form.photo_document_id}
+              onChange={(docId) => setForm((f) => ({ ...f, photo_document_id: docId }))}
+            />
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
               Annuler

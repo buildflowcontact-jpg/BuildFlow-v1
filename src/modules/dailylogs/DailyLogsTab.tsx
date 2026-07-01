@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Plus, ClipboardList, Pencil, Trash2, Cloud, Users as UsersIcon } from 'lucide-react';
+import { Plus, ClipboardList, Pencil, Trash2, Cloud, Users as UsersIcon, Camera } from 'lucide-react';
 import { useDailyLogs } from '@/hooks/useDailyLogs';
+import { useAuthStore } from '@/stores/authStore';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -8,6 +9,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Modal } from '@/components/ui/Modal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
+import { PhotoUploadField } from '@/components/ui/PhotoUploadField';
 import { formatDate } from '@/utils/date';
 import type { DailyLog } from '@/types/domain';
 import type { TablesInsert } from '@/types/database.types';
@@ -20,6 +22,7 @@ type DailyLogFormState = {
   workers_count: string;
   manpower_notes: string;
   progress_summary: string;
+  photo_document_id: string | null;
 };
 
 function emptyForm(): DailyLogFormState {
@@ -30,6 +33,7 @@ function emptyForm(): DailyLogFormState {
     workers_count: '',
     manpower_notes: '',
     progress_summary: '',
+    photo_document_id: null,
   };
 }
 
@@ -39,6 +43,7 @@ interface DailyLogsTabProps {
 
 export function DailyLogsTab({ projectId }: DailyLogsTabProps) {
   const { dailyLogs, isLoading, create, update, remove } = useDailyLogs(projectId);
+  const userId = useAuthStore((s) => s.profile?.id);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<DailyLog | null>(null);
@@ -59,19 +64,23 @@ export function DailyLogsTab({ projectId }: DailyLogsTabProps) {
       workers_count: log.workers_count?.toString() ?? '',
       manpower_notes: log.manpower_notes ?? '',
       progress_summary: log.progress_summary,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      photo_document_id: (log as any).photo_document_id ?? null,
     });
     setModalOpen(true);
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const payload: Omit<TablesInsert<'daily_logs'>, 'project_id'> = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const payload: any = {
       log_date: form.log_date,
       weather: form.weather || null,
       temperature_c: form.temperature_c ? Number(form.temperature_c) : null,
       workers_count: form.workers_count ? Number(form.workers_count) : null,
       manpower_notes: form.manpower_notes || null,
       progress_summary: form.progress_summary,
+      photo_document_id: form.photo_document_id ?? null,
     };
     if (editing) {
       update.mutate({ id: editing.id, payload }, { onSuccess: () => setModalOpen(false) });
@@ -125,6 +134,10 @@ export function DailyLogsTab({ projectId }: DailyLogsTabProps) {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                {(log as any).photo_document_id && (
+                  <Camera className="h-4 w-4 shrink-0 text-slate-400" title="Photo attachée" />
+                )}
                 <button onClick={() => openEdit(log)} className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700">
                   <Pencil className="h-4 w-4" />
                 </button>
@@ -172,6 +185,14 @@ export function DailyLogsTab({ projectId }: DailyLogsTabProps) {
             value={form.progress_summary}
             onChange={(e) => setForm({ ...form, progress_summary: e.target.value })}
           />
+          {userId && (
+            <PhotoUploadField
+              projectId={projectId}
+              uploadedBy={userId}
+              existingDocumentId={form.photo_document_id}
+              onChange={(docId) => setForm((f) => ({ ...f, photo_document_id: docId }))}
+            />
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
               Annuler

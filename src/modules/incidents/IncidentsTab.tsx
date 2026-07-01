@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, AlertTriangle, Pencil, Trash2 } from 'lucide-react';
+import { Plus, AlertTriangle, Pencil, Trash2, Camera } from 'lucide-react';
 import { useIncidents } from '@/hooks/useIncidents';
 import { useProject } from '@/hooks/useProject';
 import { useAuthStore } from '@/stores/authStore';
@@ -17,6 +17,8 @@ import { formatDateTime } from '@/utils/date';
 import type { Incident } from '@/types/domain';
 import type { IncidentSeverity, IncidentStatus, TablesInsert } from '@/types/database.types';
 import { confirmStore } from '@/components/ui/ConfirmModal';
+import { PhotoUploadField } from '@/components/ui/PhotoUploadField';
+import { useAuthStore } from '@/stores/authStore';
 
 const SEVERITY_TONE: Record<IncidentSeverity, 'slate' | 'blue' | 'yellow' | 'red'> = {
   low: 'slate',
@@ -39,6 +41,7 @@ type IncidentFormState = {
   status: IncidentStatus;
   location: string;
   assigned_to: string;
+  photo_document_id: string | null;
 };
 
 const emptyForm: IncidentFormState = {
@@ -48,6 +51,7 @@ const emptyForm: IncidentFormState = {
   status: 'open',
   location: '',
   assigned_to: '',
+  photo_document_id: null,
 };
 
 interface IncidentsTabProps {
@@ -57,7 +61,7 @@ interface IncidentsTabProps {
 export function IncidentsTab({ projectId }: IncidentsTabProps) {
   const { incidents, isLoading, create, update, remove } = useIncidents(projectId);
   const { members } = useProject(projectId);
-  const userId = useAuthStore((s) => s.session?.user.id);
+  const userId = useAuthStore((s) => s.session?.user.id ?? s.profile?.id);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Incident | null>(null);
@@ -78,6 +82,7 @@ export function IncidentsTab({ projectId }: IncidentsTabProps) {
       status: incident.status as IncidentStatus,
       location: incident.location ?? '',
       assigned_to: incident.assigned_to ?? '',
+      photo_document_id: incident.photo_document_id ?? null,
     });
     setModalOpen(true);
   }
@@ -92,6 +97,7 @@ export function IncidentsTab({ projectId }: IncidentsTabProps) {
       location: form.location || null,
       assigned_to: form.assigned_to || null,
       reported_by: editing?.reported_by ?? userId ?? null,
+      photo_document_id: form.photo_document_id ?? null,
     };
     if (editing) {
       update.mutate({ id: editing.id, payload }, { onSuccess: () => setModalOpen(false) });
@@ -132,6 +138,9 @@ export function IncidentsTab({ projectId }: IncidentsTabProps) {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
+                  {incident.photo_document_id && (
+                    <Camera className="h-4 w-4 shrink-0 text-slate-400" title="Photo attachée" />
+                  )}
                   <Badge tone={SEVERITY_TONE[incident.severity as IncidentSeverity]}>{INCIDENT_SEVERITY_LABELS[incident.severity as IncidentSeverity]}</Badge>
                   <Badge tone={STATUS_TONE[incident.status as IncidentStatus]}>{INCIDENT_STATUS_LABELS[incident.status as IncidentStatus]}</Badge>
                   <button onClick={() => openEdit(incident)} className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700">
@@ -197,6 +206,14 @@ export function IncidentsTab({ projectId }: IncidentsTabProps) {
               ))}
             </Select>
           </div>
+          {userId && (
+            <PhotoUploadField
+              projectId={projectId}
+              uploadedBy={userId}
+              existingDocumentId={form.photo_document_id}
+              onChange={(docId) => setForm((f) => ({ ...f, photo_document_id: docId }))}
+            />
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
               Annuler
