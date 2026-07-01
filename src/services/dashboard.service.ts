@@ -1,6 +1,9 @@
 import { supabase } from '@/lib/supabaseClient';
 import { unwrap } from '@/lib/unwrap';
-import type { Task, ActivityLog, Profile, Project } from '@/types/domain';
+import type { Task, ActivityLog, Profile, Project, WarrantyClaim, PlanRevision } from '@/types/domain';
+
+export type WarrantyWithProject = WarrantyClaim & { project: Pick<Project, 'id' | 'name'> | null };
+export type PlanWithProject = PlanRevision & { project: Pick<Project, 'id' | 'name'> | null };
 
 export interface DashboardSummary {
   projects: Project[];
@@ -10,17 +13,31 @@ export interface DashboardSummary {
   recentActivity: (ActivityLog & { user: Profile | null })[];
   progressByProject: Record<string, number>;
   overallProgress: number;
+  openWarrantyClaimsCount: number;
+  urgentWarrantyClaimsCount: number;
+  plansPendingReviewCount: number;
+  activeProspectsCount: number;
+  urgentWarrantyClaims: WarrantyWithProject[];
+  plansPendingReview: PlanWithProject[];
 }
 
 export const dashboardService = {
   async getSummary(organizationId: string): Promise<DashboardSummary> {
-    const projects = unwrap(
-      await supabase
+    const [projectsRes, prospectsRes] = await Promise.all([
+      supabase
         .from('projects')
         .select('*')
         .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false })
-    );
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('prospects')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organizationId)
+        .not('status', 'in', '(gagne,perdu,sans_suite)'),
+    ]);
+
+    const projects = unwrap(projectsRes);
+    const activeProspectsCount = prospectsRes.count ?? 0;
 
     const activeProjectIds = projects
       .filter((p) => p.status !== 'annule' && p.status !== 'livre')
@@ -35,12 +52,29 @@ export const dashboardService = {
         recentActivity: [],
         progressByProject: {},
         overallProgress: 0,
+        openWarrantyClaimsCount: 0,
+        urgentWarrantyClaimsCount: 0,
+        plansPendingReviewCount: 0,
+        activeProspectsCount,
+        urgentWarrantyClaims: [],
+        plansPendingReview: [],
       };
     }
 
     const today = new Date().toISOString().slice(0, 10);
 
-    const [tasksRes, overdueRes, incidentsRes, suppliesRes, activityRes] = await Promise.all([
+    const [
+      tasksRes,
+      overdueRes,
+      incidentsRes,
+      suppliesRes,
+      activityRes,
+      warrantyOpenCountRes,
+      warrantyUrgentCountRes,
+      plansCountRes,
+      warrantyClaimsRes,
+      plansPendingRes,
+    ] = await Promise.all([
       supabase.from('tasks').select('*').in('project_id', activeProjectIds),
       supabase
         .from('tasks')
@@ -67,6 +101,36 @@ export const dashboardService = {
         .in('project_id', activeProjectIds)
         .order('created_at', { ascending: false })
         .limit(15),
+      supabase
+        .from('warranty_claims')
+        .select('*', { count: 'exact', head: true })
+        .in('project_id', activeProjectIds)
+        .in('status', ['ouvert', 'en_cours']),
+      supabase
+        .from('warranty_claims')
+        .select('*', { count: 'exact', head: true })
+        .in('project_id', activeProjectIds)
+        .eq('priority', 'urgente')
+        .not('status', 'in', '(resolu,clos)'),
+      supabase
+        .from('plan_revisions')
+        .select('*', { count: 'exact', head: true })
+        .in('project_id', activeProjectIds)
+        .eq('status', 'soumis'),
+      supabase
+        .from('warranty_claims')
+        .select('*, project:projects(id, name)')
+        .in('project_id', activeProjectIds)
+        .in('status', ['ouvert', 'en_cours'])
+        .order('reported_date', { ascending: true })
+        .limit(5),
+      supabase
+        .from('plan_revisions')
+        .select('*, project:projects(id, name)')
+        .in('project_id', activeProjectIds)
+        .eq('status', 'soumis')
+        .order('submitted_at', { ascending: true })
+        .limit(5),
     ]);
 
     if (tasksRes.error) throw tasksRes.error;
@@ -97,6 +161,12 @@ export const dashboardService = {
       recentActivity: (activityRes.data ?? []) as unknown as (ActivityLog & { user: Profile | null })[],
       progressByProject,
       overallProgress,
+      openWarrantyClaimsCount: warrantyOpenCountRes.count ?? 0,
+      urgentWarrantyClaimsCount: warrantyUrgentCountRes.count ?? 0,
+      plansPendingReviewCount: plansCountRes.count ?? 0,
+      activeProspectsCount,
+      urgentWarrantyClaims: (warrantyClaimsRes.data ?? []) as unknown as WarrantyWithProject[],
+      plansPendingReview: (plansPendingRes.data ?? []) as unknown as PlanWithProject[],
     };
   },
 };

@@ -1,5 +1,17 @@
 import { Link } from 'react-router-dom';
-import { Activity, AlertTriangle, Clock, TrendingUp, FolderKanban, Truck } from 'lucide-react';
+import {
+  Activity,
+  AlertTriangle,
+  Clock,
+  TrendingUp,
+  FolderKanban,
+  Truck,
+  Shield,
+  ShieldAlert,
+  FileCheck,
+  Users,
+  GitBranch,
+} from 'lucide-react';
 import { useDashboard } from '@/hooks/useDashboard';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -7,8 +19,8 @@ import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 import { formatDate, formatRelative, isOverdue } from '@/utils/date';
-import { PROJECT_STATUS_LABELS } from '@/types/domain';
-import type { ProjectStatus } from '@/types/database.types';
+import { PROJECT_STATUS_LABELS, WARRANTY_STATUS_LABELS, WARRANTY_PRIORITY_LABELS, PLAN_DISCIPLINE_LABELS } from '@/types/domain';
+import type { ProjectStatus, WarrantyPriority, WarrantyStatus, PlanDiscipline } from '@/types/database.types';
 
 function KpiCard({
   icon: Icon,
@@ -34,15 +46,44 @@ function KpiCard({
   );
 }
 
+const WARRANTY_PRIORITY_TONE = {
+  basse: 'slate',
+  normale: 'blue',
+  haute: 'yellow',
+  urgente: 'red',
+} as const satisfies Record<WarrantyPriority, 'slate' | 'blue' | 'yellow' | 'red'>;
+
+const WARRANTY_STATUS_TONE = {
+  ouvert: 'red',
+  en_cours: 'yellow',
+  resolu: 'green',
+  clos: 'slate',
+} as const satisfies Record<WarrantyStatus, 'red' | 'yellow' | 'green' | 'slate'>;
+
 export function DashboardPage() {
   const { data, isLoading } = useDashboard();
 
   if (isLoading || !data) return <FullPageSpinner />;
 
-  const { projects, overdueTasks, openIncidentsCount, lateSuppliesCount, recentActivity, progressByProject, overallProgress } = data;
+  const {
+    projects,
+    overdueTasks,
+    openIncidentsCount,
+    lateSuppliesCount,
+    recentActivity,
+    progressByProject,
+    overallProgress,
+    openWarrantyClaimsCount,
+    urgentWarrantyClaimsCount,
+    plansPendingReviewCount,
+    activeProspectsCount,
+    urgentWarrantyClaims,
+    plansPendingReview,
+  } = data;
 
   return (
     <div className="flex flex-col gap-6">
+      {/* KPI row 1 */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard icon={TrendingUp} label="Progression moyenne" value={`${overallProgress}%`} tone="bg-brand-50 text-brand-600" />
         <KpiCard icon={Clock} label="Tâches en retard" value={overdueTasks.length} tone="bg-amber-50 text-amber-600" />
@@ -50,8 +91,17 @@ export function DashboardPage() {
         <KpiCard icon={Truck} label="Commandes en retard" value={lateSuppliesCount} tone="bg-violet-50 text-violet-600" />
       </div>
 
+      {/* KPI row 2 */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <KpiCard icon={Shield} label="Garanties ouvertes" value={openWarrantyClaimsCount} tone="bg-orange-50 text-orange-600" />
+        <KpiCard icon={ShieldAlert} label="Garanties urgentes" value={urgentWarrantyClaimsCount} tone="bg-rose-50 text-rose-600" />
+        <KpiCard icon={FileCheck} label="Plans à réviser" value={plansPendingReviewCount} tone="bg-sky-50 text-sky-600" />
+        <KpiCard icon={Users} label="Prospects actifs" value={activeProspectsCount} tone="bg-emerald-50 text-emerald-600" />
+      </div>
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
+          {/* Progression projets */}
           <Card>
             <CardHeader>
               <CardTitle>Progression des projets</CardTitle>
@@ -79,6 +129,7 @@ export function DashboardPage() {
             )}
           </Card>
 
+          {/* Tâches en retard */}
           <Card>
             <CardHeader>
               <CardTitle>Tâches en retard</CardTitle>
@@ -99,29 +150,93 @@ export function DashboardPage() {
               </ul>
             )}
           </Card>
+
+          {/* Garanties urgentes */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Garanties / SAV urgents</CardTitle>
+              <ShieldAlert className="h-4 w-4 text-slate-400" />
+            </CardHeader>
+            {urgentWarrantyClaims.length === 0 ? (
+              <p className="text-sm text-slate-400">Aucune garantie ouverte.</p>
+            ) : (
+              <ul className="divide-y divide-slate-100">
+                {urgentWarrantyClaims.map((claim) => (
+                  <li key={claim.id} className="flex items-start justify-between gap-3 py-2.5 text-sm">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-slate-800">{claim.title}</p>
+                      <p className="text-xs text-slate-400">
+                        {claim.project?.name ?? '—'} · Signalé le {formatDate(claim.reported_date)}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 gap-1.5">
+                      <Badge tone={WARRANTY_PRIORITY_TONE[claim.priority as WarrantyPriority]}>
+                        {WARRANTY_PRIORITY_LABELS[claim.priority as WarrantyPriority]}
+                      </Badge>
+                      <Badge tone={WARRANTY_STATUS_TONE[claim.status as WarrantyStatus]}>
+                        {WARRANTY_STATUS_LABELS[claim.status as WarrantyStatus]}
+                      </Badge>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Activité récente</CardTitle>
-            <Activity className="h-4 w-4 text-slate-400" />
-          </CardHeader>
-          {recentActivity.length === 0 ? (
-            <p className="text-sm text-slate-400">Pas encore d'activité.</p>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {recentActivity.map((log) => (
-                <li key={log.id} className="text-sm">
-                  <p className="text-slate-700">
-                    <span className="font-medium">{log.user?.full_name ?? 'Quelqu’un'}</span>{' '}
-                    <span className="text-slate-500">{describeAction(log.action)}</span>
-                  </p>
-                  <p className="text-xs text-slate-400">{formatRelative(log.created_at)}</p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
+        <div className="flex flex-col gap-6">
+          {/* Activité récente */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Activité récente</CardTitle>
+              <Activity className="h-4 w-4 text-slate-400" />
+            </CardHeader>
+            {recentActivity.length === 0 ? (
+              <p className="text-sm text-slate-400">Pas encore d'activité.</p>
+            ) : (
+              <ul className="flex flex-col gap-3">
+                {recentActivity.map((log) => (
+                  <li key={log.id} className="text-sm">
+                    <p className="text-slate-700">
+                      <span className="font-medium">{log.user?.full_name ?? "Quelqu'un"}</span>{' '}
+                      <span className="text-slate-500">{describeAction(log.action)}</span>
+                    </p>
+                    <p className="text-xs text-slate-400">{formatRelative(log.created_at)}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
+          {/* Plans en attente de révision */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Plans à réviser</CardTitle>
+              <GitBranch className="h-4 w-4 text-slate-400" />
+            </CardHeader>
+            {plansPendingReview.length === 0 ? (
+              <p className="text-sm text-slate-400">Aucun plan en attente.</p>
+            ) : (
+              <ul className="flex flex-col gap-3">
+                {plansPendingReview.map((revision) => (
+                  <li key={revision.id} className="text-sm">
+                    <Link
+                      to={`/projects/${revision.project_id}/plan-validations`}
+                      className="block rounded-md hover:bg-slate-50 -mx-2 px-2 py-1.5 transition-colors"
+                    >
+                      <p className="truncate font-medium text-slate-800">{revision.title}</p>
+                      <p className="text-xs text-slate-400">
+                        {revision.project?.name ?? '—'} ·{' '}
+                        {PLAN_DISCIPLINE_LABELS[revision.discipline as PlanDiscipline]} · Rev.{' '}
+                        {revision.revision_index}
+                      </p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+        </div>
       </div>
     </div>
   );
