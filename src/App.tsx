@@ -60,6 +60,7 @@ const ProjectMessagingPage = lazy(() => import('@/modules/projects/pages/Project
 const CrmPage = lazy(() => import('@/modules/crm/CrmPage'));
 const ProjectWarrantyPage = lazy(() => import('@/modules/projects/pages/ProjectWarrantyPage'));
 const ProjectPlanValidationPage = lazy(() => import('@/modules/projects/pages/ProjectPlanValidationPage'));
+const ProjectCalendarPage = lazy(() => import('@/modules/projects/pages/ProjectCalendarPage'));
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -111,6 +112,14 @@ export const router = createBrowserRouter([
             element: (
               <Lazy>
                 <ProjectGanttPage />
+              </Lazy>
+            ),
+          },
+          {
+            path: 'calendar',
+            element: (
+              <Lazy>
+                <ProjectCalendarPage />
               </Lazy>
             ),
           },

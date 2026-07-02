@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Plus, ClipboardCheck, Pencil, Trash2, FileDown, FileSignature, Camera } from 'lucide-react';
+import { Plus, ClipboardCheck, Pencil, Trash2, FileDown, FileSignature, Camera, CheckCheck, X } from 'lucide-react';
 import { usePunchList } from '@/hooks/usePunchList';
 import { useProject } from '@/hooks/useProject';
 import { useDocuments } from '@/hooks/useDocuments';
 import { useClients } from '@/hooks/useClients';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/stores/toastStore';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -70,6 +71,38 @@ export function PunchListTab({ projectId }: PunchListTabProps) {
   const [chefSignerName, setChefSignerName] = useState('');
   const [chefSignature, setChefSignature] = useState<string | null>(null);
   const [pvGenerating, setPvGenerating] = useState(false);
+
+  // Bulk selection
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkPending, setBulkPending] = useState(false);
+  const allIds = items.map((i) => i.id);
+  const allSelected = allIds.length > 0 && allIds.every((id) => selectedIds.has(id));
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    setSelectedIds(allSelected ? new Set() : new Set(allIds));
+  }
+
+  async function handleBulkResolve() {
+    const ids = [...selectedIds];
+    setBulkPending(true);
+    try {
+      await Promise.all(ids.map((id) => update.mutateAsync({ id, payload: { status: 'resolved' } })));
+      setSelectedIds(new Set());
+      toast.success(`${ids.length} réserve(s) levée(s)`);
+    } catch {
+      toast.error("Erreur lors de la mise à jour");
+    } finally {
+      setBulkPending(false);
+    }
+  }
 
   const resolvedCount = items.filter((i) => i.status === 'resolved' || i.status === 'verified').length;
   const remainingCount = items.length - resolvedCount;
@@ -157,8 +190,6 @@ export function PunchListTab({ projectId }: PunchListTabProps) {
             variant="outline"
             disabled={!project || items.length === 0}
             onClick={() => {
-              // Chargé à la demande : jsPDF/jspdf-autotable ne sont utiles qu'à
-              // l'export, inutile de les inclure dans le bundle initial.
               if (project) void import('@/services/pdfExport.service').then((m) => m.exportPunchListPdf(project, items, members));
             }}
           >
@@ -176,46 +207,82 @@ export function PunchListTab({ projectId }: PunchListTabProps) {
         </div>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="mb-3 flex items-center gap-3 rounded-lg bg-blue-50 px-3 py-2 text-sm">
+          <span className="font-medium text-blue-700">{selectedIds.size} sélectionnée(s)</span>
+          <Button size="sm" loading={bulkPending} onClick={handleBulkResolve}>
+            <CheckCheck className="h-4 w-4" />
+            Marquer comme levées
+          </Button>
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="ml-auto text-blue-500 hover:text-blue-700"
+            aria-label="Annuler la sélection"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {items.length === 0 ? (
         <EmptyState icon={ClipboardCheck} title="Aucune réserve" description="Consignez les réserves relevées lors des réceptions." />
       ) : (
-        <ul className="divide-y divide-slate-100">
-          {items.map((item) => {
-            const assignee = members.find((m) => m.profile?.id === item.assigned_to);
-            const late = isOverdue(item.due_date) && item.status !== 'resolved' && item.status !== 'verified';
-            return (
-              <li key={item.id} className="flex items-center justify-between py-3 text-sm">
-                <div>
-                  <p className="font-medium text-slate-800">{item.title}</p>
-                  <p className="text-xs text-slate-400">
-                    {item.location ? `${item.location} · ` : ''}
-                    {assignee ? `Assigné à ${assignee.profile?.full_name ?? assignee.invited_email}` : 'Non assigné'}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  {item.photo_document_id && (
-                    <Camera className="h-4 w-4 shrink-0 text-slate-400" title="Photo attachée" />
-                  )}
-                  <span className={late ? 'text-xs font-medium text-red-500' : 'text-xs text-slate-400'}>
-                    {item.due_date ? formatDate(item.due_date) : '—'}
-                  </span>
-                  <Badge tone={STATUS_TONE[item.status as PunchListStatus]}>{PUNCH_LIST_STATUS_LABELS[item.status as PunchListStatus]}</Badge>
-                  <button onClick={() => openEdit(item)} className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700">
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      confirmStore.getState().show({ message: 'Supprimer cette réserve ?' }).then((ok) => { if (ok) remove.mutate(item.id); });
-                    }}
-                    className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        <>
+          <div className="mb-1 flex items-center gap-2 border-b border-slate-100 px-1 pb-2">
+            <input
+              type="checkbox"
+              checked={allSelected}
+              onChange={toggleSelectAll}
+              className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              aria-label="Tout sélectionner"
+            />
+            <span className="text-xs text-slate-400">Tout sélectionner</span>
+          </div>
+          <ul className="divide-y divide-slate-100">
+            {items.map((item) => {
+              const assignee = members.find((m) => m.profile?.id === item.assigned_to);
+              const late = isOverdue(item.due_date) && item.status !== 'resolved' && item.status !== 'verified';
+              const isSelected = selectedIds.has(item.id);
+              return (
+                <li key={item.id} className={`flex items-center gap-3 py-3 text-sm${isSelected ? ' bg-blue-50/50' : ''}`}>
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => toggleSelect(item.id)}
+                    className="h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-slate-800">{item.title}</p>
+                    <p className="text-xs text-slate-400">
+                      {item.location ? `${item.location} · ` : ''}
+                      {assignee ? `Assigné à ${assignee.profile?.full_name ?? assignee.invited_email}` : 'Non assigné'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {item.photo_document_id && (
+                      <Camera className="h-4 w-4 shrink-0 text-slate-400" />
+                    )}
+                    <span className={late ? 'text-xs font-medium text-red-500' : 'text-xs text-slate-400'}>
+                      {item.due_date ? formatDate(item.due_date) : '—'}
+                    </span>
+                    <Badge tone={STATUS_TONE[item.status as PunchListStatus]}>{PUNCH_LIST_STATUS_LABELS[item.status as PunchListStatus]}</Badge>
+                    <button onClick={() => openEdit(item)} className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700">
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        confirmStore.getState().show({ message: 'Supprimer cette réserve ?' }).then((ok) => { if (ok) remove.mutate(item.id); });
+                      }}
+                      className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Modifier la réserve' : 'Nouvelle réserve'} size="lg">

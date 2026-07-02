@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { Outlet, useParams, useLocation, Link } from 'react-router-dom';
-import { FileDown, ChevronDown, ChevronRight, FileSpreadsheet, FileArchive, Columns2, X, MapPin } from 'lucide-react';
+import { FileDown, ChevronDown, ChevronRight, FileSpreadsheet, FileArchive, Columns2, X, MapPin, Pencil } from 'lucide-react';
 import { useProject } from '@/hooks/useProject';
 import { PROJECT_SECTIONS } from '@/modules/projects/projectSections';
 import { ProjectSplitView } from '@/modules/projects/ProjectSplitView';
@@ -342,6 +342,7 @@ export function ProjectLayout() {
             {splitOpen ? <X className="h-4 w-4" /> : <Columns2 className="h-4 w-4" />}
           </Button>
           <Button variant="outline" onClick={openEdit}>
+            <Pencil className="h-4 w-4" />
             Modifier
           </Button>
         </div>

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { HardHat, CheckCircle2, HelpCircle, FileText, ClipboardList, AlertCircle } from 'lucide-react';
+import { HardHat, CheckCircle2, HelpCircle, FileText, ClipboardList, AlertCircle, ClipboardCheck } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { formatDate } from '@/utils/date';
 
-// ── Types ────────────────────────────────────────────────────────────────────
+// ── Types --------------------------------------------------------------------
 
 interface PortalProject {
   id: string;
@@ -24,6 +24,7 @@ interface PortalData {
   pending_change_orders: { id: string; title: string; status: string; amount: number | null; created_at: string }[];
   recent_documents: { id: string; name: string; type: string; created_at: string }[];
   recent_logs: { id: string; log_date: string; summary: string | null; weather: string | null }[];
+  punch_list: { id: string; title: string; status: string; location: string | null; due_date: string | null }[];
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -40,7 +41,14 @@ const STATUS_LABELS: Record<string, string> = {
   rejected: 'Rejeté',
 };
 
-// ── Composant ─────────────────────────────────────────────────────────────────
+const PUNCH_STATUS_LABELS: Record<string, string> = {
+  open: 'Ouverte',
+  in_progress: 'En cours',
+  resolved: 'Levée',
+  verified: 'Vérifiée',
+};
+
+// ── Composant ----------------------------------------------------------------
 
 export function PublicPortalPage() {
   const { token } = useParams<{ token: string }>();
@@ -101,7 +109,7 @@ export function PublicPortalPage() {
 
         {data && !loading && (
           <div className="flex flex-col gap-8">
-            {/* Entête projet */}
+            {/* Entete projet */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -122,13 +130,13 @@ export function PublicPortalPage() {
                 <div>
                   <p className="text-slate-400">Début</p>
                   <p className="mt-0.5 font-medium text-slate-700">
-                    {data.project.start_date ? formatDate(data.project.start_date) : '—'}
+                    {data.project.start_date ? formatDate(data.project.start_date) : '--'}
                   </p>
                 </div>
                 <div>
                   <p className="text-slate-400">Fin prévue</p>
                   <p className="mt-0.5 font-medium text-slate-700">
-                    {data.project.end_date_planned ? formatDate(data.project.end_date_planned) : '—'}
+                    {data.project.end_date_planned ? formatDate(data.project.end_date_planned) : '--'}
                   </p>
                 </div>
                 <div>
@@ -136,7 +144,7 @@ export function PublicPortalPage() {
                   <p className="mt-0.5 font-medium text-slate-700">
                     {data.project.budget != null
                       ? `${data.project.budget.toLocaleString('fr-FR')} €`
-                      : '—'}
+                      : '--'}
                   </p>
                 </div>
                 <div>
@@ -161,7 +169,7 @@ export function PublicPortalPage() {
               <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="mb-3 flex items-center gap-2">
                   <HelpCircle className="h-4 w-4 text-brand-500" />
-                  <h2 className="font-semibold text-slate-800">Demandes d'information</h2>
+                  <h2 className="font-semibold text-slate-800">Demandes d’information</h2>
                   {data.open_rfis.length > 0 && (
                     <span className="ml-auto rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600">
                       {data.open_rfis.length}
@@ -253,6 +261,32 @@ export function PublicPortalPage() {
                   </ul>
                 )}
               </section>
+
+              {/* Réserves de réception */}
+              {(data.punch_list ?? []).length > 0 && (
+                <section className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm sm:col-span-2">
+                  <div className="mb-3 flex items-center gap-2">
+                    <ClipboardCheck className="h-4 w-4 text-orange-500" />
+                    <h2 className="font-semibold text-slate-800">Réserves de réception</h2>
+                    <span className="ml-auto rounded-full bg-orange-50 px-2 py-0.5 text-xs font-medium text-orange-600">
+                      {data.punch_list.length}
+                    </span>
+                  </div>
+                  <ul className="divide-y divide-slate-100">
+                    {data.punch_list.map((item) => (
+                      <li key={item.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-medium text-slate-700">{item.title}</p>
+                          {item.location && <p className="text-xs text-slate-400">{item.location}</p>}
+                        </div>
+                        <span className="shrink-0 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600">
+                          {PUNCH_STATUS_LABELS[item.status] ?? item.status}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
             </div>
 
             <p className="text-center text-xs text-slate-400">

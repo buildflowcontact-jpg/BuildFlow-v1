@@ -1,8 +1,9 @@
+import type { CSSProperties } from 'react';
 import { cn } from '@/utils/cn';
 
 /** Bloc shimmer générique. */
-export function SkeletonBlock({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded-lg bg-slate-200', className)} />;
+export function SkeletonBlock({ className, style }: { className?: string; style?: CSSProperties }) {
+  return <div className={cn('animate-pulse rounded-lg bg-slate-200', className)} style={style} />;
 }
 
 /**

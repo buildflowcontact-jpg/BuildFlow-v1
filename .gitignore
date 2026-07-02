@@ -21,3 +21,7 @@ logo.png
 {}
 .gitdb/
 dist_check2/
+
+# Fichiers temporaires Microsoft Office
+~$*
+*.docx

@@ -30,10 +30,12 @@ interface TaskTreeProps {
   onDelete: (task: TaskWithChildren) => void;
   onManageDependencies: (task: TaskWithChildren) => void;
   onShare: (task: TaskWithChildren) => void;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
   depth?: number;
 }
 
-export function TaskTree({ nodes, dependencies, onEdit, onAddChild, onDelete, onManageDependencies, onShare, depth = 0 }: TaskTreeProps) {
+export function TaskTree({ nodes, dependencies, onEdit, onAddChild, onDelete, onManageDependencies, onShare, selectedIds, onToggleSelect, depth = 0 }: TaskTreeProps) {
   if (nodes.length === 0 && depth === 0) {
     return <p className="py-6 text-center text-sm text-slate-400">Aucune tâche pour le moment.</p>;
   }
@@ -50,6 +52,8 @@ export function TaskTree({ nodes, dependencies, onEdit, onAddChild, onDelete, on
           onDelete={onDelete}
           onManageDependencies={onManageDependencies}
           onShare={onShare}
+          selectedIds={selectedIds}
+          onToggleSelect={onToggleSelect}
           depth={depth}
         />
       ))}
@@ -65,6 +69,8 @@ function TaskRow({
   onDelete,
   onManageDependencies,
   onShare,
+  selectedIds,
+  onToggleSelect,
   depth,
 }: {
   task: TaskWithChildren;
@@ -74,15 +80,27 @@ function TaskRow({
   onDelete: (task: TaskWithChildren) => void;
   onManageDependencies: (task: TaskWithChildren) => void;
   onShare: (task: TaskWithChildren) => void;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
   depth: number;
 }) {
   const [expanded, setExpanded] = useState(true);
   const hasChildren = task.children.length > 0;
   const depCount = dependencies.filter((d) => d.task_id === task.id).length;
+  const isSelected = selectedIds?.has(task.id) ?? false;
 
   return (
     <li>
-      <div className="group flex items-center gap-2 rounded-lg px-2 py-2 hover:bg-slate-50">
+      <div className={cn('group flex items-center gap-2 rounded-lg px-2 py-2 hover:bg-slate-50', isSelected && 'bg-blue-50/60')}>
+        {onToggleSelect && (
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => onToggleSelect(task.id)}
+            className="h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          />
+        )}
+
         <button
           onClick={() => setExpanded((v) => !v)}
           className={cn('flex h-5 w-5 items-center justify-center text-slate-400', !hasChildren && 'invisible')}
@@ -165,6 +183,8 @@ function TaskRow({
           onDelete={onDelete}
           onManageDependencies={onManageDependencies}
           onShare={onShare}
+          selectedIds={selectedIds}
+          onToggleSelect={onToggleSelect}
           depth={depth + 1}
         />
       )}

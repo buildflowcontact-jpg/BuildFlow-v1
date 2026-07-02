@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Pencil, Trash2, Send, Check, X, ArrowRightCircle } from 'lucide-react';
+import { Pencil, Trash2, Send, Check, X, ArrowRightCircle, TrendingUp } from 'lucide-react';
 import { useQuote, useUpdateQuote } from '@/hooks/useQuotes';
+import { useExpenses, useBudgetCategories } from '@/hooks/useBudget';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
@@ -44,10 +46,17 @@ export function QuoteDetailModal({
 }: QuoteDetailModalProps) {
   const { data: quote, isLoading } = useQuote(quoteId);
   const updateQuote = useUpdateQuote(quoteId, projectId);
+  const { createFromQuote } = useExpenses(projectId);
+  const { categories } = useBudgetCategories(projectId);
+
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<QuoteFormState | null>(null);
   const [rows, setRows] = useState<LineItemRow[]>([]);
   const [formError, setFormError] = useState<Error | null>(null);
+
+  const [importOpen, setImportOpen] = useState(false);
+  const [importCategoryId, setImportCategoryId] = useState('');
+  const [importDate, setImportDate] = useState(() => new Date().toISOString().slice(0, 10));
 
   function startEdit() {
     if (!quote) return;
@@ -78,16 +87,10 @@ export function QuoteDetailModal({
     e.preventDefault();
     if (!form) return;
     const formCheck = validateOrError(quoteFormSchema, form);
-    if (formCheck.error) {
-      setFormError(formCheck.error);
-      return;
-    }
+    if (formCheck.error) { setFormError(formCheck.error); return; }
     const items = lineRowsToItems<QuoteItemInput>(rows);
     const itemsCheck = validateOrError(lineItemsSchema, items);
-    if (itemsCheck.error) {
-      setFormError(itemsCheck.error);
-      return;
-    }
+    if (itemsCheck.error) { setFormError(itemsCheck.error); return; }
     setFormError(null);
     updateQuote.mutate(
       {
@@ -104,135 +107,182 @@ export function QuoteDetailModal({
     );
   }
 
+  function openImport() {
+    setImportCategoryId('');
+    setImportDate(new Date().toISOString().slice(0, 10));
+    setImportOpen(true);
+  }
+
+  function handleImportToBudget(e: React.FormEvent) {
+    e.preventDefault();
+    if (!quote) return;
+    createFromQuote.mutate(
+      {
+        projectId,
+        quoteId: quote.id,
+        title: quote.title,
+        amount: quote.subtotal,
+        categoryId: importCategoryId || null,
+        expenseDate: importDate,
+      },
+      { onSuccess: () => setImportOpen(false) }
+    );
+  }
+
   return (
-    <Modal open onClose={onClose} title={quote ? `Devis #${quote.number ?? '—'}` : 'Devis'} size="xl">
-      {isLoading || !quote ? (
-        <Spinner />
-      ) : editing && form ? (
-        <form onSubmit={handleSave} className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Input id="form-title" label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-            <Input id="form-validity-until"
-              type="date"
-              label="Valide jusqu'au"
-              value={form.validity_until}
-              onChange={(e) => setForm({ ...form, validity_until: e.target.value })}
-            />
+    <>
+      <Modal open onClose={onClose} title={quote ? `Devis #${quote.number ?? '—'}` : 'Devis'} size="xl">
+        {isLoading || !quote ? (
+          <Spinner />
+        ) : editing && form ? (
+          <form onSubmit={handleSave} className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Input id="form-title" label="Titre" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+              <Input
+                id="form-validity-until"
+                type="date"
+                label="Valide jusqu'au"
+                value={form.validity_until}
+                onChange={(e) => setForm({ ...form, validity_until: e.target.value })}
+              />
+            </div>
+            <Textarea label="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            <LineItemsEditor rows={rows} onChange={setRows} />
+            <ErrorMessage error={formError} />
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setEditing(false)}>Annuler</Button>
+              <Button type="submit" loading={updateQuote.isPending}>Enregistrer</Button>
+            </div>
+          </form>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="font-medium text-slate-800">{quote.title}</p>
+                <p className="text-sm text-slate-500">{clientName(quote.client_id)}</p>
+              </div>
+              <Badge tone={STATUS_TONE[quote.status]}>{QUOTE_STATUS_LABELS[quote.status]}</Badge>
+            </div>
+
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                  <tr>
+                    <th className="px-3 py-2 text-left">Lot</th>
+                    <th className="px-3 py-2 text-left">Description</th>
+                    <th className="px-2 py-2 text-left">Qté</th>
+                    <th className="px-2 py-2 text-left">Unité</th>
+                    <th className="px-2 py-2 text-left">Prix unit. HT</th>
+                    <th className="px-2 py-2 text-left">TVA</th>
+                    <th className="px-3 py-2 text-right">Total HT</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {quote.items.map((item) => (
+                    <tr key={item.id}>
+                      <td className="px-3 py-1.5 text-slate-400">{item.lot ?? '—'}</td>
+                      <td className="px-3 py-1.5">{item.description}</td>
+                      <td className="px-2 py-1.5">{item.quantity}</td>
+                      <td className="px-2 py-1.5">{item.unit}</td>
+                      <td className="px-2 py-1.5">{formatCurrency(item.unit_price)}</td>
+                      <td className="px-2 py-1.5">{item.vat_rate} %</td>
+                      <td className="px-3 py-1.5 text-right">{formatCurrency(item.line_total)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex justify-end">
+              <div className="w-64 rounded-xl bg-slate-50 p-3 text-sm">
+                <div className="flex justify-between py-0.5">
+                  <span className="text-slate-500">Total HT</span>
+                  <span className="font-medium text-slate-800">{formatCurrency(quote.subtotal)}</span>
+                </div>
+                <div className="flex justify-between py-0.5">
+                  <span className="text-slate-500">TVA</span>
+                  <span className="font-medium text-slate-800">{formatCurrency(quote.vat_amount)}</span>
+                </div>
+                <div className="flex justify-between border-t border-slate-200 py-1 pt-1.5">
+                  <span className="font-medium text-slate-700">Total TTC</span>
+                  <span className="font-semibold text-slate-900">{formatCurrency(quote.total)}</span>
+                </div>
+              </div>
+            </div>
+
+            {quote.notes && <p className="text-sm text-slate-600">{quote.notes}</p>}
+
+            <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
+              {quote.status === 'draft' && (
+                <>
+                  <Button variant="outline" onClick={startEdit}>
+                    <Pencil className="h-4 w-4" />
+                    Modifier
+                  </Button>
+                  <Button variant="outline" className="text-red-600"
+                    onClick={() => confirmStore.getState().show({ message: 'Supprimer ce devis ?' }).then((ok) => { if (ok) onDelete(quote.id); })}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Supprimer
+                  </Button>
+                  <Button loading={sendPending} onClick={() => onSend(quote.id)}>
+                    <Send className="h-4 w-4" />
+                    Envoyer au client
+                  </Button>
+                </>
+              )}
+              {quote.status === 'sent' && (
+                <>
+                  <Button variant="outline" className="text-red-600" onClick={() => onOpenDecide('decline')}>
+                    <X className="h-4 w-4" />
+                    Marquer refusé
+                  </Button>
+                  <Button onClick={() => onOpenDecide('accept')}>
+                    <Check className="h-4 w-4" />
+                    Marquer accepté
+                  </Button>
+                </>
+              )}
+              {quote.status === 'accepted' && (
+                <>
+                  <Button variant="outline" onClick={openImport}>
+                    <TrendingUp className="h-4 w-4" />
+                    Importer en budget
+                  </Button>
+                  <Button loading={convertPending} onClick={() => onConvert(quote.id)}>
+                    <ArrowRightCircle className="h-4 w-4" />
+                    Convertir en facture
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
-          <Textarea label="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-          <LineItemsEditor rows={rows} onChange={setRows} />
-          <ErrorMessage error={formError} />
+        )}
+      </Modal>
+
+      <Modal open={importOpen} onClose={() => setImportOpen(false)} title="Importer en budget">
+        <form onSubmit={handleImportToBudget} className="flex flex-col gap-4">
+          <div className="rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
+            <p className="font-medium text-slate-800">{quote?.title}</p>
+            <p>Montant HT : <span className="font-semibold text-slate-900">{formatCurrency(quote?.subtotal ?? 0)}</span></p>
+            <p className="mt-1 text-xs text-slate-400">Une ligne de dépense « Engagée » sera créée dans le module Budget.</p>
+          </div>
+          <Select id="import-category" label="Poste budgétaire (optionnel)" value={importCategoryId} onChange={(e) => setImportCategoryId(e.target.value)}>
+            <option value="">Sans poste</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </Select>
+          <Input id="import-date" type="date" label="Date d'engagement" required value={importDate} onChange={(e) => setImportDate(e.target.value)} />
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={() => setEditing(false)}>
-              Annuler
-            </Button>
-            <Button type="submit" loading={updateQuote.isPending}>
-              Enregistrer
+            <Button type="button" variant="outline" onClick={() => setImportOpen(false)}>Annuler</Button>
+            <Button type="submit" loading={createFromQuote.isPending}>
+              <TrendingUp className="h-4 w-4" />
+              Importer
             </Button>
           </div>
         </form>
-      ) : (
-        <div className="flex flex-col gap-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="font-medium text-slate-800">{quote.title}</p>
-              <p className="text-sm text-slate-500">{clientName(quote.client_id)}</p>
-            </div>
-            <Badge tone={STATUS_TONE[quote.status]}>{QUOTE_STATUS_LABELS[quote.status]}</Badge>
-          </div>
-
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-3 py-2 text-left">Lot</th>
-                  <th className="px-3 py-2 text-left">Description</th>
-                  <th className="px-2 py-2 text-left">Qté</th>
-                  <th className="px-2 py-2 text-left">Unité</th>
-                  <th className="px-2 py-2 text-left">Prix unit. HT</th>
-                  <th className="px-2 py-2 text-left">TVA</th>
-                  <th className="px-3 py-2 text-right">Total HT</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {quote.items.map((item) => (
-                  <tr key={item.id}>
-                    <td className="px-3 py-1.5 text-slate-400">{item.lot ?? '—'}</td>
-                    <td className="px-3 py-1.5">{item.description}</td>
-                    <td className="px-2 py-1.5">{item.quantity}</td>
-                    <td className="px-2 py-1.5">{item.unit}</td>
-                    <td className="px-2 py-1.5">{formatCurrency(item.unit_price)}</td>
-                    <td className="px-2 py-1.5">{item.vat_rate} %</td>
-                    <td className="px-3 py-1.5 text-right">{formatCurrency(item.line_total)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="flex justify-end">
-            <div className="w-64 rounded-xl bg-slate-50 p-3 text-sm">
-              <div className="flex justify-between py-0.5">
-                <span className="text-slate-500">Total HT</span>
-                <span className="font-medium text-slate-800">{formatCurrency(quote.subtotal)}</span>
-              </div>
-              <div className="flex justify-between py-0.5">
-                <span className="text-slate-500">TVA</span>
-                <span className="font-medium text-slate-800">{formatCurrency(quote.vat_amount)}</span>
-              </div>
-              <div className="flex justify-between border-t border-slate-200 py-1 pt-1.5">
-                <span className="font-medium text-slate-700">Total TTC</span>
-                <span className="font-semibold text-slate-900">{formatCurrency(quote.total)}</span>
-              </div>
-            </div>
-          </div>
-
-          {quote.notes && <p className="text-sm text-slate-600">{quote.notes}</p>}
-
-          <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
-            {quote.status === 'draft' && (
-              <>
-                <Button variant="outline" onClick={startEdit}>
-                  <Pencil className="h-4 w-4" />
-                  Modifier
-                </Button>
-                <Button
-                  variant="outline"
-                  className="text-red-600"
-                  onClick={() => {
-                    confirmStore.getState().show({ message: 'Supprimer ce devis ?' }).then((ok) => { if (ok) onDelete(quote.id); });
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Supprimer
-                </Button>
-                <Button loading={sendPending} onClick={() => onSend(quote.id)}>
-                  <Send className="h-4 w-4" />
-                  Envoyer au client
-                </Button>
-              </>
-            )}
-            {quote.status === 'sent' && (
-              <>
-                <Button variant="outline" className="text-red-600" onClick={() => onOpenDecide('decline')}>
-                  <X className="h-4 w-4" />
-                  Marquer refusé
-                </Button>
-                <Button onClick={() => onOpenDecide('accept')}>
-                  <Check className="h-4 w-4" />
-                  Marquer accepté
-                </Button>
-              </>
-            )}
-            {quote.status === 'accepted' && (
-              <Button loading={convertPending} onClick={() => onConvert(quote.id)}>
-                <ArrowRightCircle className="h-4 w-4" />
-                Convertir en facture
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
-    </Modal>
+      </Modal>
+    </>
   );
 }

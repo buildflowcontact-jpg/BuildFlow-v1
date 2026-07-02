@@ -7,6 +7,7 @@ import {
   PUNCH_LIST_STATUS_LABELS,
   PHASE_TYPE_LABELS,
   PHASE_STATUS_LABELS,
+  TASK_STATUS_LABELS,
   MEETING_ACTION_ITEM_STATUS_LABELS,
   DOE_ITEM_STATUS_LABELS,
   DOE_ITEM_CATEGORY_LABELS,
@@ -28,6 +29,9 @@ import type {
   PrecautionItem,
   DoeItem,
   Company,
+  DailyLog,
+  Rfi,
+  ChangeOrder,
   WasteTracking,
   WarrantyClaim,
 } from '@/types/domain';
@@ -598,9 +602,9 @@ export function buildCaptureReportPdf(
   captures: { label: string; dataUrl: string; createdAt: string }[]
 ): jsPDF {
   const doc = createDocument('Rapport de captures', `${project.name} — ${title}`);
-  const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 40;
+  const pageWidth = doc.internal.pageSize.getWidth();
 
   captures.forEach((capture, index) => {
     if (index > 0) doc.addPage();
@@ -1104,4 +1108,206 @@ export function pdfToFile(doc: jsPDF, filename: string): File {
   addFooters(doc);
   const blob = doc.output('blob');
   return new File([blob], filename, { type: 'application/pdf' });
+}
+
+
+/**
+ * Rapport hebdomadaire de chantier : avancement global, journaux de la
+ * semaine, taches en retard, reserves ouvertes, RFIs et avenants en attente.
+ * Conçu pour etre envoye chaque semaine au client ou archive dans Documents.
+ */
+export function buildWeeklyReportPdf(
+  project: Project,
+  tasks: Task[],
+  dailyLogs: DailyLog[],
+  punchItems: PunchListItem[],
+  rfis: Rfi[],
+  changeOrders: ChangeOrder[],
+  budgetSummary: { planned: number; committed: number; actual: number; hasData: boolean }
+): jsPDF {
+  const today = new Date();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - 6);
+  const weekLabel = `Semaine du ${format(weekStart, 'dd/MM', { locale: fr })} au ${format(today, 'dd/MM/yyyy', { locale: fr })}`;
+  const doc = createDocument('Rapport hebdomadaire de chantier', `${project.name} — ${weekLabel}`);
+
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  // --- Avancement global ------------------------------------------------
+  let y = 110;
+  const totalTasks = tasks.length;
+  const doneTasks = tasks.filter((t) => t.status === 'done').length;
+  const pct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+  const overdueTasks = tasks.filter(
+    (t) => t.end_date && new Date(t.end_date) < today && t.status !== 'done'
+  );
+
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('Avancement', 40, y);
+
+  const summaryBody: string[][] = [
+    ['Tâches terminées', `${doneTasks} / ${totalTasks} (${pct} %)`],
+    ['Tâches en retard', String(overdueTasks.length)],
+  ];
+  if (budgetSummary.hasData) {
+    const budgetPct = budgetSummary.planned > 0 ? Math.round((budgetSummary.committed / budgetSummary.planned) * 100) : 0;
+    summaryBody.push(['Budget engagé', `${budgetSummary.committed.toLocaleString('fr-FR')} € / ${budgetSummary.planned.toLocaleString('fr-FR')} € (${budgetPct} %)`]);
+    summaryBody.push(['Budget dépensé', `${budgetSummary.actual.toLocaleString('fr-FR')} €`]);
+  }
+
+  autoTable(doc, {
+    startY: y + 10,
+    theme: 'plain',
+    styles: { fontSize: 9, textColor: [51, 65, 85] },
+    body: summaryBody,
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 150 } },
+  });
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 20;
+
+  // --- Journaux de chantier de la semaine ------------------------------
+  const weekStart7 = weekStart.toISOString().slice(0, 10);
+  const recentLogs = dailyLogs
+    .filter((l) => l.log_date >= weekStart7)
+    .sort((a, b) => b.log_date.localeCompare(a.log_date));
+
+  if (y + 40 > pageHeight - 50) { doc.addPage(); y = 50; }
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('Journal de chantier', 40, y);
+
+  if (recentLogs.length === 0) {
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(148, 163, 184);
+    doc.text('Aucune entrée cette semaine.', 40, y + 16);
+    y += 36;
+  } else {
+    autoTable(doc, {
+      startY: y + 10,
+      head: [['Date', 'Avancement']],
+      body: recentLogs.map((l) => [
+        format(new Date(l.log_date), 'EEEE d MMMM', { locale: fr }),
+        l.progress_summary ?? '—',
+      ]),
+      headStyles: { fillColor: [22, 163, 74] },
+      styles: { fontSize: 9 },
+      columnStyles: { 0: { cellWidth: 130 } },
+    });
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 20;
+  }
+
+  // --- Tâches en retard -------------------------------------------------
+  if (overdueTasks.length > 0) {
+    if (y + 40 > pageHeight - 50) { doc.addPage(); y = 50; }
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 41, 59);
+    doc.text('Tâches en retard', 40, y);
+
+    autoTable(doc, {
+      startY: y + 10,
+      head: [['Tâche', 'Statut', 'Échéance']],
+      body: overdueTasks.slice(0, 10).map((t) => [
+        t.title,
+        TASK_STATUS_LABELS[t.status as TaskStatus],
+        t.end_date ? format(new Date(t.end_date), 'dd/MM/yyyy') : '—',
+      ]),
+      headStyles: { fillColor: [239, 68, 68] },
+      styles: { fontSize: 9 },
+      columnStyles: { 0: { cellWidth: 250 } },
+    });
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 20;
+  }
+
+  // --- Réserves ouvertes -----------------------------------------------
+  const openPunch = punchItems.filter((i) => i.status !== 'resolved' && i.status !== 'verified');
+  if (openPunch.length > 0) {
+    if (y + 40 > pageHeight - 50) { doc.addPage(); y = 50; }
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 41, 59);
+    doc.text(`Réserves ouvertes (${openPunch.length})`, 40, y);
+
+    autoTable(doc, {
+      startY: y + 10,
+      head: [['Réserve', 'Localisation', 'Statut', 'Échéance']],
+      body: openPunch.slice(0, 15).map((i) => [
+        i.title,
+        i.location ?? '—',
+        PUNCH_LIST_STATUS_LABELS[i.status as PunchListStatus],
+        i.due_date ? format(new Date(i.due_date), 'dd/MM/yyyy') : '—',
+      ]),
+      headStyles: { fillColor: [249, 115, 22] },
+      styles: { fontSize: 9 },
+      columnStyles: { 0: { cellWidth: 180 } },
+    });
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 20;
+  }
+
+  // --- RFIs ouvertes ---------------------------------------------------
+  const openRfis = rfis.filter((r) => r.status !== 'closed');
+  if (openRfis.length > 0) {
+    if (y + 40 > pageHeight - 50) { doc.addPage(); y = 50; }
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 41, 59);
+    doc.text(`Demandes d'information ouvertes (${openRfis.length})`, 40, y);
+
+    autoTable(doc, {
+      startY: y + 10,
+      head: [['#', 'Titre', 'Statut']],
+      body: openRfis.slice(0, 10).map((r) => [
+        `RFI-${r.number}`,
+        r.title,
+        r.status,
+      ]),
+      headStyles: { fillColor: BRAND_COLOR },
+      styles: { fontSize: 9 },
+      columnStyles: { 1: { cellWidth: 220 } },
+    });
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 20;
+  }
+
+  // --- Avenants en attente ---------------------------------------------
+  const pendingCos = changeOrders.filter((c) => c.status === 'pending_approval');
+  if (pendingCos.length > 0) {
+    if (y + 40 > pageHeight - 50) { doc.addPage(); y = 50; }
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 41, 59);
+    doc.text(`Avenants en attente d'approbation (${pendingCos.length})`, 40, y);
+
+    autoTable(doc, {
+      startY: y + 10,
+      head: [['#', 'Titre', 'Impact (€)', 'Délai (j)']],
+      body: pendingCos.map((c) => [
+        `AV-${c.number}`,
+        c.title,
+        c.cost_impact != null ? c.cost_impact.toLocaleString('fr-FR') : '—',
+        c.delay_impact_days != null ? String(c.delay_impact_days) : '—',
+      ]),
+      headStyles: { fillColor: [245, 158, 11] },
+      styles: { fontSize: 9 },
+      columnStyles: { 1: { cellWidth: 220 } },
+    });
+  }
+
+  return doc;
+}
+
+export function exportWeeklyReportPdf(
+  project: Project,
+  tasks: Task[],
+  dailyLogs: DailyLog[],
+  punchItems: PunchListItem[],
+  rfis: Rfi[],
+  changeOrders: ChangeOrder[],
+  budgetSummary: { planned: number; committed: number; actual: number; hasData: boolean }
+): void {
+  const doc = buildWeeklyReportPdf(project, tasks, dailyLogs, punchItems, rfis, changeOrders, budgetSummary);
+  const today = format(new Date(), 'yyyy-MM-dd');
+  downloadDoc(doc, `rapport-hebdo-${project.reference ?? project.name}-${today}.pdf`);
 }

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { qualityTemplatesService, type QualityTemplateItemInput } from '@/services/qualityTemplates.service';
+import { toast } from '@/stores/toastStore';
 import type { TablesInsert } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
 
@@ -23,7 +24,8 @@ export function useQualityTemplates(projectId: string | undefined) {
       payload: Omit<TablesInsert<'quality_templates'>, 'project_id'>;
       items: QualityTemplateItemInput[];
     }) => qualityTemplatesService.create({ ...payload, project_id: projectId! }, items),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Modèle créé'); },
+    onError: () => toast.error("Erreur lors de la création"),
   });
 
   const update = useMutation({
@@ -36,12 +38,14 @@ export function useQualityTemplates(projectId: string | undefined) {
       payload: Parameters<typeof qualityTemplatesService.update>[1];
       items: QualityTemplateItemInput[];
     }) => qualityTemplatesService.update(id, payload, items),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Modèle mis à jour'); },
+    onError: () => toast.error("Erreur lors de la mise à jour"),
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => qualityTemplatesService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Modèle supprimé'); },
+    onError: () => toast.error("Erreur lors de la suppression"),
   });
 
   return { ...query, templates: query.data ?? [], create, update, remove };

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { qualityInspectionsService, type AdHocChecklistItem } from '@/services/qualityInspections.service';
+import { toast } from '@/stores/toastStore';
 import type { QualityInspectionResult, TablesInsert } from '@/types/database.types';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
 
@@ -23,12 +24,14 @@ export function useQualityInspections(projectId: string | undefined) {
       payload: Omit<TablesInsert<'quality_inspections'>, 'project_id'>;
       adHocItems?: AdHocChecklistItem[];
     }) => qualityInspectionsService.create({ ...payload, project_id: projectId! }, adHocItems),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Inspection créée'); },
+    onError: () => toast.error("Erreur lors de la création"),
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => qualityInspectionsService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Inspection supprimée'); },
+    onError: () => toast.error("Erreur lors de la suppression"),
   });
 
   return { ...query, inspections: query.data ?? [], create, remove };
@@ -44,9 +47,6 @@ export function useQualityInspection(inspectionId: string | undefined, projectId
     enabled: Boolean(inspectionId),
   });
 
-  // Les non-conformités sont créées par trigger SQL côté serveur dès qu'un
-  // résultat passe à "non_conforme" : on écoute aussi cette table pour que la
-  // liste de NC se mette à jour sans action manuelle de l'utilisateur.
   useRealtimeInvalidate('quality_inspection_results', { column: 'inspection_id', value: inspectionId ?? '' }, queryKey);
 
   const setResult = useMutation({
@@ -70,7 +70,9 @@ export function useQualityInspection(inspectionId: string | undefined, projectId
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
       queryClient.invalidateQueries({ queryKey: ['quality-inspections', projectId] });
+      toast.success('Inspection clôturée');
     },
+    onError: () => toast.error("Erreur lors de la clôture"),
   });
 
   return { ...query, setResult, complete };

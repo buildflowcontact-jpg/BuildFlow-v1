@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ClipboardList, HelpCircle, FileSignature, FileText, ArrowRight, Link2, Plus, Trash2, Copy, Check } from 'lucide-react';
+import { ClipboardList, HelpCircle, FileSignature, FileText, ArrowRight, Link2, Plus, Trash2, Copy, Check, ExternalLink, ClipboardCheck } from 'lucide-react';
 import { useProject } from '@/hooks/useProject';
 import { useTasks } from '@/hooks/useTasks';
 import { useDailyLogs } from '@/hooks/useDailyLogs';
 import { useRfis } from '@/hooks/useRfis';
 import { useChangeOrders } from '@/hooks/useChangeOrders';
 import { useDocuments } from '@/hooks/useDocuments';
+import { usePunchList } from '@/hooks/usePunchList';
 import { usePortalTokens } from '@/hooks/usePortalTokens';
 import { confirmStore } from '@/components/ui/ConfirmModal';
 import { toast } from '@/stores/toastStore';
@@ -16,11 +17,11 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
-import { PROJECT_STATUS_LABELS, RFI_STATUS_LABELS, CHANGE_ORDER_STATUS_LABELS, parsePortalWidgets } from '@/types/domain';
+import { PROJECT_STATUS_LABELS, RFI_STATUS_LABELS, CHANGE_ORDER_STATUS_LABELS, PUNCH_LIST_STATUS_LABELS, parsePortalWidgets } from '@/types/domain';
 import { formatDate, formatDateTime } from '@/utils/date';
-import type { ProjectStatus } from '@/types/database.types';
+import type { ProjectStatus, PunchListStatus } from '@/types/database.types';
 
-// ── Panneau de gestion des liens portail ──────────────────────────────────────
+// Panneau de gestion des liens portail
 
 function PortalLinksPanel({ projectId }: { projectId: string }) {
   const { tokens, isLoading, create, revoke } = usePortalTokens(projectId);
@@ -86,14 +87,23 @@ function PortalLinksPanel({ projectId }: { projectId: string }) {
         <ul className="divide-y divide-slate-100">
           {tokens.map((t) => (
             <li key={t.id} className="flex items-center gap-3 py-2.5 text-sm">
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-slate-700 truncate">{t.client_email}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium text-slate-700">{t.client_email}</p>
                 <p className="text-xs text-slate-400">Expire le {formatDate(t.expires_at)}</p>
               </div>
+              <a
+                href={getUrl(t.token)}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Ouvrir le portail"
+                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-brand-50 hover:text-brand-600"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </a>
               <button
                 onClick={() => handleCopy(t.token, t.id)}
                 title="Copier le lien"
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-brand-50 hover:text-brand-600 transition-colors"
+                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-brand-50 hover:text-brand-600"
               >
                 {copiedId === t.id ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
               </button>
@@ -104,7 +114,7 @@ function PortalLinksPanel({ projectId }: { projectId: string }) {
                   })
                 }
                 title="Révoquer"
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -131,6 +141,7 @@ export function ClientPortalTab({ projectId }: ClientPortalTabProps) {
   const { rfis, isLoading: rfisLoading } = useRfis(projectId);
   const { changeOrders, isLoading: changeOrdersLoading } = useChangeOrders(projectId);
   const { documents, isLoading: documentsLoading } = useDocuments(projectId);
+  const { items: punchItems, isLoading: punchLoading } = usePunchList(projectId);
 
   const progress = useMemo(() => {
     if (tasks.length === 0) return 0;
@@ -151,13 +162,24 @@ export function ClientPortalTab({ projectId }: ClientPortalTabProps) {
     () => [...documents].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 5),
     [documents]
   );
+  const openPunchItems = useMemo(
+    () => punchItems.filter((i) => i.status !== 'resolved' && i.status !== 'verified').slice(0, 8),
+    [punchItems]
+  );
 
-  if (projectLoading || tasksLoading || logsLoading || rfisLoading || changeOrdersLoading || documentsLoading) {
+  if (projectLoading || tasksLoading || logsLoading || rfisLoading || changeOrdersLoading || documentsLoading || punchLoading) {
     return <FullPageSpinner />;
   }
   if (!project) return null;
 
   const widgets = parsePortalWidgets(project.portal_widgets);
+
+  const PUNCH_TONE: Record<string, 'red' | 'blue' | 'green' | 'purple'> = {
+    open: 'red',
+    in_progress: 'blue',
+    resolved: 'green',
+    verified: 'purple',
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -240,7 +262,7 @@ export function ClientPortalTab({ projectId }: ClientPortalTabProps) {
             <Card>
               <div className="mb-3 flex items-center justify-between">
                 <CardHeader className="!mb-0">
-                  <CardTitle>Demandes d'information ouvertes</CardTitle>
+                  <CardTitle>Demandes d’information ouvertes</CardTitle>
                 </CardHeader>
                 <button
                   onClick={() => navigate(`${base}/rfis`)}
@@ -250,7 +272,7 @@ export function ClientPortalTab({ projectId }: ClientPortalTabProps) {
                 </button>
               </div>
               {openRfis.length === 0 ? (
-                <EmptyState icon={HelpCircle} title="Aucune RFI ouverte" description="Posez vos questions techniques à l'équipe projet." />
+                <EmptyState icon={HelpCircle} title="Aucune RFI ouverte" description="Posez vos questions techniques à l’équipe projet." />
               ) : (
                 <ul className="divide-y divide-slate-100">
                   {openRfis.map((rfi) => (
@@ -266,6 +288,40 @@ export function ClientPortalTab({ projectId }: ClientPortalTabProps) {
             </Card>
           )}
         </div>
+      )}
+
+      {widgets.punch_list && (
+        <Card>
+          <div className="mb-3 flex items-center justify-between">
+            <CardHeader className="!mb-0">
+              <div className="flex items-center gap-2">
+                <ClipboardCheck className="h-4 w-4 text-orange-500" />
+                <CardTitle>Réserves en cours</CardTitle>
+              </div>
+            </CardHeader>
+            <button
+              onClick={() => navigate(`${base}/punchlist`)}
+              className="flex items-center gap-1 text-sm font-medium text-brand-600 hover:underline"
+            >
+              Voir tout <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          {openPunchItems.length === 0 ? (
+            <EmptyState icon={ClipboardCheck} title="Toutes les réserves sont levées" description="Aucune réserve ouverte sur ce projet." />
+          ) : (
+            <ul className="divide-y divide-slate-100">
+              {openPunchItems.map((item) => (
+                <li key={item.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-slate-800">{item.title}</p>
+                    {item.location && <p className="text-xs text-slate-400">{item.location}</p>}
+                  </div>
+                  <Badge tone={PUNCH_TONE[item.status] ?? 'slate'}>{PUNCH_LIST_STATUS_LABELS[item.status as PunchListStatus]}</Badge>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
       )}
 
       {widgets.documents && (
@@ -303,11 +359,12 @@ export function ClientPortalTab({ projectId }: ClientPortalTabProps) {
         !widgets.change_orders &&
         !widgets.daily_logs &&
         !widgets.rfis &&
+        !widgets.punch_list &&
         !widgets.documents && (
           <EmptyState
             icon={ClipboardList}
             title="Aucun widget activé"
-            description="Le chef de projet n'a encore activé aucune section pour ce portail."
+            description="Le chef de projet n’a encore activé aucune section pour ce portail."
           />
         )}
 

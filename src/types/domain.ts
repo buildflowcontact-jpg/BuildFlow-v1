@@ -511,6 +511,7 @@ export interface PortalWidgetsConfig {
   rfis: boolean;
   change_orders: boolean;
   documents: boolean;
+  punch_list: boolean;
 }
 
 export const DEFAULT_PORTAL_WIDGETS: PortalWidgetsConfig = {
@@ -519,6 +520,7 @@ export const DEFAULT_PORTAL_WIDGETS: PortalWidgetsConfig = {
   rfis: true,
   change_orders: true,
   documents: true,
+  punch_list: false,
 };
 
 export const PORTAL_WIDGET_LABELS: Record<keyof PortalWidgetsConfig, string> = {
@@ -527,6 +529,7 @@ export const PORTAL_WIDGET_LABELS: Record<keyof PortalWidgetsConfig, string> = {
   rfis: 'Demandes d’information (RFI)',
   change_orders: 'Avenants',
   documents: 'Documents récents',
+  punch_list: 'Réserves de réception',
 };
 
 /** Fusionne la config stockée (jsonb, potentiellement partielle) avec les valeurs par défaut. */

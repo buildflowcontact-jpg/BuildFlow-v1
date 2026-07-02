@@ -33,6 +33,7 @@ import {
   Recycle,
   BadgeCheck,
   GitBranch,
+  CalendarDays,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useUiStore } from '@/stores/uiStore';
@@ -73,6 +74,7 @@ const projectNavGroups = [
     items: [
       { to: 'tasks', label: 'Tâches', icon: ListTree },
       { to: 'gantt', label: 'Planning', icon: GanttChartSquare },
+      { to: 'calendar', label: 'Calendrier', icon: CalendarDays },
     ],
   },
   {

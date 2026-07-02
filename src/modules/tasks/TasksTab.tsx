@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, List, LayoutGrid } from 'lucide-react';
+import { Plus, List, LayoutGrid, CheckCheck, X } from 'lucide-react';
 import { confirmStore } from '@/components/ui/ConfirmModal';
 import { useTasks } from '@/hooks/useTasks';
 import { usePhases } from '@/hooks/usePhases';
@@ -7,6 +7,7 @@ import { useProject } from '@/hooks/useProject';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { FullPageSpinner } from '@/components/ui/Spinner';
+import { toast } from '@/stores/toastStore';
 import { TaskTree } from './TaskTree';
 import { KanbanView } from './KanbanView';
 import { TaskFormModal } from './TaskFormModal';
@@ -36,6 +37,32 @@ export function TasksTab({ projectId }: TasksTabProps) {
   const [depsOpen, setDepsOpen] = useState(false);
 
   const [sharingTask, setSharingTask] = useState<Task | null>(null);
+
+  // Bulk selection (list view only)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkPending, setBulkPending] = useState(false);
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  async function handleBulkDone() {
+    const ids = [...selectedIds];
+    setBulkPending(true);
+    try {
+      await Promise.all(ids.map((id) => update.mutateAsync({ id, payload: { status: 'done' } })));
+      setSelectedIds(new Set());
+      toast.success(`${ids.length} tâche(s) terminée(s)`);
+    } catch {
+      toast.error("Erreur lors de la mise à jour");
+    } finally {
+      setBulkPending(false);
+    }
+  }
 
   function openCreate(parentId?: string) {
     setEditingTask(null);
@@ -93,7 +120,6 @@ export function TasksTab({ projectId }: TasksTabProps) {
           <p className="text-sm text-slate-500">{tasks.length} tâche(s) au total</p>
         </div>
         <div className="flex items-center gap-2">
-          {/* Toggle vue liste / kanban */}
           <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
             <button
               onClick={() => setView('list')}
@@ -123,6 +149,23 @@ export function TasksTab({ projectId }: TasksTabProps) {
         </div>
       </div>
 
+      {view === 'list' && selectedIds.size > 0 && (
+        <div className="mb-3 flex items-center gap-3 rounded-lg bg-blue-50 px-3 py-2 text-sm">
+          <span className="font-medium text-blue-700">{selectedIds.size} sélectionnée(s)</span>
+          <Button size="sm" loading={bulkPending} onClick={handleBulkDone}>
+            <CheckCheck className="h-4 w-4" />
+            Marquer comme terminées
+          </Button>
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="ml-auto text-blue-500 hover:text-blue-700"
+            aria-label="Annuler la sélection"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {view === 'list' ? (
         <TaskTree
           nodes={tree}
@@ -132,6 +175,8 @@ export function TasksTab({ projectId }: TasksTabProps) {
           onDelete={handleDelete}
           onManageDependencies={openDependencies}
           onShare={setSharingTask}
+          selectedIds={selectedIds}
+          onToggleSelect={toggleSelect}
         />
       ) : (
         <KanbanView

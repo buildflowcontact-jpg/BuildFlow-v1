@@ -3,6 +3,7 @@ import { projectsService } from '@/services/projects.service';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuthStore } from '@/stores/authStore';
 import { useRealtimeInvalidate } from './useRealtimeInvalidate';
+import { toast } from '@/stores/toastStore';
 import type { TablesInsert, TablesUpdate } from '@/types/database.types';
 
 export function useProjects() {
@@ -25,18 +26,21 @@ export function useProjects() {
         organization_id: organization!.id,
         owner_id: useAuthStore.getState().session!.user.id,
       }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Projet créé'); },
+    onError: () => toast.error("Erreur lors de la création du projet"),
   });
 
   const update = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: TablesUpdate<'projects'> }) =>
       projectsService.update(id, payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Projet mis à jour'); },
+    onError: () => toast.error("Erreur lors de la mise à jour"),
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => projectsService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey }); toast.success('Projet supprimé'); },
+    onError: () => toast.error("Erreur lors de la suppression"),
   });
 
   return { ...query, projects: query.data ?? [], create, update, remove };

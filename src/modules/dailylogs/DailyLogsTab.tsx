@@ -12,7 +12,6 @@ import { FullPageSpinner } from '@/components/ui/Spinner';
 import { PhotoUploadField } from '@/components/ui/PhotoUploadField';
 import { formatDate } from '@/utils/date';
 import type { DailyLog } from '@/types/domain';
-import type { TablesInsert } from '@/types/database.types';
 import { confirmStore } from '@/components/ui/ConfirmModal';
 
 type DailyLogFormState = {
@@ -136,7 +135,7 @@ export function DailyLogsTab({ projectId }: DailyLogsTabProps) {
               <div className="flex items-center gap-2">
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 {(log as any).photo_document_id && (
-                  <Camera className="h-4 w-4 shrink-0 text-slate-400" title="Photo attachée" />
+                  <span title="Photo attachée"><Camera className="h-4 w-4 shrink-0 text-slate-400" /></span>
                 )}
                 <button onClick={() => openEdit(log)} className="rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700">
                   <Pencil className="h-4 w-4" />

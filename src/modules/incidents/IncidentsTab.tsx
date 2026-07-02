@@ -18,7 +18,6 @@ import type { Incident } from '@/types/domain';
 import type { IncidentSeverity, IncidentStatus, TablesInsert } from '@/types/database.types';
 import { confirmStore } from '@/components/ui/ConfirmModal';
 import { PhotoUploadField } from '@/components/ui/PhotoUploadField';
-import { useAuthStore } from '@/stores/authStore';
 
 const SEVERITY_TONE: Record<IncidentSeverity, 'slate' | 'blue' | 'yellow' | 'red'> = {
   low: 'slate',
@@ -139,7 +138,7 @@ export function IncidentsTab({ projectId }: IncidentsTabProps) {
                 </div>
                 <div className="flex items-center gap-3">
                   {incident.photo_document_id && (
-                    <Camera className="h-4 w-4 shrink-0 text-slate-400" title="Photo attachée" />
+                    <span title="Photo attachée"><Camera className="h-4 w-4 shrink-0 text-slate-400" /></span>
                   )}
                   <Badge tone={SEVERITY_TONE[incident.severity as IncidentSeverity]}>{INCIDENT_SEVERITY_LABELS[incident.severity as IncidentSeverity]}</Badge>
                   <Badge tone={STATUS_TONE[incident.status as IncidentStatus]}>{INCIDENT_STATUS_LABELS[incident.status as IncidentStatus]}</Badge>

@@ -4,8 +4,7 @@ import { cn } from '@/utils/cn';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { TASK_PRIORITY_LABELS } from '@/types/domain';
-import type { Task } from '@/types/domain';
-import type { ProjectMember } from '@/types/domain';
+import type { Task, ProjectMemberWithProfile } from '@/types/domain';
 import type { TaskStatus, TaskPriority } from '@/types/database.types';
 
 const COLUMNS: { status: TaskStatus; label: string; color: string; bg: string }[] = [
@@ -24,7 +23,7 @@ const PRIORITY_TONE: Record<TaskPriority, 'slate' | 'blue' | 'yellow' | 'red'> =
 
 interface KanbanViewProps {
   tasks: Task[];
-  members: ProjectMember[];
+  members: ProjectMemberWithProfile[];
   onEdit: (task: Task) => void;
   onStatusChange: (taskId: string, newStatus: TaskStatus) => void;
   onAddTask: () => void;
